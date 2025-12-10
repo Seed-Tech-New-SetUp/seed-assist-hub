@@ -52,7 +52,8 @@ const navigation: NavItem[] = [
       {
         title: "In Person",
         items: [
-          { title: "Reports", href: "/events/in-person/reports" },
+          { title: "BSF Reports", href: "/events/in-person/bsf" },
+          { title: "Campus Tour Reports", href: "/events/in-person/campus-tour" },
           { title: "Upcoming Events", href: "/events/in-person/upcoming" },
         ],
       },
