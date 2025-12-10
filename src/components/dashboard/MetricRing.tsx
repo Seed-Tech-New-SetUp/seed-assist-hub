@@ -6,22 +6,15 @@ interface MetricRingProps {
   label: string;
   sublabel?: string;
   size?: "sm" | "md" | "lg";
-  gradient?: "primary" | "accent" | "success" | "warning";
+  variant?: "primary" | "success" | "warning" | "info";
   className?: string;
 }
 
-const gradientIds = {
-  primary: "gradient-primary",
-  accent: "gradient-accent",
-  success: "gradient-success",
-  warning: "gradient-warning",
-};
-
-const gradientColors = {
-  primary: { start: "hsl(225, 73%, 57%)", end: "hsl(280, 73%, 60%)" },
-  accent: { start: "hsl(280, 73%, 60%)", end: "hsl(320, 73%, 55%)" },
-  success: { start: "hsl(152, 69%, 46%)", end: "hsl(170, 69%, 46%)" },
-  warning: { start: "hsl(38, 92%, 50%)", end: "hsl(20, 92%, 55%)" },
+const variantColors = {
+  primary: "hsl(215, 70%, 45%)",
+  success: "hsl(160, 50%, 42%)",
+  warning: "hsl(35, 85%, 50%)",
+  info: "hsl(200, 70%, 48%)",
 };
 
 const sizes = {
@@ -36,7 +29,7 @@ export function MetricRing({
   label,
   sublabel,
   size = "md",
-  gradient = "primary",
+  variant = "primary",
   className,
 }: MetricRingProps) {
   const { size: dimensions, stroke, fontSize } = sizes[size];
@@ -45,20 +38,12 @@ export function MetricRing({
   const percentage = Math.min((value / max) * 100, 100);
   const offset = circumference - (percentage / 100) * circumference;
 
-  const colors = gradientColors[gradient];
-  const id = `${gradientIds[gradient]}-${Math.random().toString(36).substr(2, 9)}`;
+  const color = variantColors[variant];
 
   return (
     <div className={cn("flex flex-col items-center gap-3", className)}>
       <div className="relative" style={{ width: dimensions, height: dimensions }}>
         <svg className="transform -rotate-90" width={dimensions} height={dimensions}>
-          <defs>
-            <linearGradient id={id} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor={colors.start} />
-              <stop offset="100%" stopColor={colors.end} />
-            </linearGradient>
-          </defs>
-          
           {/* Background circle */}
           <circle
             cx={dimensions / 2}
@@ -76,18 +61,18 @@ export function MetricRing({
             cy={dimensions / 2}
             r={radius}
             fill="none"
-            stroke={`url(#${id})`}
+            stroke={color}
             strokeWidth={stroke}
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
-            className="transition-all duration-1000 ease-out"
+            className="transition-all duration-700 ease-out"
           />
         </svg>
         
         {/* Center content */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className={cn("font-display font-bold", fontSize)}>
+          <span className={cn("font-semibold", fontSize)}>
             {value}
           </span>
           {sublabel && (

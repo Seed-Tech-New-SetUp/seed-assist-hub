@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { 
   Calendar, 
   FileText, 
@@ -31,7 +30,7 @@ const activities = [
     description: "Sarah Chen applied for Excellence Award",
     time: "4 hours ago",
     icon: FileText,
-    iconBg: "bg-accent/10 text-accent",
+    iconBg: "bg-info/10 text-info",
   },
   {
     id: 3,
@@ -49,7 +48,7 @@ const activities = [
     description: "Harvard Business School - MBA program",
     time: "Yesterday",
     icon: GraduationCap,
-    iconBg: "bg-info/10 text-info",
+    iconBg: "bg-primary/10 text-primary",
   },
   {
     id: 5,
@@ -64,7 +63,7 @@ const activities = [
 
 export function ActivityFeed() {
   return (
-    <Card className="overflow-hidden border-border/50">
+    <Card className="overflow-hidden border-border">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
@@ -84,11 +83,11 @@ export function ActivityFeed() {
               key={activity.id}
               className={cn(
                 "flex items-start gap-4 py-4 animate-fade-in opacity-0",
-                index !== activities.length - 1 && "border-b border-border/50"
+                index !== activities.length - 1 && "border-b border-border"
               )}
               style={{ animationDelay: `${index * 100}ms`, animationFillMode: "forwards" }}
             >
-              <div className={cn("p-2.5 rounded-xl", activity.iconBg)}>
+              <div className={cn("p-2 rounded-lg", activity.iconBg)}>
                 <activity.icon className="h-4 w-4" />
               </div>
               <div className="flex-1 min-w-0">
@@ -133,7 +132,7 @@ const upcomingEvents = [
 
 export function UpcomingEventsList() {
   return (
-    <Card className="overflow-hidden border-border/50">
+    <Card className="overflow-hidden border-border">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
@@ -151,12 +150,12 @@ export function UpcomingEventsList() {
           {upcomingEvents.map((event, index) => (
             <div
               key={event.id}
-              className="flex items-center gap-4 p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors animate-fade-in opacity-0"
+              className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors animate-fade-in opacity-0"
               style={{ animationDelay: `${index * 100}ms`, animationFillMode: "forwards" }}
             >
-              <div className="flex flex-col items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary">
+              <div className="flex flex-col items-center justify-center w-12 h-12 rounded-lg bg-primary/10 text-primary">
                 <span className="text-xs font-medium">{event.date.split(" ")[0]}</span>
-                <span className="text-lg font-display font-bold">{event.date.split(" ")[1]}</span>
+                <span className="text-lg font-semibold">{event.date.split(" ")[1]}</span>
               </div>
               
               <div className="flex-1 min-w-0">

@@ -9,8 +9,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
@@ -27,23 +25,23 @@ const roiData = [
 ];
 
 const channelData = [
-  { name: "Virtual Events", value: 35, color: "hsl(225, 73%, 57%)" },
-  { name: "Direct Outreach", value: 28, color: "hsl(280, 73%, 60%)" },
-  { name: "Partner Referrals", value: 22, color: "hsl(152, 69%, 46%)" },
-  { name: "Digital Marketing", value: 15, color: "hsl(38, 92%, 50%)" },
+  { name: "Virtual Events", value: 35, color: "hsl(215, 70%, 45%)" },
+  { name: "Direct Outreach", value: 28, color: "hsl(200, 70%, 48%)" },
+  { name: "Partner Referrals", value: 22, color: "hsl(160, 50%, 42%)" },
+  { name: "Digital Marketing", value: 15, color: "hsl(35, 85%, 50%)" },
 ];
 
 const funnelData = [
-  { stage: "Impressions", value: 45000, fill: "hsl(225, 73%, 57%)" },
-  { stage: "Engaged", value: 12000, fill: "hsl(250, 73%, 60%)" },
-  { stage: "Leads", value: 4800, fill: "hsl(280, 73%, 60%)" },
-  { stage: "Applied", value: 1200, fill: "hsl(310, 73%, 55%)" },
-  { stage: "Admitted", value: 420, fill: "hsl(152, 69%, 46%)" },
+  { stage: "Impressions", value: 45000, fill: "hsl(215, 70%, 45%)" },
+  { stage: "Engaged", value: 12000, fill: "hsl(200, 70%, 48%)" },
+  { stage: "Leads", value: 4800, fill: "hsl(160, 50%, 42%)" },
+  { stage: "Applied", value: 1200, fill: "hsl(35, 85%, 50%)" },
+  { stage: "Admitted", value: 420, fill: "hsl(160, 50%, 42%)" },
 ];
 
 export function AdvancedROIChart() {
   return (
-    <Card className="col-span-2 overflow-hidden border-border/50">
+    <Card className="col-span-2 overflow-hidden border-border">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
@@ -70,12 +68,12 @@ export function AdvancedROIChart() {
             <AreaChart data={roiData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorReturns" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(225, 73%, 57%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(225, 73%, 57%)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="hsl(215, 70%, 45%)" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="hsl(215, 70%, 45%)" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorInvestment" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(280, 73%, 60%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(280, 73%, 60%)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="hsl(160, 50%, 42%)" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="hsl(160, 50%, 42%)" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
@@ -95,7 +93,7 @@ export function AdvancedROIChart() {
                 contentStyle={{
                   backgroundColor: 'hsl(var(--card))',
                   border: '1px solid hsl(var(--border))',
-                  borderRadius: '12px',
+                  borderRadius: '8px',
                   boxShadow: '0 4px 12px -2px rgb(0 0 0 / 0.08)',
                 }}
                 labelStyle={{ color: 'hsl(var(--foreground))', fontWeight: 600 }}
@@ -103,8 +101,8 @@ export function AdvancedROIChart() {
               <Area
                 type="monotone"
                 dataKey="returns"
-                stroke="hsl(225, 73%, 57%)"
-                strokeWidth={2.5}
+                stroke="hsl(215, 70%, 45%)"
+                strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorReturns)"
                 name="Returns"
@@ -112,8 +110,8 @@ export function AdvancedROIChart() {
               <Area
                 type="monotone"
                 dataKey="investment"
-                stroke="hsl(280, 73%, 60%)"
-                strokeWidth={2.5}
+                stroke="hsl(160, 50%, 42%)"
+                strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorInvestment)"
                 name="Investment"
@@ -123,10 +121,10 @@ export function AdvancedROIChart() {
         </div>
 
         {/* Quick stats */}
-        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border/50">
+        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border">
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Total Investment</p>
-            <p className="text-xl font-display font-bold">$128K</p>
+            <p className="text-xl font-semibold">$128K</p>
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               <ArrowUpRight className="h-3 w-3 text-success" />
               <span className="text-success">+12%</span> vs last period
@@ -134,7 +132,7 @@ export function AdvancedROIChart() {
           </div>
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Total Returns</p>
-            <p className="text-xl font-display font-bold text-primary">$520K</p>
+            <p className="text-xl font-semibold text-primary">$520K</p>
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               <ArrowUpRight className="h-3 w-3 text-success" />
               <span className="text-success">+28%</span> vs last period
@@ -142,7 +140,7 @@ export function AdvancedROIChart() {
           </div>
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Leads Generated</p>
-            <p className="text-xl font-display font-bold">1,800</p>
+            <p className="text-xl font-semibold">1,800</p>
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               <ArrowUpRight className="h-3 w-3 text-success" />
               <span className="text-success">+35%</span> vs last period
@@ -156,7 +154,7 @@ export function AdvancedROIChart() {
 
 export function ChannelPerformance() {
   return (
-    <Card className="overflow-hidden border-border/50">
+    <Card className="overflow-hidden border-border">
       <CardHeader className="pb-2">
         <CardTitle>Channel Mix</CardTitle>
         <CardDescription>Lead attribution by source</CardDescription>
@@ -204,7 +202,7 @@ export function ChannelPerformance() {
 
 export function ConversionFunnel() {
   return (
-    <Card className="overflow-hidden border-border/50">
+    <Card className="overflow-hidden border-border">
       <CardHeader className="pb-2">
         <CardTitle>Conversion Funnel</CardTitle>
         <CardDescription>From impression to admission</CardDescription>
@@ -219,9 +217,9 @@ export function ConversionFunnel() {
                   <span className="text-muted-foreground">{stage.stage}</span>
                   <span className="font-medium">{stage.value.toLocaleString()}</span>
                 </div>
-                <div className="h-3 bg-muted/50 rounded-full overflow-hidden">
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
                   <div
-                    className="h-full rounded-full transition-all duration-1000 ease-out"
+                    className="h-full rounded-full transition-all duration-700 ease-out"
                     style={{
                       width: `${percentage}%`,
                       backgroundColor: stage.fill,
@@ -233,10 +231,10 @@ export function ConversionFunnel() {
           })}
         </div>
         
-        <div className="mt-6 pt-4 border-t border-border/50">
+        <div className="mt-6 pt-4 border-t border-border">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Overall Conversion</span>
-            <Badge className="gradient-success text-white">
+            <Badge className="bg-success text-success-foreground">
               0.93%
             </Badge>
           </div>

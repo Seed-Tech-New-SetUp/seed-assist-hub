@@ -4,20 +4,15 @@ import { MetricRing } from "@/components/dashboard/MetricRing";
 import { AdvancedROIChart, ChannelPerformance, ConversionFunnel } from "@/components/dashboard/AdvancedROIChart";
 import { ActivityFeed, UpcomingEventsList } from "@/components/dashboard/ActivityFeed";
 import { GlobalInsights, AIInsights } from "@/components/dashboard/GlobalInsights";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Target,
   FileText,
   GraduationCap,
   TrendingUp,
-  Users,
-  Building2,
-  CheckCircle2,
-  DollarSign,
-  Sparkles,
-  ArrowRight,
+  Download,
+  BarChart3,
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -27,21 +22,21 @@ export default function Dashboard() {
       <div className="mb-8 animate-fade-in">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-display font-bold mb-2">
-              Welcome back, <span className="gradient-text">John</span>
+            <h1 className="text-2xl lg:text-3xl font-semibold mb-1">
+              Welcome back, John
             </h1>
             <p className="text-muted-foreground">
-              Here's your holistic ROI overview for Harvard Business School
+              ROI overview for Harvard Business School
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2">
-              <Sparkles className="h-4 w-4" />
-              Generate Report
+            <Button variant="outline" size="default" className="gap-2">
+              <Download className="h-4 w-4" />
+              Export Report
             </Button>
-            <Button className="gap-2 gradient-primary text-white border-0">
+            <Button size="default" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
               View Analytics
-              <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -55,7 +50,7 @@ export default function Dashboard() {
           change={12.5}
           changeLabel="vs last month"
           icon={Target}
-          gradient="primary"
+          variant="primary"
           delay={100}
         />
         <InsightCard
@@ -64,7 +59,7 @@ export default function Dashboard() {
           change={8.2}
           changeLabel="vs last month"
           icon={FileText}
-          gradient="accent"
+          variant="info"
           delay={150}
         />
         <InsightCard
@@ -73,7 +68,7 @@ export default function Dashboard() {
           change={-2.3}
           changeLabel="vs last month"
           icon={GraduationCap}
-          gradient="success"
+          variant="success"
           delay={200}
         />
         <InsightCard
@@ -82,7 +77,7 @@ export default function Dashboard() {
           change={18.7}
           changeLabel="vs last quarter"
           icon={TrendingUp}
-          gradient="warm"
+          variant="warning"
           delay={250}
         />
       </div>
@@ -95,18 +90,18 @@ export default function Dashboard() {
 
       {/* Secondary Stats + Conversion Funnel */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-        <Card className="border-border/50 overflow-hidden animate-fade-in-up" style={{ animationDelay: "300ms" }}>
+        <Card className="border-border animate-fade-in-up" style={{ animationDelay: "300ms" }}>
           <CardContent className="p-5">
             <div className="flex flex-col items-center">
-              <MetricRing value={24} max={30} label="Virtual Events" sublabel="this month" gradient="primary" />
+              <MetricRing value={24} max={30} label="Virtual Events" sublabel="this month" variant="primary" />
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-border/50 overflow-hidden animate-fade-in-up" style={{ animationDelay: "350ms" }}>
+        <Card className="border-border animate-fade-in-up" style={{ animationDelay: "350ms" }}>
           <CardContent className="p-5">
             <div className="flex flex-col items-center">
-              <MetricRing value={892} max={1000} label="Admits This Year" sublabel="+24.5%" gradient="success" />
+              <MetricRing value={892} max={1000} label="Admits This Year" sublabel="+24.5%" variant="success" />
             </div>
           </CardContent>
         </Card>
