@@ -14,7 +14,8 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
 // Events
-import InPersonReports from "./pages/events/InPersonReports";
+import BSFReports from "./pages/events/BSFReports";
+import CampusTourReports from "./pages/events/CampusTourReports";
 import UpcomingEvents from "./pages/events/UpcomingEvents";
 import VirtualMasterclass from "./pages/events/VirtualMasterclass";
 import VirtualMeetups from "./pages/events/VirtualMeetups";
@@ -51,7 +52,8 @@ const App = () => (
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
 
               {/* Events - In Person */}
-              <Route path="/events/in-person/reports" element={<ProtectedRoute><InPersonReports /></ProtectedRoute>} />
+              <Route path="/events/in-person/bsf" element={<ProtectedRoute><BSFReports /></ProtectedRoute>} />
+              <Route path="/events/in-person/campus-tour" element={<ProtectedRoute><CampusTourReports /></ProtectedRoute>} />
               <Route path="/events/in-person/upcoming" element={<ProtectedRoute><UpcomingEvents /></ProtectedRoute>} />
 
               {/* Events - Virtual */}
