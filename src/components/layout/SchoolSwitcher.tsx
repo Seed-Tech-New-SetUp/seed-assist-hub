@@ -1,0 +1,124 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSchool } from "@/contexts/SchoolContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Building2, ChevronDown, Check, MapPin } from "lucide-react";
+
+export function SchoolSwitcher() {
+  const { schools, currentSchool, setCurrentSchool } = useSchool();
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+
+  if (!currentSchool || schools.length <= 1) {
+    return currentSchool ? (
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-muted/50">
+        <div className="h-7 w-7 rounded bg-primary/10 flex items-center justify-center">
+          {currentSchool.logo_url ? (
+            <img
+              src={currentSchool.logo_url}
+              alt={currentSchool.name}
+              className="h-5 w-5 object-contain"
+            />
+          ) : (
+            <Building2 className="h-4 w-4 text-primary" />
+          )}
+        </div>
+        <div className="hidden sm:block">
+          <p className="text-xs font-medium leading-tight truncate max-w-[120px]">
+            {currentSchool.name}
+          </p>
+          <p className="text-[10px] text-muted-foreground capitalize">
+            {currentSchool.role}
+          </p>
+        </div>
+      </div>
+    ) : null;
+  }
+
+  const handleSchoolChange = (school: typeof schools[0]) => {
+    setCurrentSchool(school);
+    setOpen(false);
+    navigate("/dashboard");
+  };
+
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="flex items-center gap-2 px-3 py-1.5 h-auto hover:bg-muted/50"
+        >
+          <div className="h-7 w-7 rounded bg-primary/10 flex items-center justify-center">
+            {currentSchool.logo_url ? (
+              <img
+                src={currentSchool.logo_url}
+                alt={currentSchool.name}
+                className="h-5 w-5 object-contain"
+              />
+            ) : (
+              <Building2 className="h-4 w-4 text-primary" />
+            )}
+          </div>
+          <div className="hidden sm:block text-left">
+            <p className="text-xs font-medium leading-tight truncate max-w-[120px]">
+              {currentSchool.name}
+            </p>
+            <p className="text-[10px] text-muted-foreground capitalize">
+              {currentSchool.role}
+            </p>
+          </div>
+          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-64">
+        <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
+          Switch School
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {schools.map((school) => (
+          <DropdownMenuItem
+            key={school.id}
+            onClick={() => handleSchoolChange(school)}
+            className="cursor-pointer py-2"
+          >
+            <div className="flex items-center gap-3 w-full">
+              <div className="h-8 w-8 rounded bg-muted flex items-center justify-center flex-shrink-0">
+                {school.logo_url ? (
+                  <img
+                    src={school.logo_url}
+                    alt={school.name}
+                    className="h-5 w-5 object-contain"
+                  />
+                ) : (
+                  <Building2 className="h-4 w-4 text-muted-foreground" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{school.name}</p>
+                {(school.city || school.country) && (
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <MapPin className="h-2.5 w-2.5" />
+                    <span className="truncate">
+                      {[school.city, school.country].filter(Boolean).join(", ")}
+                    </span>
+                  </div>
+                )}
+              </div>
+              {currentSchool.id === school.id && (
+                <Check className="h-4 w-4 text-primary flex-shrink-0" />
+              )}
+            </div>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}

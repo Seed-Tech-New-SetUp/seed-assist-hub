@@ -1,4 +1,6 @@
+import { useNavigate } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
+import { SchoolSwitcher } from "./SchoolSwitcher";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -10,13 +12,44 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, Bell, Settings, User, LogOut, HelpCircle, ChevronDown } from "lucide-react";
+import { Search, Bell, Settings, User, LogOut, HelpCircle, ChevronDown, Building2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSchool } from "@/contexts/SchoolContext";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
+  const { user, signOut } = useAuth();
+  const { schools } = useSchool();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/login");
+  };
+
+  const handleSwitchSchool = () => {
+    navigate("/select-school");
+  };
+
+  const getInitials = () => {
+    if (user?.user_metadata?.full_name) {
+      return user.user_metadata.full_name
+        .split(" ")
+        .map((n: string) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    return user?.email?.slice(0, 2).toUpperCase() || "U";
+  };
+
+  const getDisplayName = () => {
+    return user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <AppSidebar />
@@ -24,10 +57,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="pl-16 lg:pl-60 transition-all duration-200">
         <header className="sticky top-0 z-30 h-16 glass-strong border-b border-border/50">
           <div className="flex items-center justify-between h-full px-6">
-            <div className="flex-1 max-w-md">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search anything..." className="pl-10 bg-muted/50 border-0 focus-visible:bg-background focus-visible:ring-1" />
+            <div className="flex items-center gap-4">
+              <SchoolSwitcher />
+              
+              <div className="hidden md:block flex-1 max-w-md">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input placeholder="Search anything..." className="pl-10 bg-muted/50 border-0 focus-visible:bg-background focus-visible:ring-1" />
+                </div>
               </div>
             </div>
 
@@ -47,22 +84,33 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="gap-2 px-2 h-10">
                     <Avatar className="h-8 w-8 ring-2 ring-primary/20">
-                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">JD</AvatarFallback>
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                        {getInitials()}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="hidden md:flex flex-col items-start">
-                      <span className="text-sm font-medium">John Davis</span>
-                      <span className="text-[10px] text-muted-foreground leading-none">Administrator</span>
+                      <span className="text-sm font-medium">{getDisplayName()}</span>
+                      <span className="text-[10px] text-muted-foreground leading-none">
+                        {user?.email}
+                      </span>
                     </div>
                     <ChevronDown className="h-4 w-4 text-muted-foreground hidden md:block" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>John Davis</DropdownMenuLabel>
+                  <DropdownMenuLabel>{getDisplayName()}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem><User className="mr-2 h-4 w-4" />Profile</DropdownMenuItem>
                   <DropdownMenuItem><Settings className="mr-2 h-4 w-4" />Settings</DropdownMenuItem>
+                  {schools.length > 1 && (
+                    <DropdownMenuItem onClick={handleSwitchSchool}>
+                      <Building2 className="mr-2 h-4 w-4" />Switch School
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-destructive"><LogOut className="mr-2 h-4 w-4" />Log out</DropdownMenuItem>
+                  <DropdownMenuItem className="text-destructive" onClick={handleSignOut}>
+                    <LogOut className="mr-2 h-4 w-4" />Log out
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
