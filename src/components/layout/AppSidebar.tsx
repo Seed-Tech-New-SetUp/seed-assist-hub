@@ -57,6 +57,7 @@ const navigation: NavGroup[] = [
     title: "School Management",
     items: [
       { title: "School Profiles", href: "/school-profiles", icon: Building2 },
+      { title: "User Management", href: "/user-management", icon: Users },
       { title: "Profile Leads", href: "/profile-leads", icon: Target, badge: 24 },
       { title: "Lead Generation", href: "/lead-generation", icon: TrendingUp },
     ],
