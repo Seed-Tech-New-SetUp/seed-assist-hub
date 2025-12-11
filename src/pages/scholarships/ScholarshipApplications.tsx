@@ -32,14 +32,15 @@ import { Star, Check, Pause, X, Trophy, Search, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
-type ApplicationStatus = "SEED_RECOMMENDED" | "SHORTLISTED" | "ON_HOLD" | "REJECTED" | "WINNER";
+type WorkflowStatus = "SHORTLISTED" | "ON_HOLD" | "REJECTED" | "WINNER" | "PENDING";
 
 interface Applicant {
   id: string;
   name: string;
   country: string;
   countryCode: string;
-  status: ApplicationStatus;
+  isSeedRecommended: boolean;
+  status: WorkflowStatus;
   standardizedTest: {
     name: string;
     score: number;
@@ -56,7 +57,8 @@ const applicants: Applicant[] = [
     name: "Priya Sharma",
     country: "India",
     countryCode: "IN",
-    status: "SEED_RECOMMENDED",
+    isSeedRecommended: true,
+    status: "PENDING",
     standardizedTest: { name: "GMAT", score: 720 },
     ugCompletionYear: 2019,
     ugGpa: 3.8,
@@ -67,6 +69,7 @@ const applicants: Applicant[] = [
     name: "Chen Wei",
     country: "China",
     countryCode: "CN",
+    isSeedRecommended: true,
     status: "SHORTLISTED",
     standardizedTest: { name: "GRE", score: 328 },
     ugCompletionYear: 2020,
@@ -78,6 +81,7 @@ const applicants: Applicant[] = [
     name: "Ahmed Hassan",
     country: "Egypt",
     countryCode: "EG",
+    isSeedRecommended: false,
     status: "ON_HOLD",
     standardizedTest: { name: "GMAT", score: 680 },
     ugCompletionYear: 2018,
@@ -89,6 +93,7 @@ const applicants: Applicant[] = [
     name: "Maria Garcia",
     country: "Mexico",
     countryCode: "MX",
+    isSeedRecommended: true,
     status: "WINNER",
     standardizedTest: { name: "GRE", score: 335 },
     ugCompletionYear: 2019,
@@ -100,6 +105,7 @@ const applicants: Applicant[] = [
     name: "John Obi",
     country: "Nigeria",
     countryCode: "NG",
+    isSeedRecommended: false,
     status: "REJECTED",
     standardizedTest: { name: "GMAT", score: 650 },
     ugCompletionYear: 2021,
@@ -108,8 +114,8 @@ const applicants: Applicant[] = [
   },
 ];
 
-const statusConfig: Record<ApplicationStatus, { label: string; icon: React.ElementType; color: string }> = {
-  SEED_RECOMMENDED: { label: "SEED Recommended", icon: Star, color: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20" },
+const statusConfig: Record<WorkflowStatus, { label: string; icon: React.ElementType; color: string }> = {
+  PENDING: { label: "Pending", icon: Pause, color: "bg-gray-500/10 text-gray-600 border-gray-500/20" },
   SHORTLISTED: { label: "Shortlisted", icon: Check, color: "bg-green-500/10 text-green-600 border-green-500/20" },
   ON_HOLD: { label: "On Hold", icon: Pause, color: "bg-orange-500/10 text-orange-600 border-orange-500/20" },
   REJECTED: { label: "Rejected", icon: X, color: "bg-red-500/10 text-red-600 border-red-500/20" },
@@ -121,7 +127,7 @@ export default function ScholarshipApplications() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedApplicants, setSelectedApplicants] = useState<string[]>([]);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
-  const [newStatus, setNewStatus] = useState<ApplicationStatus | null>(null);
+  const [newStatus, setNewStatus] = useState<WorkflowStatus | null>(null);
   const [showNotifyDialog, setShowNotifyDialog] = useState(false);
   const { toast } = useToast();
 
@@ -129,13 +135,20 @@ export default function ScholarshipApplications() {
   const statusCounts = applicants.reduce((acc, applicant) => {
     acc[applicant.status] = (acc[applicant.status] || 0) + 1;
     return acc;
-  }, {} as Record<ApplicationStatus, number>);
+  }, {} as Record<WorkflowStatus, number>);
+  
+  const seedRecommendedCount = applicants.filter(a => a.isSeedRecommended).length;
 
   const filteredApplicants = applicants.filter(applicant => {
     const matchesSearch = applicant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       applicant.country.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || applicant.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesStatus = statusFilter === "all" || 
+      statusFilter === "SEED_RECOMMENDED" ? applicant.isSeedRecommended : applicant.status === statusFilter;
+    
+    if (statusFilter === "SEED_RECOMMENDED") {
+      return matchesSearch && applicant.isSeedRecommended;
+    }
+    return matchesSearch && (statusFilter === "all" || applicant.status === statusFilter);
   });
 
   const toggleSelectAll = () => {
@@ -152,7 +165,7 @@ export default function ScholarshipApplications() {
     );
   };
 
-  const handleBulkStatusChange = (status: ApplicationStatus) => {
+  const handleBulkStatusChange = (status: WorkflowStatus) => {
     setNewStatus(status);
     setShowStatusDialog(true);
   };
@@ -182,8 +195,25 @@ export default function ScholarshipApplications() {
         </div>
 
         {/* Status Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {(Object.entries(statusConfig) as [ApplicationStatus, typeof statusConfig[ApplicationStatus]][]).map(([status, config]) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {/* SEED Recommended Card */}
+          <Card
+            className={`cursor-pointer transition-all ${statusFilter === "SEED_RECOMMENDED" ? "ring-2 ring-primary" : "hover:bg-muted/50"}`}
+            onClick={() => setStatusFilter(statusFilter === "SEED_RECOMMENDED" ? "all" : "SEED_RECOMMENDED")}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-yellow-500/10">
+                  <Star className="h-4 w-4 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="text-xl font-bold">{seedRecommendedCount}</p>
+                  <p className="text-[10px] text-muted-foreground leading-tight">SEED Recommended</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          {(Object.entries(statusConfig) as [WorkflowStatus, typeof statusConfig[WorkflowStatus]][]).map(([status, config]) => (
             <Card
               key={status}
               className={`cursor-pointer transition-all ${statusFilter === status ? "ring-2 ring-primary" : "hover:bg-muted/50"}`}
@@ -239,7 +269,7 @@ export default function ScholarshipApplications() {
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">{selectedApplicants.length} applicant(s) selected</span>
                 <div className="flex gap-2">
-                  <Select onValueChange={(value) => handleBulkStatusChange(value as ApplicationStatus)}>
+                  <Select onValueChange={(value) => handleBulkStatusChange(value as WorkflowStatus)}>
                     <SelectTrigger className="w-[160px]">
                       <SelectValue placeholder="Assign Status" />
                     </SelectTrigger>
@@ -302,10 +332,18 @@ export default function ScholarshipApplications() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={status.color}>
-                          <status.icon className="h-3 w-3 mr-1" />
-                          {status.label}
-                        </Badge>
+                        <div className="flex flex-wrap gap-1">
+                          {applicant.isSeedRecommended && (
+                            <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+                              <Star className="h-3 w-3 mr-1" />
+                              SEED
+                            </Badge>
+                          )}
+                          <Badge variant="outline" className={status.color}>
+                            <status.icon className="h-3 w-3 mr-1" />
+                            {status.label}
+                          </Badge>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <div>
