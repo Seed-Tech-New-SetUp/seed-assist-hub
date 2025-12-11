@@ -38,7 +38,7 @@ import {
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
-type ApplicationStatus = "SEED_RECOMMENDED" | "SHORTLISTED" | "ON_HOLD" | "REJECTED" | "WINNER";
+type WorkflowStatus = "SHORTLISTED" | "ON_HOLD" | "REJECTED" | "WINNER" | "PENDING";
 
 interface ScholarshipAward {
   id: string;
@@ -60,7 +60,8 @@ const studentData = {
   name: "Priya Sharma",
   country: "India",
   countryCode: "IN",
-  status: "SEED_RECOMMENDED" as ApplicationStatus,
+  isSeedRecommended: true,
+  status: "PENDING" as WorkflowStatus,
   scholarshipName: "Global Leaders MBA Scholarship 2024",
   email: "priya.sharma@email.com",
   phone: "+91 98765 43210",
@@ -93,8 +94,8 @@ const studentData = {
   standardizedTest: { name: "GMAT", score: 720 },
 };
 
-const statusConfig: Record<ApplicationStatus, { label: string; icon: React.ElementType; color: string; buttonColor: string }> = {
-  SEED_RECOMMENDED: { label: "SEED Recommended", icon: Star, color: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20", buttonColor: "bg-yellow-500 hover:bg-yellow-600" },
+const statusConfig: Record<WorkflowStatus, { label: string; icon: React.ElementType; color: string; buttonColor: string }> = {
+  PENDING: { label: "Pending", icon: Pause, color: "bg-gray-500/10 text-gray-600 border-gray-500/20", buttonColor: "bg-gray-500 hover:bg-gray-600" },
   SHORTLISTED: { label: "Shortlist", icon: Check, color: "bg-green-500/10 text-green-600 border-green-500/20", buttonColor: "bg-green-500 hover:bg-green-600" },
   ON_HOLD: { label: "On Hold", icon: Pause, color: "bg-orange-500/10 text-orange-600 border-orange-500/20", buttonColor: "bg-orange-500 hover:bg-orange-600" },
   REJECTED: { label: "Reject", icon: X, color: "bg-red-500/10 text-red-600 border-red-500/20", buttonColor: "bg-red-500 hover:bg-red-600" },
@@ -113,7 +114,7 @@ export default function StudentProfile() {
   const [newAwardName, setNewAwardName] = useState("");
   const [newAwardAmount, setNewAwardAmount] = useState("");
 
-  const handleStatusChange = (status: ApplicationStatus) => {
+  const handleStatusChange = (status: WorkflowStatus) => {
     if (status === "WINNER") {
       setShowAwardsModal(true);
     } else {
@@ -182,7 +183,7 @@ export default function StudentProfile() {
             </Link>
           </Button>
           <div className="flex gap-2">
-            {(["SHORTLISTED", "ON_HOLD", "REJECTED", "WINNER"] as ApplicationStatus[]).map((status) => {
+            {(["SHORTLISTED", "ON_HOLD", "REJECTED", "WINNER"] as WorkflowStatus[]).map((status) => {
               const config = statusConfig[status];
               return (
                 <Button
@@ -205,9 +206,17 @@ export default function StudentProfile() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <h1 className="text-2xl font-display font-bold">{student.name}</h1>
-                <Badge variant="outline" className={statusConfig[student.status].color}>
-                  {statusConfig[student.status].label}
-                </Badge>
+                <div className="flex gap-2">
+                  {student.isSeedRecommended && (
+                    <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+                      <Star className="h-3 w-3 mr-1" />
+                      SEED Recommended
+                    </Badge>
+                  )}
+                  <Badge variant="outline" className={statusConfig[student.status].color}>
+                    {statusConfig[student.status].label}
+                  </Badge>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="icon">
