@@ -863,159 +863,109 @@ function ProgramRankingsSection() {
 }
 
 function ProgramRecruitersSection() {
-  const [recruiters, setRecruiters] = useState([
-    { name: "Google", industry: "Technology", hiresPerYear: "8" },
-    { name: "McKinsey & Company", industry: "Consulting", hiresPerYear: "12" },
-    { name: "Goldman Sachs", industry: "Finance", hiresPerYear: "6" },
-  ]);
+  const [recruiters, setRecruiters] = useState(["Google", "McKinsey & Company", "Goldman Sachs"]);
+  const [newRecruiter, setNewRecruiter] = useState("");
 
-  const addRecruiter = () => setRecruiters([...recruiters, { name: "", industry: "", hiresPerYear: "" }]);
-  const removeRecruiter = (index: number) => setRecruiters(recruiters.filter((_, i) => i !== index));
-  const updateRecruiter = (index: number, field: string, value: string) => {
-    const newRecruiters = [...recruiters];
-    newRecruiters[index] = { ...newRecruiters[index], [field]: value };
-    setRecruiters(newRecruiters);
+  const addRecruiter = () => {
+    if (newRecruiter.trim()) {
+      setRecruiters([...recruiters, newRecruiter.trim()]);
+      setNewRecruiter("");
+    }
   };
+  const removeRecruiter = (index: number) => setRecruiters(recruiters.filter((_, i) => i !== index));
 
   return (
     <div className="space-y-4">
-      <Button onClick={addRecruiter} variant="outline" size="sm">
-        <Plus className="h-4 w-4 mr-2" />
-        Add Recruiter
-      </Button>
-      {recruiters.map((recruiter, index) => (
-        <Card key={index}>
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label>Company Name</Label>
-                  <Input 
-                    value={recruiter.name}
-                    onChange={(e) => updateRecruiter(index, "name", e.target.value)}
-                    placeholder="Company name..." 
-                    className="mt-1.5" 
-                  />
-                </div>
-                <div>
-                  <Label>Industry</Label>
-                  <Select 
-                    value={recruiter.industry} 
-                    onValueChange={(value) => updateRecruiter(index, "industry", value)}
-                  >
-                    <SelectTrigger className="mt-1.5">
-                      <SelectValue placeholder="Select industry" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Technology">Technology</SelectItem>
-                      <SelectItem value="Consulting">Consulting</SelectItem>
-                      <SelectItem value="Finance">Finance</SelectItem>
-                      <SelectItem value="Healthcare">Healthcare</SelectItem>
-                      <SelectItem value="Consumer Goods">Consumer Goods</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Hires Per Year</Label>
-                  <Input 
-                    type="number"
-                    value={recruiter.hiresPerYear}
-                    onChange={(e) => updateRecruiter(index, "hiresPerYear", e.target.value)}
-                    placeholder="0" 
-                    className="mt-1.5" 
-                  />
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-destructive"
-                onClick={() => removeRecruiter(index)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-      {recruiters.length === 0 && (
-        <p className="text-sm text-muted-foreground text-center py-4">No recruiters added yet</p>
-      )}
+      {/* Add Recruiter */}
+      <div className="flex gap-2">
+        <Input
+          value={newRecruiter}
+          onChange={(e) => setNewRecruiter(e.target.value)}
+          placeholder="Enter company name..."
+          onKeyDown={(e) => e.key === "Enter" && addRecruiter()}
+        />
+        <Button onClick={addRecruiter} disabled={!newRecruiter.trim()}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add
+        </Button>
+      </div>
+
+      {/* Recruiters List */}
+      <div>
+        <h4 className="font-medium text-sm text-muted-foreground mb-3">Added Recruiters ({recruiters.length})</h4>
+        {recruiters.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-4 border rounded-lg">No recruiters added yet</p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {recruiters.map((recruiter, index) => (
+              <Badge key={index} variant="secondary" className="text-sm py-1.5 px-3 gap-2">
+                <Building2 className="h-3.5 w-3.5" />
+                {recruiter}
+                <button 
+                  onClick={() => removeRecruiter(index)}
+                  className="ml-1 hover:text-destructive transition-colors"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
 function ProgramJobRolesSection() {
-  const [jobRoles, setJobRoles] = useState([
-    { title: "Product Manager", percentage: "18", avgSalary: "145000" },
-    { title: "Consultant", percentage: "25", avgSalary: "165000" },
-    { title: "Investment Banker", percentage: "12", avgSalary: "180000" },
-  ]);
+  const [jobRoles, setJobRoles] = useState(["Product Manager", "Consultant", "Investment Banker"]);
+  const [newJobRole, setNewJobRole] = useState("");
 
-  const addJobRole = () => setJobRoles([...jobRoles, { title: "", percentage: "", avgSalary: "" }]);
-  const removeJobRole = (index: number) => setJobRoles(jobRoles.filter((_, i) => i !== index));
-  const updateJobRole = (index: number, field: string, value: string) => {
-    const newJobRoles = [...jobRoles];
-    newJobRoles[index] = { ...newJobRoles[index], [field]: value };
-    setJobRoles(newJobRoles);
+  const addJobRole = () => {
+    if (newJobRole.trim()) {
+      setJobRoles([...jobRoles, newJobRole.trim()]);
+      setNewJobRole("");
+    }
   };
+  const removeJobRole = (index: number) => setJobRoles(jobRoles.filter((_, i) => i !== index));
 
   return (
     <div className="space-y-4">
-      <Button onClick={addJobRole} variant="outline" size="sm">
-        <Plus className="h-4 w-4 mr-2" />
-        Add Job Role
-      </Button>
-      {jobRoles.map((role, index) => (
-        <Card key={index}>
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label>Job Title</Label>
-                  <Input 
-                    value={role.title}
-                    onChange={(e) => updateJobRole(index, "title", e.target.value)}
-                    placeholder="Job title..." 
-                    className="mt-1.5" 
-                  />
-                </div>
-                <div>
-                  <Label>Placement %</Label>
-                  <Input 
-                    type="number"
-                    value={role.percentage}
-                    onChange={(e) => updateJobRole(index, "percentage", e.target.value)}
-                    placeholder="0" 
-                    className="mt-1.5" 
-                  />
-                </div>
-                <div>
-                  <Label>Avg Salary (USD)</Label>
-                  <Input 
-                    type="number"
-                    value={role.avgSalary}
-                    onChange={(e) => updateJobRole(index, "avgSalary", e.target.value)}
-                    placeholder="0" 
-                    className="mt-1.5" 
-                  />
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-destructive"
-                onClick={() => removeJobRole(index)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-      {jobRoles.length === 0 && (
-        <p className="text-sm text-muted-foreground text-center py-4">No job roles added yet</p>
-      )}
+      {/* Add Job Role */}
+      <div className="flex gap-2">
+        <Input
+          value={newJobRole}
+          onChange={(e) => setNewJobRole(e.target.value)}
+          placeholder="Enter job role name..."
+          onKeyDown={(e) => e.key === "Enter" && addJobRole()}
+        />
+        <Button onClick={addJobRole} disabled={!newJobRole.trim()}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add
+        </Button>
+      </div>
+
+      {/* Job Roles List */}
+      <div>
+        <h4 className="font-medium text-sm text-muted-foreground mb-3">Added Job Roles ({jobRoles.length})</h4>
+        {jobRoles.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-4 border rounded-lg">No job roles added yet</p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {jobRoles.map((role, index) => (
+              <Badge key={index} variant="secondary" className="text-sm py-1.5 px-3 gap-2">
+                <Briefcase className="h-3.5 w-3.5" />
+                {role}
+                <button 
+                  onClick={() => removeJobRole(index)}
+                  className="ml-1 hover:text-destructive transition-colors"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -1025,8 +975,17 @@ function ProgramFAQsSection() {
     { question: "What is the application deadline?", answer: "Applications are reviewed on a rolling basis with final deadline in April." },
     { question: "Is GMAT required?", answer: "Yes, we accept both GMAT and GRE scores." },
   ]);
+  const [isAdding, setIsAdding] = useState(false);
+  const [newFaq, setNewFaq] = useState({ question: "", answer: "" });
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-  const addFaq = () => setFaqs([...faqs, { question: "", answer: "" }]);
+  const addFaq = () => {
+    if (newFaq.question.trim() && newFaq.answer.trim()) {
+      setFaqs([...faqs, { ...newFaq }]);
+      setNewFaq({ question: "", answer: "" });
+      setIsAdding(false);
+    }
+  };
   const removeFaq = (index: number) => setFaqs(faqs.filter((_, i) => i !== index));
   const updateFaq = (index: number, field: string, value: string) => {
     const newFaqs = [...faqs];
@@ -1036,132 +995,238 @@ function ProgramFAQsSection() {
 
   return (
     <div className="space-y-4">
-      <Button onClick={addFaq} variant="outline" size="sm">
-        <Plus className="h-4 w-4 mr-2" />
-        Add FAQ
-      </Button>
-      {faqs.map((faq, index) => (
-        <Card key={index}>
-          <CardContent className="p-4 space-y-3">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 space-y-3">
-                <div>
-                  <Label>Question</Label>
-                  <Input 
-                    value={faq.question}
-                    onChange={(e) => updateFaq(index, "question", e.target.value)}
-                    placeholder="Enter question..." 
-                    className="mt-1.5" 
-                  />
-                </div>
-                <div>
-                  <Label>Answer</Label>
-                  <Textarea 
-                    value={faq.answer}
-                    onChange={(e) => updateFaq(index, "answer", e.target.value)}
-                    placeholder="Enter answer..." 
-                    className="mt-1.5" 
-                  />
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-destructive"
-                onClick={() => removeFaq(index)}
-              >
-                <Trash2 className="h-4 w-4" />
+      {/* Add FAQ Button */}
+      {!isAdding ? (
+        <Button onClick={() => setIsAdding(true)} variant="outline">
+          <Plus className="h-4 w-4 mr-2" />
+          Add FAQ
+        </Button>
+      ) : (
+        <Card className="border-dashed">
+          <CardContent className="p-4 space-y-4">
+            <h4 className="font-medium text-sm text-muted-foreground">Add New FAQ</h4>
+            <div>
+              <Label>Question</Label>
+              <Input
+                value={newFaq.question}
+                onChange={(e) => setNewFaq({ ...newFaq, question: e.target.value })}
+                placeholder="Enter question..."
+                className="mt-1.5"
+              />
+            </div>
+            <div>
+              <Label>Answer</Label>
+              <Textarea
+                value={newFaq.answer}
+                onChange={(e) => setNewFaq({ ...newFaq, answer: e.target.value })}
+                placeholder="Enter answer..."
+                className="mt-1.5"
+                rows={3}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={addFaq} disabled={!newFaq.question.trim() || !newFaq.answer.trim()}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add FAQ
+              </Button>
+              <Button variant="outline" onClick={() => { setIsAdding(false); setNewFaq({ question: "", answer: "" }); }}>
+                Cancel
               </Button>
             </div>
           </CardContent>
         </Card>
-      ))}
-      {faqs.length === 0 && (
-        <p className="text-sm text-muted-foreground text-center py-4">No FAQs added yet</p>
       )}
+
+      {/* FAQs List */}
+      <div>
+        <h4 className="font-medium text-sm text-muted-foreground mb-3">Added FAQs ({faqs.length})</h4>
+        {faqs.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-4 border rounded-lg">No FAQs added yet</p>
+        ) : (
+          <div className="space-y-3">
+            {faqs.map((faq, index) => (
+              <Card key={index}>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 space-y-3">
+                      {editingIndex === index ? (
+                        <>
+                          <div>
+                            <Label>Question</Label>
+                            <Input
+                              value={faq.question}
+                              onChange={(e) => updateFaq(index, "question", e.target.value)}
+                              className="mt-1.5"
+                            />
+                          </div>
+                          <div>
+                            <Label>Answer</Label>
+                            <Textarea
+                              value={faq.answer}
+                              onChange={(e) => updateFaq(index, "answer", e.target.value)}
+                              className="mt-1.5"
+                              rows={3}
+                            />
+                          </div>
+                          <Button size="sm" onClick={() => setEditingIndex(null)}>
+                            <Check className="h-4 w-4 mr-2" />
+                            Done
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <div>
+                            <p className="font-medium text-foreground">{faq.question}</p>
+                            <p className="text-sm text-muted-foreground mt-1">{faq.answer}</p>
+                          </div>
+                          <Button size="sm" variant="outline" onClick={() => setEditingIndex(index)}>
+                            Edit
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-destructive shrink-0"
+                      onClick={() => removeFaq(index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
 function ProgramPOCsSection() {
   const [pocs, setPocs] = useState([
-    { name: "Sarah Williams", designation: "Admissions Director", email: "sarah.w@school.edu", phone: "+1 555-0123" },
-    { name: "James Chen", designation: "Program Coordinator", email: "james.c@school.edu", phone: "+1 555-0124" },
+    { fullName: "Sarah Williams", designation: "Admissions Director", organisation: "Harvard Business School", contactNo: "5550123", email: "sarah.w@school.edu" },
+    { fullName: "James Chen", designation: "Program Coordinator", organisation: "Harvard Business School", contactNo: "5550124", email: "james.c@school.edu" },
   ]);
+  const [newPoc, setNewPoc] = useState({ fullName: "", designation: "", organisation: "Harvard Business School", contactNo: "", email: "" });
 
-  const addPoc = () => setPocs([...pocs, { name: "", designation: "", email: "", phone: "" }]);
-  const removePoc = (index: number) => setPocs(pocs.filter((_, i) => i !== index));
-  const updatePoc = (index: number, field: string, value: string) => {
-    const newPocs = [...pocs];
-    newPocs[index] = { ...newPocs[index], [field]: value };
-    setPocs(newPocs);
+  const addPoc = () => {
+    if (newPoc.fullName.trim() && newPoc.email.trim()) {
+      setPocs([...pocs, { ...newPoc }]);
+      setNewPoc({ fullName: "", designation: "", organisation: "Harvard Business School", contactNo: "", email: "" });
+    }
   };
+  const removePoc = (index: number) => setPocs(pocs.filter((_, i) => i !== index));
 
   return (
-    <div className="space-y-4">
-      <Button onClick={addPoc} variant="outline" size="sm">
-        <Plus className="h-4 w-4 mr-2" />
-        Add Point of Contact
-      </Button>
-      {pocs.map((poc, index) => (
-        <Card key={index}>
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Name</Label>
-                  <Input 
-                    value={poc.name}
-                    onChange={(e) => updatePoc(index, "name", e.target.value)}
-                    placeholder="Contact name..." 
-                    className="mt-1.5" 
-                  />
-                </div>
-                <div>
-                  <Label>Designation</Label>
-                  <Input 
-                    value={poc.designation}
-                    onChange={(e) => updatePoc(index, "designation", e.target.value)}
-                    placeholder="Job title..." 
-                    className="mt-1.5" 
-                  />
-                </div>
-                <div>
-                  <Label>Email</Label>
-                  <Input 
-                    type="email"
-                    value={poc.email}
-                    onChange={(e) => updatePoc(index, "email", e.target.value)}
-                    placeholder="email@example.com" 
-                    className="mt-1.5" 
-                  />
-                </div>
-                <div>
-                  <Label>Phone</Label>
-                  <Input 
-                    type="tel"
-                    value={poc.phone}
-                    onChange={(e) => updatePoc(index, "phone", e.target.value)}
-                    placeholder="+1 555-0123" 
-                    className="mt-1.5" 
-                  />
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-destructive"
-                onClick={() => removePoc(index)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+    <div className="space-y-6">
+      {/* Add POC Form */}
+      <Card className="border-dashed">
+        <CardContent className="p-4 space-y-4">
+          <h4 className="font-medium text-sm text-muted-foreground">Add New Point of Contact</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label>Full Name</Label>
+              <Input
+                value={newPoc.fullName}
+                onChange={(e) => setNewPoc({ ...newPoc, fullName: e.target.value })}
+                placeholder="Enter full name..."
+                className="mt-1.5"
+              />
             </div>
-          </CardContent>
-        </Card>
-      ))}
-      {pocs.length === 0 && (
-        <p className="text-sm text-muted-foreground text-center py-4">No points of contact added yet</p>
-      )}
+            <div>
+              <Label>Designation</Label>
+              <Input
+                value={newPoc.designation}
+                onChange={(e) => setNewPoc({ ...newPoc, designation: e.target.value })}
+                placeholder="Enter designation..."
+                className="mt-1.5"
+              />
+            </div>
+            <div>
+              <Label>Organisation (School)</Label>
+              <Input
+                value={newPoc.organisation}
+                className="mt-1.5 bg-muted"
+                disabled
+              />
+            </div>
+            <div>
+              <Label>Contact No (without country code)</Label>
+              <Input
+                type="tel"
+                value={newPoc.contactNo}
+                onChange={(e) => setNewPoc({ ...newPoc, contactNo: e.target.value })}
+                placeholder="5551234567"
+                className="mt-1.5"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <Label>Email Address</Label>
+              <Input
+                type="email"
+                value={newPoc.email}
+                onChange={(e) => setNewPoc({ ...newPoc, email: e.target.value })}
+                placeholder="email@example.com"
+                className="mt-1.5"
+              />
+            </div>
+          </div>
+          <Button onClick={addPoc} disabled={!newPoc.fullName.trim() || !newPoc.email.trim()}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add POC
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* POCs List */}
+      <div>
+        <h4 className="font-medium text-sm text-muted-foreground mb-3">Added Points of Contact ({pocs.length})</h4>
+        {pocs.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-4 border rounded-lg">No points of contact added yet</p>
+        ) : (
+          <div className="space-y-3">
+            {pocs.map((poc, index) => (
+              <Card key={index}>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <User className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h5 className="font-medium text-foreground">{poc.fullName}</h5>
+                        <p className="text-sm text-muted-foreground">{poc.designation} • {poc.organisation}</p>
+                        <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Mail className="h-3.5 w-3.5" />
+                            {poc.email}
+                          </span>
+                          {poc.contactNo && (
+                            <span className="flex items-center gap-1">
+                              <Phone className="h-3.5 w-3.5" />
+                              {poc.contactNo}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-destructive shrink-0"
+                      onClick={() => removePoc(index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
