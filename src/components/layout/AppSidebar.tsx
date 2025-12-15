@@ -117,8 +117,8 @@ const navigation: NavItem[] = [
 
 export function AppSidebar() {
   const { collapsed, toggleCollapsed } = useSidebarState();
-  const [openSections, setOpenSections] = useState<string[]>(["Events", "Scholarships", "School Profile"]);
-  const [openSubSections, setOpenSubSections] = useState<string[]>(["In Person", "Virtual"]);
+  const [openSections, setOpenSections] = useState<string[]>([]);
+  const [openSubSections, setOpenSubSections] = useState<string[]>([]);
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
@@ -126,8 +126,8 @@ export function AppSidebar() {
   const toggleSection = (title: string) => {
     setOpenSections(prev =>
       prev.includes(title)
-        ? prev.filter(t => t !== title)
-        : [...prev, title]
+        ? []
+        : [title]
     );
   };
 
@@ -135,7 +135,7 @@ export function AppSidebar() {
     setOpenSubSections(prev =>
       prev.includes(title)
         ? prev.filter(t => t !== title)
-        : [...prev, title]
+        : [title]
     );
   };
 
