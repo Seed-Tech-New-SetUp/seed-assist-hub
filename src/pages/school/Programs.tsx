@@ -29,6 +29,9 @@ import {
   Trash2,
   Check,
   Image,
+  Mail,
+  Linkedin,
+  User,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -435,353 +438,426 @@ function ProgramFeaturesSection() {
   );
 }
 
-function ProgramFacultySection() {
-  const [faculty, setFaculty] = useState([
-    { name: "Dr. John Smith", designation: "Professor of Finance", expertise: "Corporate Finance" },
-    { name: "Dr. Sarah Johnson", designation: "Associate Professor", expertise: "Marketing Strategy" },
-  ]);
-
-  const addFaculty = () => setFaculty([...faculty, { name: "", designation: "", expertise: "" }]);
-  const removeFaculty = (index: number) => setFaculty(faculty.filter((_, i) => i !== index));
-  const updateFaculty = (index: number, field: string, value: string) => {
-    const newFaculty = [...faculty];
-    newFaculty[index] = { ...newFaculty[index], [field]: value };
-    setFaculty(newFaculty);
-  };
-
-  return (
-    <div className="space-y-4">
-      <Button onClick={addFaculty} variant="outline" size="sm">
-        <Plus className="h-4 w-4 mr-2" />
-        Add Faculty Member
-      </Button>
-      {faculty.map((member, index) => (
-        <Card key={index}>
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label>Name</Label>
-                  <Input 
-                    value={member.name}
-                    onChange={(e) => updateFaculty(index, "name", e.target.value)}
-                    placeholder="Faculty name..." 
-                    className="mt-1.5" 
-                  />
-                </div>
-                <div>
-                  <Label>Designation</Label>
-                  <Input 
-                    value={member.designation}
-                    onChange={(e) => updateFaculty(index, "designation", e.target.value)}
-                    placeholder="Title/Position..." 
-                    className="mt-1.5" 
-                  />
-                </div>
-                <div>
-                  <Label>Expertise</Label>
-                  <Input 
-                    value={member.expertise}
-                    onChange={(e) => updateFaculty(index, "expertise", e.target.value)}
-                    placeholder="Area of expertise..." 
-                    className="mt-1.5" 
-                  />
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-destructive"
-                onClick={() => removeFaculty(index)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-      {faculty.length === 0 && (
-        <p className="text-sm text-muted-foreground text-center py-4">No faculty members added yet</p>
-      )}
-    </div>
-  );
+// Reusable Person Form Component for Faculty, Students, Alumni
+interface PersonData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  linkedinUrl: string;
+  designation: string;
+  organisation: string;
+  category: string;
+  callToAction: "email" | "linkedin";
+  profileImage: string;
 }
 
-function CurrentStudentsSection() {
-  const [countries, setCountries] = useState(["United States", "India", "China", "Germany", "Brazil"]);
+const emptyPerson: PersonData = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  linkedinUrl: "",
+  designation: "",
+  organisation: "",
+  category: "Faculty",
+  callToAction: "email",
+  profileImage: "",
+};
 
-  const addCountry = () => setCountries([...countries, ""]);
-  const removeCountry = (index: number) => setCountries(countries.filter((_, i) => i !== index));
-  const updateCountry = (index: number, value: string) => {
-    const newCountries = [...countries];
-    newCountries[index] = value;
-    setCountries(newCountries);
+interface PersonFormSectionProps {
+  title: string;
+  defaultCategory: string;
+  persons: PersonData[];
+  setPersons: React.Dispatch<React.SetStateAction<PersonData[]>>;
+  addButtonLabel: string;
+}
+
+function PersonFormSection({ title, defaultCategory, persons, setPersons, addButtonLabel }: PersonFormSectionProps) {
+  const [newPerson, setNewPerson] = useState<PersonData>({ ...emptyPerson, category: defaultCategory });
+
+  const addPerson = () => {
+    if (newPerson.firstName.trim() && newPerson.lastName.trim()) {
+      setPersons([...persons, { ...newPerson }]);
+      setNewPerson({ ...emptyPerson, category: defaultCategory });
+    }
   };
+
+  const removePerson = (index: number) => setPersons(persons.filter((_, i) => i !== index));
 
   return (
     <div className="space-y-6">
-      {/* Enrollment Stats */}
-      <div>
-        <h4 className="font-medium text-sm mb-3">Enrollment Statistics</h4>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div>
-            <Label>Class Size</Label>
-            <Input type="number" defaultValue="120" className="mt-1.5" />
-          </div>
-          <div>
-            <Label>Female %</Label>
-            <Input type="number" defaultValue="42" className="mt-1.5" />
-          </div>
-          <div>
-            <Label>International %</Label>
-            <Input type="number" defaultValue="65" className="mt-1.5" />
-          </div>
-          <div>
-            <Label>Avg Age</Label>
-            <Input type="number" defaultValue="28" className="mt-1.5" />
-          </div>
-        </div>
-      </div>
-
-      {/* Demographics */}
-      <div>
-        <h4 className="font-medium text-sm mb-3">Demographics</h4>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>Avg Work Experience (years)</Label>
-            <Input type="number" defaultValue="5.2" step="0.1" className="mt-1.5" />
-          </div>
-          <div>
-            <Label>Nationalities Represented</Label>
-            <Input type="number" defaultValue="45" className="mt-1.5" />
-          </div>
-        </div>
-      </div>
-
-      {/* Top Countries */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <Label>Top Countries Represented</Label>
-          <Button variant="outline" size="sm" onClick={addCountry}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Country
-          </Button>
-        </div>
-        <div className="space-y-2">
-          {countries.map((country, index) => (
-            <div key={index} className="flex gap-2">
-              <Input
-                value={country}
-                onChange={(e) => updateCountry(index, e.target.value)}
-                placeholder="Enter country..."
+      {/* Add New Person Form */}
+      <Card className="border-dashed">
+        <CardContent className="p-4 space-y-4">
+          <h4 className="font-medium text-sm text-muted-foreground">Add New {title}</h4>
+          
+          {/* Row 1: First Name, Last Name, Email */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label>First Name</Label>
+              <Input 
+                value={newPerson.firstName}
+                onChange={(e) => setNewPerson({ ...newPerson, firstName: e.target.value })}
+                placeholder="First name..." 
+                className="mt-1.5" 
               />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-destructive shrink-0"
-                onClick={() => removeCountry(index)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
             </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ProgramAlumniSection() {
-  const [alumni, setAlumni] = useState([
-    { name: "Michael Chen", batch: "2020", company: "Google", role: "Product Manager" },
-    { name: "Emily Rodriguez", batch: "2019", company: "McKinsey", role: "Senior Consultant" },
-  ]);
-
-  const addAlumni = () => setAlumni([...alumni, { name: "", batch: "", company: "", role: "" }]);
-  const removeAlumni = (index: number) => setAlumni(alumni.filter((_, i) => i !== index));
-  const updateAlumni = (index: number, field: string, value: string) => {
-    const newAlumni = [...alumni];
-    newAlumni[index] = { ...newAlumni[index], [field]: value };
-    setAlumni(newAlumni);
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Alumni Stats */}
-      <div>
-        <h4 className="font-medium text-sm mb-3">Alumni Network Statistics</h4>
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <Label>Total Alumni</Label>
-            <Input type="number" defaultValue="15000" className="mt-1.5" />
+            <div>
+              <Label>Last Name</Label>
+              <Input 
+                value={newPerson.lastName}
+                onChange={(e) => setNewPerson({ ...newPerson, lastName: e.target.value })}
+                placeholder="Last name..." 
+                className="mt-1.5" 
+              />
+            </div>
+            <div>
+              <Label>Email</Label>
+              <Input 
+                type="email"
+                value={newPerson.email}
+                onChange={(e) => setNewPerson({ ...newPerson, email: e.target.value })}
+                placeholder="Email address..." 
+                className="mt-1.5" 
+              />
+            </div>
           </div>
-          <div>
-            <Label>Countries</Label>
-            <Input type="number" defaultValue="90" className="mt-1.5" />
-          </div>
-          <div>
-            <Label>CEO/Founders</Label>
-            <Input type="number" defaultValue="500" className="mt-1.5" />
-          </div>
-        </div>
-      </div>
 
-      {/* Notable Alumni */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="font-medium text-sm">Notable Alumni</h4>
-          <Button onClick={addAlumni} variant="outline" size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Alumni
-          </Button>
-        </div>
-        {alumni.map((person, index) => (
-          <Card key={index} className="mb-3">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div>
-                    <Label>Name</Label>
-                    <Input 
-                      value={person.name}
-                      onChange={(e) => updateAlumni(index, "name", e.target.value)}
-                      placeholder="Alumni name..." 
-                      className="mt-1.5" 
-                    />
-                  </div>
-                  <div>
-                    <Label>Batch</Label>
-                    <Input 
-                      value={person.batch}
-                      onChange={(e) => updateAlumni(index, "batch", e.target.value)}
-                      placeholder="Graduation year..." 
-                      className="mt-1.5" 
-                    />
-                  </div>
-                  <div>
-                    <Label>Company</Label>
-                    <Input 
-                      value={person.company}
-                      onChange={(e) => updateAlumni(index, "company", e.target.value)}
-                      placeholder="Current company..." 
-                      className="mt-1.5" 
-                    />
-                  </div>
-                  <div>
-                    <Label>Role</Label>
-                    <Input 
-                      value={person.role}
-                      onChange={(e) => updateAlumni(index, "role", e.target.value)}
-                      placeholder="Current role..." 
-                      className="mt-1.5" 
-                    />
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-destructive"
-                  onClick={() => removeAlumni(index)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+          {/* Row 2: LinkedIn, Designation, Organisation */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label>LinkedIn URL</Label>
+              <Input 
+                type="url"
+                value={newPerson.linkedinUrl}
+                onChange={(e) => setNewPerson({ ...newPerson, linkedinUrl: e.target.value })}
+                placeholder="https://linkedin.com/in/..." 
+                className="mt-1.5" 
+              />
+            </div>
+            <div>
+              <Label>Designation</Label>
+              <Input 
+                value={newPerson.designation}
+                onChange={(e) => setNewPerson({ ...newPerson, designation: e.target.value })}
+                placeholder="Title/Position..." 
+                className="mt-1.5" 
+              />
+            </div>
+            <div>
+              <Label>Organisation</Label>
+              <Input 
+                value={newPerson.organisation}
+                onChange={(e) => setNewPerson({ ...newPerson, organisation: e.target.value })}
+                placeholder="Organisation name..." 
+                className="mt-1.5" 
+              />
+            </div>
+          </div>
+
+          {/* Row 3: Category, Call to Action */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label>Category</Label>
+              <Input 
+                value={newPerson.category}
+                disabled
+                className="mt-1.5 bg-muted" 
+              />
+            </div>
+            <div>
+              <Label>Call to Action</Label>
+              <Select 
+                value={newPerson.callToAction} 
+                onValueChange={(value: "email" | "linkedin") => setNewPerson({ ...newPerson, callToAction: value })}
+              >
+                <SelectTrigger className="mt-1.5">
+                  <SelectValue placeholder="Select..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="linkedin">LinkedIn</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Profile Image</Label>
+              <div className="mt-1.5 border-2 border-dashed rounded-lg p-3 text-center cursor-pointer hover:bg-muted/50 transition-colors">
+                <User className="h-5 w-5 mx-auto text-muted-foreground" />
+                <p className="text-xs text-muted-foreground mt-1">Upload photo</p>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-        {alumni.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-4">No notable alumni added yet</p>
+            </div>
+          </div>
+
+          <Button onClick={addPerson} disabled={!newPerson.firstName.trim() || !newPerson.lastName.trim()}>
+            <Plus className="h-4 w-4 mr-2" />
+            {addButtonLabel}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Added Persons List */}
+      <div>
+        <h4 className="font-medium text-sm text-muted-foreground mb-3">Added {title}s ({persons.length})</h4>
+        {persons.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-4 border rounded-lg">No {title.toLowerCase()}s added yet</p>
+        ) : (
+          <div className="space-y-3">
+            {persons.map((person, index) => (
+              <Card key={index}>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex gap-4 flex-1">
+                      {person.profileImage ? (
+                        <img src={person.profileImage} alt={`${person.firstName} ${person.lastName}`} className="w-12 h-12 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0">
+                          <User className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h5 className="font-medium text-foreground">{person.firstName} {person.lastName}</h5>
+                          <Badge variant="secondary" className="text-xs">{person.category}</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{person.designation} {person.organisation && `at ${person.organisation}`}</p>
+                        <div className="flex items-center gap-3 mt-1">
+                          {person.email && (
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Mail className="h-3 w-3" /> {person.email}
+                            </span>
+                          )}
+                          {person.linkedinUrl && (
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Linkedin className="h-3 w-3" /> LinkedIn
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-destructive shrink-0"
+                      onClick={() => removePerson(index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         )}
       </div>
     </div>
   );
 }
 
-function ProgramRankingsSection() {
-  const [rankings, setRankings] = useState([
-    { organization: "Financial Times", year: "2024", rank: "5", category: "Global MBA" },
-    { organization: "QS World", year: "2024", rank: "8", category: "MBA" },
+function ProgramFacultySection() {
+  const [faculty, setFaculty] = useState<PersonData[]>([
+    { firstName: "John", lastName: "Smith", email: "john.smith@university.edu", linkedinUrl: "https://linkedin.com/in/johnsmith", designation: "Professor of Finance", organisation: "Business School", category: "Faculty", callToAction: "email", profileImage: "" },
+    { firstName: "Sarah", lastName: "Johnson", email: "sarah.johnson@university.edu", linkedinUrl: "", designation: "Associate Professor", organisation: "Marketing Department", category: "Faculty", callToAction: "linkedin", profileImage: "" },
   ]);
 
-  const addRanking = () => setRankings([...rankings, { organization: "", year: "", rank: "", category: "" }]);
-  const removeRanking = (index: number) => setRankings(rankings.filter((_, i) => i !== index));
-  const updateRanking = (index: number, field: string, value: string) => {
-    const newRankings = [...rankings];
-    newRankings[index] = { ...newRankings[index], [field]: value };
-    setRankings(newRankings);
-  };
+  return (
+    <PersonFormSection 
+      title="Faculty Member" 
+      defaultCategory="Faculty" 
+      persons={faculty} 
+      setPersons={setFaculty}
+      addButtonLabel="Add Faculty Member"
+    />
+  );
+}
+
+function CurrentStudentsSection() {
+  const [students, setStudents] = useState<PersonData[]>([
+    { firstName: "Emily", lastName: "Chen", email: "emily.chen@student.edu", linkedinUrl: "https://linkedin.com/in/emilychen", designation: "MBA Candidate", organisation: "Class of 2025", category: "Current Student", callToAction: "linkedin", profileImage: "" },
+  ]);
 
   return (
-    <div className="space-y-4">
-      <Button onClick={addRanking} variant="outline" size="sm">
-        <Plus className="h-4 w-4 mr-2" />
-        Add Ranking
-      </Button>
-      {rankings.map((ranking, index) => (
-        <Card key={index}>
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                  <Label>Organization</Label>
-                  <Input 
-                    value={ranking.organization}
-                    onChange={(e) => updateRanking(index, "organization", e.target.value)}
-                    placeholder="e.g., Financial Times" 
-                    className="mt-1.5" 
-                  />
-                </div>
-                <div>
-                  <Label>Year</Label>
-                  <Select 
-                    value={ranking.year} 
-                    onValueChange={(value) => updateRanking(index, "year", value)}
-                  >
-                    <SelectTrigger className="mt-1.5">
-                      <SelectValue placeholder="Select year" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="2024">2024</SelectItem>
-                      <SelectItem value="2023">2023</SelectItem>
-                      <SelectItem value="2022">2022</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Rank</Label>
-                  <Input 
-                    type="number"
-                    value={ranking.rank}
-                    onChange={(e) => updateRanking(index, "rank", e.target.value)}
-                    placeholder="1" 
-                    className="mt-1.5" 
-                  />
-                </div>
-                <div>
-                  <Label>Category</Label>
-                  <Input 
-                    value={ranking.category}
-                    onChange={(e) => updateRanking(index, "category", e.target.value)}
-                    placeholder="e.g., Global MBA" 
-                    className="mt-1.5" 
-                  />
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-destructive"
-                onClick={() => removeRanking(index)}
+    <PersonFormSection 
+      title="Current Student" 
+      defaultCategory="Current Student" 
+      persons={students} 
+      setPersons={setStudents}
+      addButtonLabel="Add Current Student"
+    />
+  );
+}
+
+function ProgramAlumniSection() {
+  const [alumni, setAlumni] = useState<PersonData[]>([
+    { firstName: "Michael", lastName: "Chen", email: "michael.chen@google.com", linkedinUrl: "https://linkedin.com/in/michaelchen", designation: "Product Manager", organisation: "Google", category: "Alumni", callToAction: "linkedin", profileImage: "" },
+    { firstName: "Emily", lastName: "Rodriguez", email: "emily.r@mckinsey.com", linkedinUrl: "", designation: "Senior Consultant", organisation: "McKinsey", category: "Alumni", callToAction: "email", profileImage: "" },
+  ]);
+
+  return (
+    <PersonFormSection 
+      title="Alumni" 
+      defaultCategory="Alumni" 
+      persons={alumni} 
+      setPersons={setAlumni}
+      addButtonLabel="Add Alumni"
+    />
+  );
+}
+
+// Mock ranking organizations from backend
+const mockRankingOrganizations = [
+  { id: "1", name: "Financial Times" },
+  { id: "2", name: "QS World University Rankings" },
+  { id: "3", name: "The Economist" },
+  { id: "4", name: "Bloomberg Businessweek" },
+  { id: "5", name: "US News & World Report" },
+  { id: "6", name: "Forbes" },
+];
+
+interface RankingData {
+  organisation: string;
+  year: string;
+  level: string;
+  rank: string;
+  supportingText: string;
+}
+
+function ProgramRankingsSection() {
+  const [rankings, setRankings] = useState<RankingData[]>([
+    { organisation: "Financial Times", year: "2024", level: "Program", rank: "5", supportingText: "Top 5 globally for MBA programs" },
+    { organisation: "QS World University Rankings", year: "2024", level: "Program", rank: "8", supportingText: "Ranked 8th in the QS Global MBA Rankings" },
+  ]);
+  const [newRanking, setNewRanking] = useState<RankingData>({
+    organisation: "",
+    year: "",
+    level: "Program",
+    rank: "",
+    supportingText: "",
+  });
+
+  const addRanking = () => {
+    if (newRanking.organisation && newRanking.year && newRanking.rank) {
+      setRankings([...rankings, { ...newRanking }]);
+      setNewRanking({ organisation: "", year: "", level: "Program", rank: "", supportingText: "" });
+    }
+  };
+
+  const removeRanking = (index: number) => setRankings(rankings.filter((_, i) => i !== index));
+
+  return (
+    <div className="space-y-6">
+      {/* Add New Ranking Form */}
+      <Card className="border-dashed">
+        <CardContent className="p-4 space-y-4">
+          <h4 className="font-medium text-sm text-muted-foreground">Add New Ranking</h4>
+          
+          {/* Row 1: Organisation, Year, Level */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label>Ranking Organisation</Label>
+              <Select 
+                value={newRanking.organisation} 
+                onValueChange={(value) => setNewRanking({ ...newRanking, organisation: value })}
               >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+                <SelectTrigger className="mt-1.5">
+                  <SelectValue placeholder="Select organisation..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockRankingOrganizations.map((org) => (
+                    <SelectItem key={org.id} value={org.name}>{org.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          </CardContent>
-        </Card>
-      ))}
-      {rankings.length === 0 && (
-        <p className="text-sm text-muted-foreground text-center py-4">No rankings added yet</p>
-      )}
+            <div>
+              <Label>Ranking Year</Label>
+              <Input 
+                value={newRanking.year}
+                onChange={(e) => setNewRanking({ ...newRanking, year: e.target.value })}
+                placeholder="e.g., 2024" 
+                className="mt-1.5" 
+              />
+            </div>
+            <div>
+              <Label>Ranking Level</Label>
+              <Input 
+                value={newRanking.level}
+                disabled
+                className="mt-1.5 bg-muted" 
+              />
+            </div>
+          </div>
+
+          {/* Row 2: Rank, Supporting Text */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label>Rank</Label>
+              <Input 
+                type="number"
+                value={newRanking.rank}
+                onChange={(e) => setNewRanking({ ...newRanking, rank: e.target.value })}
+                placeholder="e.g., 5" 
+                className="mt-1.5" 
+                min="1"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <Label>Supporting Text</Label>
+              <Input 
+                value={newRanking.supportingText}
+                onChange={(e) => setNewRanking({ ...newRanking, supportingText: e.target.value })}
+                placeholder="Additional context about this ranking..." 
+                className="mt-1.5" 
+              />
+            </div>
+          </div>
+
+          <Button onClick={addRanking} disabled={!newRanking.organisation || !newRanking.year || !newRanking.rank}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Ranking
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Added Rankings List */}
+      <div>
+        <h4 className="font-medium text-sm text-muted-foreground mb-3">Added Rankings ({rankings.length})</h4>
+        {rankings.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-4 border rounded-lg">No rankings added yet</p>
+        ) : (
+          <div className="space-y-3">
+            {rankings.map((ranking, index) => (
+              <Card key={index}>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary text-primary-foreground font-bold text-lg">
+                          #{ranking.rank}
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-foreground">{ranking.organisation}</h5>
+                          <p className="text-sm text-muted-foreground">{ranking.year} • {ranking.level} Level</p>
+                        </div>
+                      </div>
+                      {ranking.supportingText && (
+                        <p className="text-sm text-muted-foreground mt-2 ml-[52px]">{ranking.supportingText}</p>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-destructive shrink-0"
+                      onClick={() => removeRanking(index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
