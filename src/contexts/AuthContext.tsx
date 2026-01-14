@@ -9,6 +9,12 @@ interface PortalUser {
   user_metadata?: {
     full_name?: string;
   };
+  // Extended user info from /me endpoint
+  role?: string;
+  phone?: string;
+  avatar_url?: string;
+  organization?: string;
+  schools?: Array<{ id: string; name: string }>;
 }
 
 interface AuthContextType {
@@ -65,6 +71,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  const fetchUserInfo = async (token: string): Promise<PortalUser | null> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('portal-auth', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: null,
+        method: 'GET',
+      });
+
+      // Use query param approach since invoke doesn't support GET with query params well
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/portal-auth?action=me`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        console.error('Failed to fetch user info');
+        return null;
+      }
+
+      const userData = await response.json();
+      console.log('User info fetched:', userData);
+
+      return {
+        id: userData.id || userData.member?.id,
+        email: userData.email || userData.member?.email,
+        full_name: userData.name || userData.member?.name,
+        user_metadata: {
+          full_name: userData.name || userData.member?.name,
+        },
+        role: userData.role || userData.member?.role,
+        phone: userData.phone || userData.member?.phone,
+        avatar_url: userData.avatar_url || userData.member?.avatar_url,
+        organization: userData.organization || userData.member?.organization,
+        schools: userData.schools || userData.member?.schools,
+      };
+    } catch (err) {
+      console.error('Error fetching user info:', err);
+      return null;
+    }
+  };
+
   const signIn = async (email: string, password: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('portal-auth', {
@@ -80,17 +135,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: new Error(data.error) };
       }
 
-      // Store portal session
-      const portalUser: PortalUser = {
-        id: data.user?.id || data.member?.id || email,
-        email: email,
-        full_name: data.user?.name || data.member?.name || email.split('@')[0],
-        user_metadata: {
-          full_name: data.user?.name || data.member?.name || email.split('@')[0],
-        },
-      };
-
       const token = data.token || data.access_token || 'portal_authenticated';
+      
+      // Fetch complete user info using the token
+      let portalUser = await fetchUserInfo(token);
+      
+      // Fallback to login response data if /me fails
+      if (!portalUser) {
+        portalUser = {
+          id: data.user?.id || data.member?.id || email,
+          email: email,
+          full_name: data.user?.name || data.member?.name || email.split('@')[0],
+          user_metadata: {
+            full_name: data.user?.name || data.member?.name || email.split('@')[0],
+          },
+        };
+      }
       
       localStorage.setItem('portal_user', JSON.stringify(portalUser));
       localStorage.setItem('portal_token', token);
