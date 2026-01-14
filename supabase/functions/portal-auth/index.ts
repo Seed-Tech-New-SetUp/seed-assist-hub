@@ -55,6 +55,52 @@ serve(async (req) => {
       );
     }
 
+    if (action === 'members-by-email') {
+      // Get user's school memberships by email
+      const authHeader = req.headers.get('Authorization');
+      const email = url.searchParams.get('email');
+      
+      if (!authHeader) {
+        return new Response(
+          JSON.stringify({ error: 'Authorization header required' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (!email) {
+        return new Response(
+          JSON.stringify({ error: 'Email parameter required' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      console.log(`Fetching members by email: ${email}`);
+
+      const response = await fetch(`${PORTAL_BASE_URL}/assist/members/by-email?email=${encodeURIComponent(email)}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': authHeader,
+          'Accept': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      console.log(`Portal members-by-email response status: ${response.status}`);
+
+      if (!response.ok) {
+        console.error('Portal members-by-email failed:', data);
+        return new Response(
+          JSON.stringify({ error: data.message || 'Failed to fetch member schools', details: data }),
+          { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify(data),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     if (action === 'forgot-password') {
       // Request OTP for password reset
       const { email } = await req.json();

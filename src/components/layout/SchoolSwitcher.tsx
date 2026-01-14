@@ -35,8 +35,8 @@ export function SchoolSwitcher() {
           <p className="text-xs font-medium leading-tight truncate max-w-[120px]">
             {currentSchool.name}
           </p>
-          <p className="text-[10px] text-muted-foreground capitalize">
-            {currentSchool.role}
+          <p className="text-[10px] text-muted-foreground">
+            {currentSchool.role_name || currentSchool.role}
           </p>
         </div>
       </div>
@@ -71,8 +71,8 @@ export function SchoolSwitcher() {
             <p className="text-xs font-medium leading-tight truncate max-w-[120px]">
               {currentSchool.name}
             </p>
-            <p className="text-[10px] text-muted-foreground capitalize">
-              {currentSchool.role}
+            <p className="text-[10px] text-muted-foreground">
+              {currentSchool.role_name || currentSchool.role}
             </p>
           </div>
           <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
