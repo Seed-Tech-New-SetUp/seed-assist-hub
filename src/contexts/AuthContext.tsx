@@ -2,6 +2,17 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
+interface PortalSchool {
+  id: string;
+  mapping_id: string;
+  entity_id: string;
+  name: string;
+  role: string;
+  role_name: string;
+  country: string;
+  country_code: string;
+}
+
 interface PortalUser {
   id: string;
   email: string;
@@ -14,7 +25,7 @@ interface PortalUser {
   phone?: string;
   avatar_url?: string;
   organization?: string;
-  schools?: Array<{ id: string; name: string }>;
+  schools?: PortalSchool[];
 }
 
 interface AuthContextType {
@@ -22,6 +33,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   portalToken: string | null;
+  portalSchools: PortalSchool[];
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -33,23 +45,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | PortalUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [portalToken, setPortalToken] = useState<string | null>(null);
+  const [portalSchools, setPortalSchools] = useState<PortalSchool[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Check for stored portal session first
     const storedPortalUser = localStorage.getItem('portal_user');
     const storedPortalToken = localStorage.getItem('portal_token');
+    const storedPortalSchools = localStorage.getItem('portal_schools');
     
     if (storedPortalUser && storedPortalToken) {
       try {
         const parsedUser = JSON.parse(storedPortalUser);
         setUser(parsedUser);
         setPortalToken(storedPortalToken);
+        if (storedPortalSchools) {
+          setPortalSchools(JSON.parse(storedPortalSchools));
+        }
         setLoading(false);
         return;
       } catch (e) {
         localStorage.removeItem('portal_user');
         localStorage.removeItem('portal_token');
+        localStorage.removeItem('portal_schools');
       }
     }
 
@@ -71,19 +89,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchUserInfo = async (token: string): Promise<PortalUser | null> => {
+  const fetchMemberSchools = async (token: string, email: string): Promise<PortalSchool[]> => {
     try {
-      const { data, error } = await supabase.functions.invoke('portal-auth', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: null,
-        method: 'GET',
-      });
-
-      // Use query param approach since invoke doesn't support GET with query params well
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/portal-auth?action=me`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/portal-auth?action=members-by-email&email=${encodeURIComponent(email)}`,
         {
           method: 'GET',
           headers: {
@@ -94,29 +103,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
 
       if (!response.ok) {
-        console.error('Failed to fetch user info');
-        return null;
+        console.error('Failed to fetch member schools');
+        return [];
       }
 
-      const userData = await response.json();
-      console.log('User info fetched:', userData);
+      const result = await response.json();
+      console.log('Member schools fetched:', result);
 
-      return {
-        id: userData.id || userData.member?.id,
-        email: userData.email || userData.member?.email,
-        full_name: userData.name || userData.member?.name,
-        user_metadata: {
-          full_name: userData.name || userData.member?.name,
-        },
-        role: userData.role || userData.member?.role,
-        phone: userData.phone || userData.member?.phone,
-        avatar_url: userData.avatar_url || userData.member?.avatar_url,
-        organization: userData.organization || userData.member?.organization,
-        schools: userData.schools || userData.member?.schools,
-      };
+      if (!result.success || !result.data) {
+        return [];
+      }
+
+      // Transform the portal API response to our PortalSchool format
+      return result.data.map((member: any) => ({
+        id: member.company?.company_id?.toString() || member.id?.toString(),
+        mapping_id: member.mapping_id,
+        entity_id: member.company?.entity_id,
+        name: member.company?.organization_name || 'Unknown School',
+        role: member.role?.role || member.company?.member_type || 'member',
+        role_name: member.role?.role_name || member.company?.member_type_label || 'Member',
+        country: member.country?.country_name || '',
+        country_code: member.country?.country_code || '',
+      }));
     } catch (err) {
-      console.error('Error fetching user info:', err);
-      return null;
+      console.error('Error fetching member schools:', err);
+      return [];
     }
   };
 
@@ -135,28 +146,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: new Error(data.error) };
       }
 
-      const token = data.token || data.access_token || 'portal_authenticated';
+      // Extract token from login response
+      const token = data.data?.access_token || data.access_token || data.token || 'portal_authenticated';
+      const loginUser = data.data?.user || data.user;
       
-      // Fetch complete user info using the token
-      let portalUser = await fetchUserInfo(token);
+      // Fetch member schools using the token
+      const schools = await fetchMemberSchools(token, email);
       
-      // Fallback to login response data if /me fails
-      if (!portalUser) {
-        portalUser = {
-          id: data.user?.id || data.member?.id || email,
-          email: email,
-          full_name: data.user?.name || data.member?.name || email.split('@')[0],
-          user_metadata: {
-            full_name: data.user?.name || data.member?.name || email.split('@')[0],
-          },
-        };
-      }
+      // Create portal user from login response
+      const portalUser: PortalUser = {
+        id: loginUser?.id || email,
+        email: email,
+        full_name: loginUser?.full_name || loginUser?.name || email.split('@')[0],
+        user_metadata: {
+          full_name: loginUser?.full_name || loginUser?.name || email.split('@')[0],
+        },
+        phone: loginUser?.phone?.toString(),
+        schools: schools,
+      };
       
       localStorage.setItem('portal_user', JSON.stringify(portalUser));
       localStorage.setItem('portal_token', token);
+      localStorage.setItem('portal_schools', JSON.stringify(schools));
       
       setUser(portalUser);
       setPortalToken(token);
+      setPortalSchools(schools);
 
       return { error: null };
     } catch (err) {
@@ -186,15 +201,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Clear portal session
     localStorage.removeItem('portal_user');
     localStorage.removeItem('portal_token');
+    localStorage.removeItem('portal_schools');
+    localStorage.removeItem('seed_current_school');
     setUser(null);
     setPortalToken(null);
+    setPortalSchools([]);
     
     // Also sign out from Supabase if there's a session
     await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, portalToken, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, portalToken, portalSchools, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

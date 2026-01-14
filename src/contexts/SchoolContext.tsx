@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./AuthContext";
 
 interface School {
@@ -9,7 +8,9 @@ interface School {
   country: string | null;
   city: string | null;
   role: string;
+  role_name: string;
   is_primary: boolean;
+  entity_id?: string;
 }
 
 interface SchoolContextType {
@@ -23,92 +24,67 @@ interface SchoolContextType {
 const SchoolContext = createContext<SchoolContextType | undefined>(undefined);
 
 export function SchoolProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, portalSchools } = useAuth();
   const [schools, setSchools] = useState<School[]>([]);
   const [currentSchool, setCurrentSchoolState] = useState<School | null>(null);
   const [loading, setLoading] = useState(true);
   const [needsSchoolSelection, setNeedsSchoolSelection] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      fetchUserSchools();
+    if (user && portalSchools.length > 0) {
+      // Transform portal schools to our School format
+      const transformedSchools: School[] = portalSchools.map((ps, index) => ({
+        id: ps.id,
+        name: ps.name,
+        logo_url: null, // Portal API doesn't provide logo
+        country: ps.country || null,
+        city: null, // Portal API doesn't provide city separately
+        role: ps.role,
+        role_name: ps.role_name,
+        is_primary: index === 0, // First school is primary by default
+        entity_id: ps.entity_id,
+      }));
+
+      setSchools(transformedSchools);
+
+      // Check for stored school preference
+      const storedSchoolId = localStorage.getItem('seed_current_school');
+      const storedSchool = transformedSchools.find((s) => s.id === storedSchoolId);
+
+      if (storedSchool) {
+        setCurrentSchoolState(storedSchool);
+        setNeedsSchoolSelection(false);
+      } else if (transformedSchools.length === 1) {
+        // Auto-select if only one school
+        setCurrentSchoolState(transformedSchools[0]);
+        localStorage.setItem('seed_current_school', transformedSchools[0].id);
+        setNeedsSchoolSelection(false);
+      } else if (transformedSchools.length > 1) {
+        // Multiple schools - need selection
+        setNeedsSchoolSelection(true);
+      } else {
+        setNeedsSchoolSelection(false);
+      }
+      
+      setLoading(false);
+    } else if (user && portalSchools.length === 0) {
+      // User logged in but no schools fetched yet - might still be loading
+      setSchools([]);
+      setLoading(false);
+      setNeedsSchoolSelection(false);
     } else {
+      // No user
       setSchools([]);
       setCurrentSchoolState(null);
       setLoading(false);
       setNeedsSchoolSelection(false);
     }
-  }, [user]);
-
-  const fetchUserSchools = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from("user_schools")
-        .select(`
-          school_id,
-          role,
-          is_primary,
-          schools (
-            id,
-            name,
-            logo_url,
-            country,
-            city
-          )
-        `)
-        .eq("user_id", user?.id);
-
-      if (error) throw error;
-
-      const userSchools: School[] = (data || []).map((item: any) => ({
-        id: item.schools.id,
-        name: item.schools.name,
-        logo_url: item.schools.logo_url,
-        country: item.schools.country,
-        city: item.schools.city,
-        role: item.role,
-        is_primary: item.is_primary,
-      }));
-
-      setSchools(userSchools);
-
-      // Check for stored school preference
-      const storedSchoolId = localStorage.getItem(`seed_current_school_${user?.id}`);
-      const storedSchool = userSchools.find((s) => s.id === storedSchoolId);
-
-      if (storedSchool) {
-        setCurrentSchoolState(storedSchool);
-        setNeedsSchoolSelection(false);
-      } else if (userSchools.length === 1) {
-        // Auto-select if only one school
-        setCurrentSchoolState(userSchools[0]);
-        setNeedsSchoolSelection(false);
-      } else if (userSchools.length > 1) {
-        // Check for primary school
-        const primarySchool = userSchools.find((s) => s.is_primary);
-        if (primarySchool) {
-          setCurrentSchoolState(primarySchool);
-          setNeedsSchoolSelection(false);
-        } else {
-          setNeedsSchoolSelection(true);
-        }
-      } else {
-        setNeedsSchoolSelection(false);
-      }
-    } catch (error) {
-      console.error("Error fetching user schools:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [user, portalSchools]);
 
   const setCurrentSchool = (school: School) => {
     setCurrentSchoolState(school);
     setNeedsSchoolSelection(false);
-    if (user) {
-      localStorage.setItem(`seed_current_school_${user.id}`, school.id);
-    }
+    localStorage.setItem('seed_current_school', school.id);
   };
 
   return (

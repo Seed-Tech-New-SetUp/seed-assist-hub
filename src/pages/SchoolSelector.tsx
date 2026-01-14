@@ -120,8 +120,8 @@ export default function SchoolSelector() {
                           </span>
                         </div>
                       )}
-                      <span className="text-xs text-primary capitalize mt-1 inline-block">
-                        {school.role}
+                      <span className="text-xs text-primary mt-1 inline-block">
+                        {school.role_name || school.role}
                       </span>
                     </div>
                     <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
