@@ -94,13 +94,13 @@ const baseNavigation: NavItem[] = [
   {
     title: "Organisation Profile",
     icon: Building2,
-    permissionKey: "orgProfile",
+    // No permissionKey - always visible for every school
     children: [
       {
         title: "",
         items: [
-          { title: "General Information", href: "/school-profile/edit", permissionKey: "generalInfo" },
-          { title: "Academic Programs", href: "/school-profile/programs", permissionKey: "academicPrograms" },
+          { title: "General Information", href: "/school-profile/edit" },
+          { title: "Academic Programs", href: "/school-profile/programs" },
         ],
       },
     ],
