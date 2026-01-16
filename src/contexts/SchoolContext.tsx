@@ -34,7 +34,7 @@ export function SchoolProvider({ children }: { children: ReactNode }) {
         id: ls.school_id,
         school_id: ls.school_id,
         name: ls.school_name,
-        logo_url: ls.school_logo ? `https://seedglobaleducation.com/uploads/school_logos/${ls.school_logo}` : null,
+        logo_url: ls.school_logo ? `https://admin.seedglobaleducation.com/assets/img/school_logos/${ls.school_logo}` : null,
         role: ls.role,
         designation: ls.designation,
       }));
@@ -47,7 +47,7 @@ export function SchoolProvider({ children }: { children: ReactNode }) {
           id: selectedSchool.school_id,
           school_id: selectedSchool.school_id,
           name: selectedSchool.school_name,
-          logo_url: selectedSchool.school_logo ? `https://seedglobaleducation.com/uploads/school_logos/${selectedSchool.school_logo}` : null,
+          logo_url: selectedSchool.school_logo ? `https://admin.seedglobaleducation.com/assets/img/school_logos/${selectedSchool.school_logo}` : null,
           role: 'member',
         };
         
