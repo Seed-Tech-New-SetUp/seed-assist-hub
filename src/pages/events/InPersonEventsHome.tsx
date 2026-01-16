@@ -4,6 +4,8 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   Users, 
   UserCheck, 
@@ -18,39 +20,56 @@ import {
   Building2
 } from "lucide-react";
 
-// Mock data for stats
-const totalStats = {
-  registrations: 1335,
-  attended: 770,
-  connections: 353,
-  citiesCovered: 12,
-  countriesCovered: 3,
-};
+interface OverviewData {
+  summary: {
+    total_registrations: number;
+    total_attended: number;
+    total_connections: number;
+    total_events: number;
+    unique_cities: number;
+    unique_countries: number;
+  };
+  by_event_type: {
+    bsf: {
+      events: number;
+      registrations: number;
+      attendees: number;
+    };
+    campus_tour: {
+      events: number;
+      registrations: number;
+      attendees: number;
+    };
+  };
+  next_event: {
+    event_id: string;
+    event_slug: string;
+    event_type: string;
+    city: string;
+    country: string;
+    date: string;
+    registrant_count: number;
+    venue?: string;
+    title?: string;
+  } | null;
+  latest_report: {
+    event_id: string;
+    event_slug: string;
+    event_type: string;
+    city: string;
+    country: string;
+    date: string;
+    registrant_count: number;
+    attendees_count: number;
+  } | null;
+}
 
-// Latest published report
-const latestReport = {
-  id: "3",
-  title: "BSF Bangalore 2024",
-  date: "2024-12-10T10:00:00",
-  venue: "Palace Grounds, Bangalore",
-  registrations: 380,
-  attended: 342,
-  connections: 156,
-};
-
-// Next upcoming event
-const nextUpcomingEvent = {
-  id: "1",
-  title: "BSF Mumbai 2025",
-  date: "2025-01-15T10:00:00",
-  venue: "Jio Convention Centre, Mumbai",
-  registrations: 450,
-};
-
-const useCountdown = (targetDate: string) => {
+const useCountdown = (targetDate: string | null) => {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
+    if (!targetDate) return;
+
     const calculateTimeLeft = () => {
       const difference = new Date(targetDate).getTime() - new Date().getTime();
       if (difference > 0) {
@@ -102,15 +121,51 @@ const formatDate = (dateStr: string) => {
   });
 };
 
-const formatTime = (dateStr: string) => {
-  return new Date(dateStr).toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
 export default function InPersonEventsHome() {
   const navigate = useNavigate();
+  const { portalToken, selectedSchool } = useAuth();
+  const [overviewData, setOverviewData] = useState<OverviewData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchOverviewData = async () => {
+      if (!portalToken || !selectedSchool?.school_id) return;
+
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `https://admin.seedglobaleducation.com/api/in-person-event/overview.php?school_id=${selectedSchool.school_id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${portalToken}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch overview data");
+        }
+
+        const result = await response.json();
+        if (result.success) {
+          setOverviewData(result.data);
+        } else {
+          throw new Error(result.message || "Failed to fetch data");
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOverviewData();
+  }, [portalToken, selectedSchool?.school_id]);
+
+  const summary = overviewData?.summary;
+  const nextEvent = overviewData?.next_event;
+  const latestReport = overviewData?.latest_report;
 
   return (
     <DashboardLayout>
@@ -131,7 +186,11 @@ export default function InPersonEventsHome() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Registrations</p>
-                  <p className="text-2xl font-bold">{totalStats.registrations.toLocaleString()}</p>
+                  {loading ? (
+                    <Skeleton className="h-8 w-16" />
+                  ) : (
+                    <p className="text-2xl font-bold">{summary?.total_registrations?.toLocaleString() || 0}</p>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -145,7 +204,11 @@ export default function InPersonEventsHome() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Attended</p>
-                  <p className="text-2xl font-bold">{totalStats.attended.toLocaleString()}</p>
+                  {loading ? (
+                    <Skeleton className="h-8 w-16" />
+                  ) : (
+                    <p className="text-2xl font-bold">{summary?.total_attended?.toLocaleString() || 0}</p>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -155,11 +218,15 @@ export default function InPersonEventsHome() {
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
                 <div className="p-3 rounded-xl bg-purple-100 dark:bg-purple-900/30">
-                  <Handshake className="h-6 w-6 text-purple-600" />
+                  <Calendar className="h-6 w-6 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Connections</p>
-                  <p className="text-2xl font-bold">{totalStats.connections.toLocaleString()}</p>
+                  <p className="text-sm text-muted-foreground">Total Events</p>
+                  {loading ? (
+                    <Skeleton className="h-8 w-16" />
+                  ) : (
+                    <p className="text-2xl font-bold">{summary?.total_events?.toLocaleString() || 0}</p>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -173,7 +240,11 @@ export default function InPersonEventsHome() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Cities Covered</p>
-                  <p className="text-2xl font-bold">{totalStats.citiesCovered}</p>
+                  {loading ? (
+                    <Skeleton className="h-8 w-16" />
+                  ) : (
+                    <p className="text-2xl font-bold">{summary?.unique_cities || 0}</p>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -187,7 +258,11 @@ export default function InPersonEventsHome() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Countries</p>
-                  <p className="text-2xl font-bold">{totalStats.countriesCovered}</p>
+                  {loading ? (
+                    <Skeleton className="h-8 w-16" />
+                  ) : (
+                    <p className="text-2xl font-bold">{summary?.unique_countries || 0}</p>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -195,107 +270,116 @@ export default function InPersonEventsHome() {
         </div>
 
         {/* Next Upcoming Event with Countdown */}
-        <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <CalendarClock className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Next Upcoming Event</CardTitle>
-              </div>
-              <Badge variant="outline" className="border-blue-500 text-blue-600 bg-blue-50 dark:bg-blue-950">
-                Upcoming
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-              <div className="space-y-2">
-                <h3 className="text-xl font-semibold">{nextUpcomingEvent.title}</h3>
-                <div className="flex flex-col sm:flex-row gap-4 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1.5">
-                    <Calendar className="h-4 w-4" />
-                    {formatDate(nextUpcomingEvent.date)}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Clock className="h-4 w-4" />
-                    {formatTime(nextUpcomingEvent.date)}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <MapPin className="h-4 w-4" />
-                    {nextUpcomingEvent.venue}
-                  </span>
+        {nextEvent && (
+          <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CalendarClock className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-lg">Next Upcoming Event</CardTitle>
                 </div>
-                <p className="text-sm">
-                  <span className="font-medium text-foreground">{nextUpcomingEvent.registrations}</span>
-                  <span className="text-muted-foreground"> registrations so far</span>
-                </p>
+                <Badge variant="outline" className="border-blue-500 text-blue-600 bg-blue-50 dark:bg-blue-950">
+                  Upcoming
+                </Badge>
               </div>
-              <div className="flex flex-col items-start lg:items-end gap-4">
-                <CountdownTimer targetDate={nextUpcomingEvent.date} />
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div className="space-y-2">
+                  <h3 className="text-xl font-semibold">
+                    {nextEvent.title || `${nextEvent.event_type} - ${nextEvent.city}`}
+                  </h3>
+                  <div className="flex flex-col sm:flex-row gap-4 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="h-4 w-4" />
+                      {formatDate(nextEvent.date)}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="h-4 w-4" />
+                      {nextEvent.city}, {nextEvent.country}
+                    </span>
+                  </div>
+                  <p className="text-sm">
+                    <span className="font-medium text-foreground">{nextEvent.registrant_count}</span>
+                    <span className="text-muted-foreground"> registrations so far</span>
+                  </p>
+                </div>
+                <div className="flex flex-col items-start lg:items-end gap-4">
+                  <CountdownTimer targetDate={nextEvent.date} />
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Latest Published Report */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-muted-foreground" />
-                <CardTitle className="text-lg">Latest Published Report</CardTitle>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div
-              className="flex items-center justify-between p-4 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer"
-              onClick={() => navigate(`/reports/${latestReport.id}`)}
-            >
-              <div className="flex items-center gap-4">
-                <div className="p-2.5 rounded-lg bg-muted">
+        {latestReport && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
                   <FileText className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-medium">{latestReport.title}</h4>
-                    <Badge variant="secondary">Report Published</Badge>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5" />
-                      {formatDate(latestReport.date)}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <MapPin className="h-3.5 w-3.5" />
-                      {latestReport.venue}
-                    </span>
-                  </div>
+                  <CardTitle className="text-lg">Latest Published Report</CardTitle>
                 </div>
               </div>
+            </CardHeader>
+            <CardContent>
+              <div
+                className="flex items-center justify-between p-4 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer"
+                onClick={() => navigate(`/events/in-person/campus-tours/${latestReport.event_slug}`)}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="p-2.5 rounded-lg bg-muted">
+                    <FileText className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium">{latestReport.event_type} - {latestReport.city}</h4>
+                      <Badge variant="secondary">Report Published</Badge>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3.5 w-3.5" />
+                        {formatDate(latestReport.date)}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-3.5 w-3.5" />
+                        {latestReport.city}, {latestReport.country}
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-              <div className="flex items-center gap-6">
-                <div className="hidden md:flex items-center gap-6 text-sm">
-                  <div className="text-center">
-                    <p className="font-semibold">{latestReport.registrations}</p>
-                    <p className="text-muted-foreground text-xs">Registered</p>
+                <div className="flex items-center gap-6">
+                  <div className="hidden md:flex items-center gap-6 text-sm">
+                    <div className="text-center">
+                      <p className="font-semibold">{latestReport.registrant_count}</p>
+                      <p className="text-muted-foreground text-xs">Registered</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="font-semibold">{latestReport.attendees_count}</p>
+                      <p className="text-muted-foreground text-xs">Attended</p>
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <p className="font-semibold">{latestReport.attended}</p>
-                    <p className="text-muted-foreground text-xs">Attended</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="font-semibold">{latestReport.connections}</p>
-                    <p className="text-muted-foreground text-xs">Connections</p>
-                  </div>
+                  <Button variant="ghost" size="sm">
+                    View Report <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
                 </div>
-                <Button variant="ghost" size="sm">
-                  View Report <ArrowRight className="h-4 w-4 ml-1" />
-                </Button>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* No data states */}
+        {!loading && !nextEvent && !latestReport && (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium mb-2">No Events Yet</h3>
+              <p className="text-muted-foreground">There are no upcoming events or published reports at the moment.</p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   );
