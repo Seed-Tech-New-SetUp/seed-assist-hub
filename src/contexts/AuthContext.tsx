@@ -264,7 +264,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const currentTempToken = tempToken || localStorage.getItem('portal_temp_token');
       
       if (!currentTempToken || !currentUser?.email) {
-        return { error: new Error('No temp token available. Please login again.') };
+        // Clear any stale data and redirect to login
+        localStorage.removeItem('portal_user');
+        localStorage.removeItem('portal_temp_token');
+        localStorage.removeItem('portal_login_schools');
+        setUser(null);
+        setTempToken(null);
+        setLoginSchools([]);
+        window.location.href = '/login';
+        return { error: null };
       }
 
       // Note: We're using fetch directly with query param instead of supabase.functions.invoke
