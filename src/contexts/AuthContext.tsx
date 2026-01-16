@@ -316,19 +316,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         designation: selectedUser?.designation,
       };
 
-      // Store final session data
+      // Store final session data (keep temp token for school switching)
       localStorage.setItem('portal_user', JSON.stringify(updatedUser));
       localStorage.setItem('portal_token', token);
       localStorage.setItem('portal_selected_school', JSON.stringify(selectedSchoolData));
       localStorage.setItem('portal_permissions', JSON.stringify(userPermissions));
       localStorage.setItem('seed_current_school', school.school_id);
-      
-      // Clear temp data
-      localStorage.removeItem('portal_temp_token');
+      // Note: We keep portal_temp_token stored so user can switch schools without re-login
 
       setUser(updatedUser);
       setPortalToken(token);
-      setTempToken(null);
+      // Keep tempToken in state for school switching
       setSelectedSchool(selectedSchoolData);
       setPermissions(userPermissions);
 
