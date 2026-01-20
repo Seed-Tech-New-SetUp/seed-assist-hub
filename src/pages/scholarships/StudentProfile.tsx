@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -36,339 +37,17 @@ import {
   Award,
   Bell,
   Send,
+  AlertCircle,
+  ExternalLink,
+  RefreshCw,
 } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { fetchApplicantProfile, ApplicantProfile, WorkflowStatus } from "@/lib/api/scholarship";
 
-type WorkflowStatus = "SHORTLISTED" | "ON_HOLD" | "REJECTED" | "WINNER" | "PENDING";
+type UIWorkflowStatus = "SHORTLISTED" | "ON_HOLD" | "REJECTED" | "WINNER" | "PENDING";
 
-interface ScholarshipAward {
-  id: string;
-  name: string;
-  amount: number;
-  isCustom: boolean;
-}
-
-// Mock university-provided awards for the scholarship
-const universityAwards: ScholarshipAward[] = [
-  { id: "1", name: "Full Tuition Waiver", amount: 50000, isCustom: false },
-  { id: "2", name: "Living Stipend", amount: 15000, isCustom: false },
-  { id: "3", name: "Research Grant", amount: 5000, isCustom: false },
-];
-
-interface StudentProfileData {
-  id: string;
-  name: string;
-  country: string;
-  countryCode: string;
-  isSeedRecommended: boolean;
-  status: WorkflowStatus;
-  scholarshipName: string;
-  email: string;
-  phone: string;
-  gender: string;
-  countryOfResidence: string;
-  nationality: string;
-  programInterest: {
-    name: string;
-    intake: string;
-  };
-  academic: {
-    institution: string;
-    year: number;
-    studyArea: string;
-    gpa: number;
-    scale: number;
-  };
-  work: {
-    industry: string;
-    years: number;
-    hasResume: boolean;
-  };
-  documents: {
-    essay: { uploaded: boolean; filename: string | null };
-    passport: { uploaded: boolean; filename: string | null };
-    finance: { uploaded: boolean; filename: string | null };
-    lor1: { uploaded: boolean; filename: string | null };
-    lor2: { uploaded: boolean; filename: string | null };
-  };
-  standardizedTest: {
-    name: string;
-    score: number;
-  };
-}
-
-// Mock detailed data for all applicants (would come from backend in real app)
-const students: StudentProfileData[] = [
-  {
-    id: "1",
-    name: "Priya Sharma",
-    country: "India",
-    countryCode: "IN",
-    isSeedRecommended: true,
-    status: "PENDING",
-    scholarshipName: "Global Leaders MBA Scholarship 2024",
-    email: "priya.sharma@email.com",
-    phone: "+91 98765 43210",
-    gender: "Female",
-    countryOfResidence: "India",
-    nationality: "Indian",
-    programInterest: {
-      name: "Full-Time MBA",
-      intake: "Fall 2024",
-    },
-    academic: {
-      institution: "Delhi University",
-      year: 2019,
-      studyArea: "Computer Science",
-      gpa: 3.8,
-      scale: 4.0,
-    },
-    work: {
-      industry: "Technology",
-      years: 5,
-      hasResume: true,
-    },
-    documents: {
-      essay: { uploaded: true, filename: "priya_essay.pdf" },
-      passport: { uploaded: true, filename: "priya_passport.pdf" },
-      finance: { uploaded: true, filename: "priya_financials.pdf" },
-      lor1: { uploaded: true, filename: "priya_lor_1.pdf" },
-      lor2: { uploaded: false, filename: null },
-    },
-    standardizedTest: { name: "GMAT", score: 720 },
-  },
-  {
-    id: "2",
-    name: "Chen Wei",
-    country: "China",
-    countryCode: "CN",
-    isSeedRecommended: true,
-    status: "SHORTLISTED",
-    scholarshipName: "Asia-Pacific Future Leaders Scholarship 2024",
-    email: "chen.wei@example.com",
-    phone: "+86 10 1234 5678",
-    gender: "Male",
-    countryOfResidence: "China",
-    nationality: "Chinese",
-    programInterest: {
-      name: "Executive MBA",
-      intake: "Spring 2025",
-    },
-    academic: {
-      institution: "Tsinghua University",
-      year: 2018,
-      studyArea: "Mechanical Engineering",
-      gpa: 3.6,
-      scale: 4.0,
-    },
-    work: {
-      industry: "Manufacturing",
-      years: 7,
-      hasResume: true,
-    },
-    documents: {
-      essay: { uploaded: true, filename: "chen_essay.pdf" },
-      passport: { uploaded: true, filename: "chen_passport.pdf" },
-      finance: { uploaded: true, filename: "chen_financials.pdf" },
-      lor1: { uploaded: true, filename: "chen_lor_1.pdf" },
-      lor2: { uploaded: false, filename: null },
-    },
-    standardizedTest: { name: "GRE", score: 328 },
-  },
-  {
-    id: "3",
-    name: "Ahmed Hassan",
-    country: "Egypt",
-    countryCode: "EG",
-    isSeedRecommended: false,
-    status: "ON_HOLD",
-    scholarshipName: "Emerging Markets Impact Scholarship 2024",
-    email: "ahmed.hassan@example.com",
-    phone: "+20 2 1234 5678",
-    gender: "Male",
-    countryOfResidence: "Egypt",
-    nationality: "Egyptian",
-    programInterest: {
-      name: "Global MBA",
-      intake: "Fall 2024",
-    },
-    academic: {
-      institution: "Cairo University",
-      year: 2017,
-      studyArea: "Finance",
-      gpa: 3.5,
-      scale: 4.0,
-    },
-    work: {
-      industry: "Banking",
-      years: 6,
-      hasResume: true,
-    },
-    documents: {
-      essay: { uploaded: true, filename: "ahmed_essay.pdf" },
-      passport: { uploaded: true, filename: "ahmed_passport.pdf" },
-      finance: { uploaded: true, filename: "ahmed_financials.pdf" },
-      lor1: { uploaded: true, filename: "ahmed_lor_1.pdf" },
-      lor2: { uploaded: true, filename: "ahmed_lor_2.pdf" },
-    },
-    standardizedTest: { name: "GMAT", score: 680 },
-  },
-  {
-    id: "4",
-    name: "Maria Garcia",
-    country: "Mexico",
-    countryCode: "MX",
-    isSeedRecommended: true,
-    status: "WINNER",
-    scholarshipName: "Women in Leadership Scholarship 2024",
-    email: "maria.garcia@example.com",
-    phone: "+52 55 1234 5678",
-    gender: "Female",
-    countryOfResidence: "Mexico",
-    nationality: "Mexican",
-    programInterest: {
-      name: "Full-Time MBA",
-      intake: "Fall 2024",
-    },
-    academic: {
-      institution: "UNAM",
-      year: 2019,
-      studyArea: "Business Administration",
-      gpa: 3.9,
-      scale: 4.0,
-    },
-    work: {
-      industry: "Consulting",
-      years: 5,
-      hasResume: true,
-    },
-    documents: {
-      essay: { uploaded: true, filename: "maria_essay.pdf" },
-      passport: { uploaded: true, filename: "maria_passport.pdf" },
-      finance: { uploaded: true, filename: "maria_financials.pdf" },
-      lor1: { uploaded: true, filename: "maria_lor_1.pdf" },
-      lor2: { uploaded: true, filename: "maria_lor_2.pdf" },
-    },
-    standardizedTest: { name: "GRE", score: 335 },
-  },
-  {
-    id: "5",
-    name: "John Obi",
-    country: "Nigeria",
-    countryCode: "NG",
-    isSeedRecommended: false,
-    status: "REJECTED",
-    scholarshipName: "Africa Business Talent Scholarship 2024",
-    email: "john.obi@example.com",
-    phone: "+234 1 234 5678",
-    gender: "Male",
-    countryOfResidence: "Nigeria",
-    nationality: "Nigerian",
-    programInterest: {
-      name: "Full-Time MBA",
-      intake: "Spring 2025",
-    },
-    academic: {
-      institution: "University of Lagos",
-      year: 2020,
-      studyArea: "Economics",
-      gpa: 3.2,
-      scale: 4.0,
-    },
-    work: {
-      industry: "Energy",
-      years: 3,
-      hasResume: true,
-    },
-    documents: {
-      essay: { uploaded: true, filename: "john_essay.pdf" },
-      passport: { uploaded: true, filename: "john_passport.pdf" },
-      finance: { uploaded: false, filename: null },
-      lor1: { uploaded: true, filename: "john_lor_1.pdf" },
-      lor2: { uploaded: false, filename: null },
-    },
-    standardizedTest: { name: "GMAT", score: 650 },
-  },
-  {
-    id: "6",
-    name: "Sara Kim",
-    country: "South Korea",
-    countryCode: "KR",
-    isSeedRecommended: true,
-    status: "PENDING",
-    scholarshipName: "Asian Innovation Scholarship 2024",
-    email: "sara.kim@example.com",
-    phone: "+82 2 1234 5678",
-    gender: "Female",
-    countryOfResidence: "South Korea",
-    nationality: "South Korean",
-    programInterest: {
-      name: "Technology Management MBA",
-      intake: "Fall 2025",
-    },
-    academic: {
-      institution: "Seoul National University",
-      year: 2020,
-      studyArea: "Information Systems",
-      gpa: 3.7,
-      scale: 4.0,
-    },
-    work: {
-      industry: "Technology",
-      years: 3,
-      hasResume: true,
-    },
-    documents: {
-      essay: { uploaded: true, filename: "sara_essay.pdf" },
-      passport: { uploaded: true, filename: "sara_passport.pdf" },
-      finance: { uploaded: true, filename: "sara_financials.pdf" },
-      lor1: { uploaded: true, filename: "sara_lor_1.pdf" },
-      lor2: { uploaded: false, filename: null },
-    },
-    standardizedTest: { name: "TOEFL", score: 115 },
-  },
-  {
-    id: "7",
-    name: "Luis Fernandez",
-    country: "Brazil",
-    countryCode: "BR",
-    isSeedRecommended: false,
-    status: "SHORTLISTED",
-    scholarshipName: "Latin America Leadership Scholarship 2024",
-    email: "luis.fernandez@example.com",
-    phone: "+55 11 1234 5678",
-    gender: "Male",
-    countryOfResidence: "Brazil",
-    nationality: "Brazilian",
-    programInterest: {
-      name: "Global MBA",
-      intake: "Spring 2025",
-    },
-    academic: {
-      institution: "University of São Paulo",
-      year: 2019,
-      studyArea: "Industrial Engineering",
-      gpa: 3.4,
-      scale: 4.0,
-    },
-    work: {
-      industry: "Logistics",
-      years: 4,
-      hasResume: true,
-    },
-    documents: {
-      essay: { uploaded: true, filename: "luis_essay.pdf" },
-      passport: { uploaded: true, filename: "luis_passport.pdf" },
-      finance: { uploaded: true, filename: "luis_financials.pdf" },
-      lor1: { uploaded: true, filename: "luis_lor_1.pdf" },
-      lor2: { uploaded: true, filename: "luis_lor_2.pdf" },
-    },
-    standardizedTest: { name: "GMAT", score: 700 },
-  },
-];
-
-const statusConfig: Record<WorkflowStatus, { label: string; icon: React.ElementType; color: string; buttonColor: string }> = {
+const statusConfig: Record<UIWorkflowStatus, { label: string; icon: React.ElementType; color: string; buttonColor: string }> = {
   PENDING: { label: "Pending", icon: Pause, color: "bg-gray-500/10 text-gray-600 border-gray-500/20", buttonColor: "bg-gray-500 hover:bg-gray-600" },
   SHORTLISTED: { label: "Shortlist", icon: Check, color: "bg-green-500/10 text-green-600 border-green-500/20", buttonColor: "bg-green-500 hover:bg-green-600" },
   ON_HOLD: { label: "On Hold", icon: Pause, color: "bg-orange-500/10 text-orange-600 border-orange-500/20", buttonColor: "bg-orange-500 hover:bg-orange-600" },
@@ -376,18 +55,25 @@ const statusConfig: Record<WorkflowStatus, { label: string; icon: React.ElementT
   WINNER: { label: "Winner", icon: Trophy, color: "bg-purple-500/10 text-purple-600 border-purple-500/20", buttonColor: "bg-purple-500 hover:bg-purple-600" },
 };
 
+// Map API status to UI status
+function mapApiStatusToUI(status: WorkflowStatus): UIWorkflowStatus {
+  switch (status) {
+    case "shortlisted": return "SHORTLISTED";
+    case "onhold": return "ON_HOLD";
+    case "rejected": return "REJECTED";
+    case "winner": return "WINNER";
+    default: return "PENDING";
+  }
+}
+
 export default function StudentProfile() {
   const { studentId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Determine current student based on route param, fallback to first applicant
-  const currentIndex = students.findIndex((s) => s.id === studentId);
-  const safeIndex = currentIndex === -1 ? 0 : currentIndex;
-
-  const student = students[safeIndex];
-  const prevStudent = safeIndex > 0 ? students[safeIndex - 1] : null;
-  const nextStudent = safeIndex < students.length - 1 ? students[safeIndex + 1] : null;
+  const [profile, setProfile] = useState<ApplicantProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [showAwardsModal, setShowAwardsModal] = useState(false);
   const [selectedAwards, setSelectedAwards] = useState<string[]>([]);
@@ -396,20 +82,41 @@ export default function StudentProfile() {
   const [newAwardAmount, setNewAwardAmount] = useState("");
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [pendingStatusData, setPendingStatusData] = useState<{
-    status: WorkflowStatus;
+    status: UIWorkflowStatus;
     totalAmount?: number;
     awardCount?: number;
   } | null>(null);
 
-  const handleStatusChange = (status: WorkflowStatus) => {
+  const loadProfile = async () => {
+    if (!studentId) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const data = await fetchApplicantProfile(studentId);
+      setProfile(data);
+    } catch (err) {
+      console.error("Error loading profile:", err);
+      setError(err instanceof Error ? err.message : "Failed to load profile");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadProfile();
+  }, [studentId]);
+
+  const handleStatusChange = (status: UIWorkflowStatus) => {
     if (status === "WINNER") {
       setShowAwardsModal(true);
     } else {
-      // For non-winner statuses, go directly to notification modal
       setPendingStatusData({ status });
       setShowNotificationModal(true);
     }
   };
+
   const toggleAwardSelection = (awardId: string) => {
     setSelectedAwards(prev =>
       prev.includes(awardId) ? prev.filter(id => id !== awardId) : [...prev, awardId]
@@ -429,11 +136,12 @@ export default function StudentProfile() {
   };
 
   const confirmWinner = () => {
-    const selectedUniversityAwards = universityAwards.filter(a => selectedAwards.includes(a.id));
-    const totalAmount = selectedUniversityAwards.reduce((sum, a) => sum + a.amount, 0) +
+    if (!profile) return;
+    
+    const selectedUniversityAwards = profile.awards.available.filter(a => selectedAwards.includes(a.id));
+    const totalAmount = selectedUniversityAwards.reduce((sum, a) => sum + a.value, 0) +
       customAwards.reduce((sum, a) => sum + (parseFloat(a.amount) || 0), 0);
 
-    // Store data for notification step
     setPendingStatusData({
       status: "WINNER",
       totalAmount,
@@ -445,18 +153,18 @@ export default function StudentProfile() {
   };
 
   const handleNotificationChoice = (sendNotification: boolean) => {
-    if (pendingStatusData) {
-      if (pendingStatusData.status === "WINNER" && pendingStatusData.awardCount) {
-        toast({
-          title: "Winner Confirmed!",
-          description: `${student.name} has been marked as winner with ${pendingStatusData.awardCount} award(s) totaling $${pendingStatusData.totalAmount?.toLocaleString()}.${sendNotification ? " Notification sent." : ""}`,
-        });
-      } else {
-        toast({
-          title: "Status Updated",
-          description: `${student.name}'s status has been changed to ${statusConfig[pendingStatusData.status].label}.${sendNotification ? " Notification sent." : ""}`,
-        });
-      }
+    if (!profile || !pendingStatusData) return;
+
+    if (pendingStatusData.status === "WINNER" && pendingStatusData.awardCount) {
+      toast({
+        title: "Winner Confirmed!",
+        description: `${profile.name} has been marked as winner with ${pendingStatusData.awardCount} award(s) totaling $${pendingStatusData.totalAmount?.toLocaleString()}.${sendNotification ? " Notification sent." : ""}`,
+      });
+    } else {
+      toast({
+        title: "Status Updated",
+        description: `${profile.name}'s status has been changed to ${statusConfig[pendingStatusData.status].label}.${sendNotification ? " Notification sent." : ""}`,
+      });
     }
 
     setShowNotificationModal(false);
@@ -466,30 +174,104 @@ export default function StudentProfile() {
   };
 
   const navigateToPrev = () => {
-    if (prevStudent) {
-      navigate(`/scholarships/applications/${prevStudent.id}`);
+    if (profile?.navigation.previous) {
+      navigate(`/scholarships/applications/${profile.navigation.previous.contactId}`);
     }
   };
 
   const navigateToNext = () => {
-    if (nextStudent) {
-      navigate(`/scholarships/applications/${nextStudent.id}`);
+    if (profile?.navigation.next) {
+      navigate(`/scholarships/applications/${profile.navigation.next.contactId}`);
     }
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="space-y-6">
+          <Skeleton className="h-24 w-full rounded-xl" />
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-10 w-40" />
+            <div className="flex gap-2">
+              <Skeleton className="h-9 w-24" />
+              <Skeleton className="h-9 w-24" />
+              <Skeleton className="h-9 w-24" />
+              <Skeleton className="h-9 w-24" />
+            </div>
+          </div>
+          <Skeleton className="h-20 w-full" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Skeleton className="h-48" />
+            <Skeleton className="h-48" />
+          </div>
+          <Skeleton className="h-40 w-full" />
+          <Skeleton className="h-40 w-full" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Error state
+  if (error || !profile) {
+    return (
+      <DashboardLayout>
+        <div className="flex flex-col items-center justify-center py-16 space-y-4">
+          <div className="p-4 rounded-full bg-destructive/10">
+            <AlertCircle className="h-8 w-8 text-destructive" />
+          </div>
+          <h2 className="text-xl font-semibold">Failed to Load Profile</h2>
+          <p className="text-muted-foreground text-center max-w-md">
+            {error || "Profile not found"}
+          </p>
+          <div className="flex gap-3">
+            <Button variant="outline" asChild>
+              <Link to="/scholarships/applications">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Applicants
+              </Link>
+            </Button>
+            <Button onClick={loadProfile}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  const uiStatus = mapApiStatusToUI(profile.status);
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Scholarship Name - Top Most */}
+        {/* Scholarship Info */}
         <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-xl p-6 border border-primary/20">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Award className="h-6 w-6 text-primary" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Award className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Scholarship Application</p>
+                <div className="flex items-center gap-4 mt-1">
+                  <span className="text-sm text-muted-foreground">
+                    Round {profile.currentRound}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    Applicant {profile.navigation.currentPosition} of {profile.navigation.totalApplicants}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">Scholarship</p>
-              <h2 className="text-xl font-display font-bold text-foreground">{student.scholarshipName}</h2>
-            </div>
+            {profile.programsOfInterest.length > 0 && (
+              <div className="flex gap-2">
+                {profile.programsOfInterest.map((program, idx) => (
+                  <Badge key={idx} variant="secondary">{program}</Badge>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -502,7 +284,7 @@ export default function StudentProfile() {
             </Link>
           </Button>
           <div className="flex gap-2">
-            {(["SHORTLISTED", "ON_HOLD", "REJECTED", "WINNER"] as WorkflowStatus[]).map((status) => {
+            {(["SHORTLISTED", "ON_HOLD", "REJECTED", "WINNER"] as UIWorkflowStatus[]).map((status) => {
               const config = statusConfig[status];
               return (
                 <Button
@@ -524,16 +306,16 @@ export default function StudentProfile() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <h1 className="text-2xl font-display font-bold">{student.name}</h1>
+                <h1 className="text-2xl font-display font-bold">{profile.name}</h1>
                 <div className="flex gap-2">
-                  {student.isSeedRecommended && (
+                  {profile.isSeedRecommended && (
                     <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
                       <Star className="h-3 w-3 mr-1" />
                       SEED Recommended
                     </Badge>
                   )}
-                  <Badge variant="outline" className={statusConfig[student.status].color}>
-                    {statusConfig[student.status].label}
+                  <Badge variant="outline" className={statusConfig[uiStatus].color}>
+                    {statusConfig[uiStatus].label}
                   </Badge>
                 </div>
               </div>
@@ -542,8 +324,8 @@ export default function StudentProfile() {
                   variant="outline" 
                   size="icon" 
                   onClick={navigateToPrev}
-                  disabled={!prevStudent}
-                  title={prevStudent ? `Previous: ${prevStudent.name}` : "No previous student"}
+                  disabled={!profile.navigation.previous}
+                  title={profile.navigation.previous ? `Previous: ${profile.navigation.previous.name}` : "No previous applicant"}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
@@ -551,8 +333,8 @@ export default function StudentProfile() {
                   variant="outline" 
                   size="icon" 
                   onClick={navigateToNext}
-                  disabled={!nextStudent}
-                  title={nextStudent ? `Next: ${nextStudent.name}` : "No next student"}
+                  disabled={!profile.navigation.next}
+                  title={profile.navigation.next ? `Next: ${profile.navigation.next.name}` : "No next applicant"}
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -574,30 +356,30 @@ export default function StudentProfile() {
                   <p className="text-xs text-muted-foreground">Email</p>
                   <div className="flex items-center gap-2 mt-1">
                     <Mail className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-sm">{student.email}</p>
+                    <p className="text-sm">{profile.email}</p>
                   </div>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Phone</p>
                   <div className="flex items-center gap-2 mt-1">
                     <Phone className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-sm">{student.phone}</p>
+                    <p className="text-sm">{profile.phone || "Not provided"}</p>
                   </div>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Gender</p>
-                  <p className="text-sm mt-1">{student.gender}</p>
+                  <p className="text-sm mt-1">{profile.gender}</p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Country of Residence</p>
                   <div className="flex items-center gap-2 mt-1">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-sm">{student.countryOfResidence}</p>
+                    <p className="text-sm">{profile.countryOfResidence}</p>
                   </div>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Nationality</p>
-                  <p className="text-sm mt-1">{student.nationality}</p>
+                  <p className="text-sm mt-1">{profile.nationality}</p>
                 </div>
               </div>
             </CardContent>
@@ -606,21 +388,24 @@ export default function StudentProfile() {
           {/* Program Interest */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Program Interest</CardTitle>
+              <CardTitle className="text-base">Programs of Interest</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-muted-foreground">Program</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-sm font-medium">{student.programInterest.name}</p>
-                  </div>
+              {profile.programsOfInterest.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {profile.programsOfInterest.map((program, idx) => (
+                    <Badge key={idx} variant="secondary" className="text-sm py-1.5 px-3">
+                      <GraduationCap className="h-4 w-4 mr-2" />
+                      {program}
+                    </Badge>
+                  ))}
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Intake Interested In</p>
-                  <p className="text-sm mt-1">{student.programInterest.intake}</p>
-                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No programs specified</p>
+              )}
+              <div className="mt-4 pt-4 border-t">
+                <p className="text-xs text-muted-foreground">Current Round</p>
+                <p className="text-lg font-semibold mt-1">Round {profile.currentRound}</p>
               </div>
             </CardContent>
           </Card>
@@ -632,33 +417,116 @@ export default function StudentProfile() {
             <CardTitle className="text-base">Academic Background</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="space-y-6">
+              {/* Undergraduate */}
               <div>
-                <p className="text-xs text-muted-foreground">Institution</p>
-                <p className="text-sm font-medium mt-1">{student.academic.institution}</p>
+                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <GraduationCap className="h-4 w-4" />
+                  Undergraduate
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Institution</p>
+                    <p className="text-sm font-medium mt-1">{profile.education.undergraduate.institution}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Completion Year</p>
+                    <p className="text-sm mt-1">{profile.education.undergraduate.completionYear}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Study Area</p>
+                    <p className="text-sm mt-1">{profile.education.undergraduate.studyArea}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">GPA</p>
+                    <p className="text-sm font-medium mt-1">{profile.education.undergraduate.gpaDisplay}</p>
+                  </div>
+                </div>
+                {profile.education.undergraduate.transcriptsUrl && (
+                  <div className="mt-3">
+                    <Button variant="outline" size="sm" asChild>
+                      <a href={profile.education.undergraduate.transcriptsUrl} target="_blank" rel="noopener noreferrer">
+                        <Download className="h-3.5 w-3.5 mr-1" />
+                        Download Transcripts
+                        <ExternalLink className="h-3 w-3 ml-1" />
+                      </a>
+                    </Button>
+                  </div>
+                )}
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Completion Year</p>
-                <p className="text-sm mt-1">{student.academic.year}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Study Area</p>
-                <p className="text-sm mt-1">{student.academic.studyArea}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">GPA</p>
-                <p className="text-sm mt-1">{student.academic.gpa} / {student.academic.scale}</p>
-              </div>
-            </div>
-            <Separator className="my-4" />
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-muted-foreground">Standardized Test</p>
-                <p className="text-sm font-medium mt-1">{student.standardizedTest.name}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Score</p>
-                <p className="text-sm mt-1">{student.standardizedTest.score}</p>
+
+              {/* Postgraduate if exists */}
+              {profile.education.hasPostgraduate && profile.education.postgraduate && (
+                <>
+                  <Separator />
+                  <div>
+                    <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                      <GraduationCap className="h-4 w-4" />
+                      Postgraduate
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Institution</p>
+                        <p className="text-sm font-medium mt-1">{profile.education.postgraduate.institution}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Completion Year</p>
+                        <p className="text-sm mt-1">{profile.education.postgraduate.completionYear}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Study Area</p>
+                        <p className="text-sm mt-1">{profile.education.postgraduate.studyArea}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">GPA</p>
+                        <p className="text-sm font-medium mt-1">{profile.education.postgraduate.gpaDisplay}</p>
+                      </div>
+                    </div>
+                    {profile.education.postgraduate.transcriptsUrl && (
+                      <div className="mt-3">
+                        <Button variant="outline" size="sm" asChild>
+                          <a href={profile.education.postgraduate.transcriptsUrl} target="_blank" rel="noopener noreferrer">
+                            <Download className="h-3.5 w-3.5 mr-1" />
+                            Download PG Transcripts
+                            <ExternalLink className="h-3 w-3 ml-1" />
+                          </a>
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
+              <Separator />
+
+              {/* Test Scores */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <p className="text-xs text-muted-foreground">Standardized Test</p>
+                  <p className="text-sm font-medium mt-1">
+                    {profile.testScores.standardizedTest && profile.testScores.standardizedTest !== "None" 
+                      ? profile.testScores.standardizedTest 
+                      : "None"}
+                  </p>
+                </div>
+                {profile.testScores.standardizedTest && profile.testScores.standardizedTest !== "None" && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Test Score</p>
+                    <p className="text-sm mt-1">{profile.testScores.standardizedTestScore}</p>
+                  </div>
+                )}
+                {profile.testScores.englishProficiencyTest && (
+                  <>
+                    <div>
+                      <p className="text-xs text-muted-foreground">English Proficiency</p>
+                      <p className="text-sm font-medium mt-1">{profile.testScores.englishProficiencyTest}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">English Score</p>
+                      <p className="text-sm mt-1">{profile.testScores.englishProficiencyScore}</p>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </CardContent>
@@ -670,73 +538,103 @@ export default function StudentProfile() {
             <CardTitle className="text-base">Work Experience</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <div>
-                <p className="text-xs text-muted-foreground">Industry</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <Briefcase className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-sm">{student.work.industry}</p>
-                </div>
-              </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
                 <p className="text-xs text-muted-foreground">Years of Experience</p>
-                <p className="text-sm mt-1">{student.work.years} years</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Briefcase className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-sm font-medium">{profile.workExperience.years} years</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Resume</p>
-                <Button variant="outline" size="sm" className="mt-1">
-                  <Download className="h-3.5 w-3.5 mr-1" />
-                  Download
-                </Button>
-              </div>
+              {profile.workExperience.industry && (
+                <div>
+                  <p className="text-xs text-muted-foreground">Industry</p>
+                  <p className="text-sm mt-1">{profile.workExperience.industry}</p>
+                </div>
+              )}
+              {profile.workExperience.currentRole && (
+                <div>
+                  <p className="text-xs text-muted-foreground">Current Role</p>
+                  <p className="text-sm mt-1">{profile.workExperience.currentRole}</p>
+                </div>
+              )}
+              {profile.workExperience.currentCompany && (
+                <div>
+                  <p className="text-xs text-muted-foreground">Current Company</p>
+                  <p className="text-sm mt-1">{profile.workExperience.currentCompany}</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Documents */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Documents</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="essay">
-              <TabsList className="grid grid-cols-5 w-full">
-                <TabsTrigger value="essay">Essay</TabsTrigger>
-                <TabsTrigger value="passport">Passport</TabsTrigger>
-                <TabsTrigger value="finance">Finance</TabsTrigger>
-                <TabsTrigger value="lor1">LOR 1</TabsTrigger>
-                <TabsTrigger value="lor2">LOR 2</TabsTrigger>
-              </TabsList>
-              {Object.entries(student.documents).map(([key, doc]) => {
-                const typedDoc = doc as { uploaded: boolean; filename: string | null };
-                return (
-                  <TabsContent key={key} value={key} className="mt-4">
-                    {typedDoc.uploaded ? (
-                      <div className="border rounded-lg p-6 text-center">
-                        <FileText className="h-12 w-12 mx-auto text-muted-foreground" />
-                        <p className="mt-2 text-sm font-medium">{typedDoc.filename}</p>
-                        <div className="flex justify-center gap-2 mt-4">
-                          <Button variant="outline" size="sm">
-                            View
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Download className="h-3.5 w-3.5 mr-1" />
-                            Download
-                          </Button>
-                        </div>
+        {/* Available Awards */}
+        {profile.awards.available.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Available Awards</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {profile.awards.available.map((award) => (
+                  <div key={award.id} className="p-4 rounded-lg border bg-muted/30">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="font-medium text-sm">{award.name}</p>
+                        <p className="text-2xl font-bold text-primary mt-1">
+                          ${award.value.toLocaleString()}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {award.percentage}% coverage
+                        </p>
                       </div>
-                    ) : (
-                      <div className="border border-dashed rounded-lg p-6 text-center">
-                        <FileText className="h-12 w-12 mx-auto text-muted-foreground/50" />
-                        <p className="mt-2 text-sm text-muted-foreground">Not Uploaded</p>
-                      </div>
-                    )}
+                      <Badge variant="secondary">{award.currency}</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Essays if available */}
+        {(profile.essays.essay1 || profile.essays.essay2 || profile.essays.essay3) && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Essays</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue={profile.essays.essay1 ? "essay1" : profile.essays.essay2 ? "essay2" : "essay3"}>
+                <TabsList>
+                  {profile.essays.essay1 && <TabsTrigger value="essay1">Essay 1</TabsTrigger>}
+                  {profile.essays.essay2 && <TabsTrigger value="essay2">Essay 2</TabsTrigger>}
+                  {profile.essays.essay3 && <TabsTrigger value="essay3">Essay 3</TabsTrigger>}
+                </TabsList>
+                {profile.essays.essay1 && (
+                  <TabsContent value="essay1" className="mt-4">
+                    <div className="p-4 bg-muted/30 rounded-lg">
+                      <p className="text-sm whitespace-pre-wrap">{profile.essays.essay1}</p>
+                    </div>
                   </TabsContent>
-                );
-              })}
-            </Tabs>
-          </CardContent>
-        </Card>
+                )}
+                {profile.essays.essay2 && (
+                  <TabsContent value="essay2" className="mt-4">
+                    <div className="p-4 bg-muted/30 rounded-lg">
+                      <p className="text-sm whitespace-pre-wrap">{profile.essays.essay2}</p>
+                    </div>
+                  </TabsContent>
+                )}
+                {profile.essays.essay3 && (
+                  <TabsContent value="essay3" className="mt-4">
+                    <div className="p-4 bg-muted/30 rounded-lg">
+                      <p className="text-sm whitespace-pre-wrap">{profile.essays.essay3}</p>
+                    </div>
+                  </TabsContent>
+                )}
+              </Tabs>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Awards Modal for Winner */}
         <Dialog open={showAwardsModal} onOpenChange={setShowAwardsModal}>
@@ -747,40 +645,45 @@ export default function StudentProfile() {
                 Assign Awards to Winner
               </DialogTitle>
               <DialogDescription>
-                Select the awards to grant to {student.name} and add any custom awards.
+                Select the awards to grant to {profile.name} and add any custom awards.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-6 py-4">
-              {/* University-provided Awards */}
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">University Awards</Label>
-                {universityAwards.map((award) => (
-                  <div
-                    key={award.id}
-                    onClick={() => toggleAwardSelection(award.id)}
-                    className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all ${
-                      selectedAwards.includes(award.id)
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded border flex items-center justify-center ${
+              {/* Available Awards from API */}
+              {profile.awards.available.length > 0 && (
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium">Available Awards</Label>
+                  {profile.awards.available.map((award) => (
+                    <div
+                      key={award.id}
+                      onClick={() => toggleAwardSelection(award.id)}
+                      className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all ${
                         selectedAwards.includes(award.id)
-                          ? "bg-primary border-primary"
-                          : "border-muted-foreground"
-                      }`}>
-                        {selectedAwards.includes(award.id) && (
-                          <Check className="h-3 w-3 text-primary-foreground" />
-                        )}
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-4 h-4 rounded border flex items-center justify-center ${
+                          selectedAwards.includes(award.id)
+                            ? "bg-primary border-primary"
+                            : "border-muted-foreground"
+                        }`}>
+                          {selectedAwards.includes(award.id) && (
+                            <Check className="h-3 w-3 text-primary-foreground" />
+                          )}
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium">{award.name}</span>
+                          <span className="text-xs text-muted-foreground ml-2">({award.percentage}%)</span>
+                        </div>
                       </div>
-                      <span className="text-sm font-medium">{award.name}</span>
+                      <span className="text-sm font-medium">${award.value.toLocaleString()}</span>
                     </div>
-                    <span className="text-sm text-muted-foreground">${award.amount.toLocaleString()}</span>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
               {/* Custom Awards */}
               <div className="space-y-3">
@@ -854,8 +757,8 @@ export default function StudentProfile() {
               </DialogTitle>
               <DialogDescription>
                 {pendingStatusData?.status === "WINNER" 
-                  ? `Would you like to send a notification to ${student.name} about their scholarship award?`
-                  : `Would you like to notify ${student.name} about their status update to "${pendingStatusData ? statusConfig[pendingStatusData.status].label : ""}"?`
+                  ? `Would you like to send a notification to ${profile.name} about their scholarship award?`
+                  : `Would you like to notify ${profile.name} about their status update to "${pendingStatusData ? statusConfig[pendingStatusData.status].label : ""}"?`
                 }
               </DialogDescription>
             </DialogHeader>
@@ -863,7 +766,7 @@ export default function StudentProfile() {
             <div className="py-4">
               <div className="rounded-lg bg-muted/50 p-4">
                 <p className="text-sm text-muted-foreground">
-                  An email notification will be sent to <span className="font-medium text-foreground">{student.email}</span> 
+                  An email notification will be sent to <span className="font-medium text-foreground">{profile.email}</span> 
                   {pendingStatusData?.status === "WINNER" 
                     ? " with details about their scholarship awards."
                     : ` informing them of their updated application status.`
