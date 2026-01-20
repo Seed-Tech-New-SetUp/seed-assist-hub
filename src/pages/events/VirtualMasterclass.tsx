@@ -3,17 +3,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  Calendar, 
-  Clock, 
-  Radio,
-  FileText,
-  Download,
-  Loader2,
-  Users,
-  Sparkles,
-  Video
-} from "lucide-react";
+import { Calendar, Clock, Radio, FileText, Download, Loader2, Users, Sparkles, Video } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { getCookie } from "@/lib/utils/cookies";
 import { decodeObjectStrings } from "@/lib/utils/decode-utf8";
@@ -158,7 +148,7 @@ export default function VirtualMasterclass() {
               Authorization: `Bearer ${portalToken}`,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -202,12 +192,12 @@ export default function VirtualMasterclass() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/virtual-events-proxy?action=download&id=${event.event_id}`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/virtual-events-proxy?action=download&id=${event.hs_event_record_id}`,
         {
           headers: {
             Authorization: `Bearer ${portalToken}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -338,7 +328,10 @@ export default function VirtualMasterclass() {
                       <div>
                         <div className="flex items-center gap-2">
                           <h4 className="font-medium">{event.event_name}</h4>
-                          <Badge variant="outline" className="border-blue-500 text-blue-600 bg-blue-50 dark:bg-blue-950">
+                          <Badge
+                            variant="outline"
+                            className="border-blue-500 text-blue-600 bg-blue-50 dark:bg-blue-950"
+                          >
                             Upcoming
                           </Badge>
                         </div>
