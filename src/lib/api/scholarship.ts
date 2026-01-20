@@ -58,7 +58,174 @@ export interface ApplicantsResponse {
   };
 }
 
-// Transformed applicant for UI
+// ===========================================
+// Profile API Types (New)
+// ===========================================
+
+export interface ApiProfileResponse {
+  success: boolean;
+  data: {
+    profile: {
+      contact_id: string;
+      name: string;
+      first_name: string;
+      last_name: string;
+      email: string;
+      phone: string | null;
+      gender: string;
+      date_of_birth: string | null;
+      nationality: string;
+      country_of_residence: string;
+      status: string;
+      recommendation_status: string;
+      current_round: number;
+    };
+    education: {
+      undergraduate: {
+        institution_name: string;
+        completion_year: number;
+        study_area: string;
+        grading_scale: string;
+        score: string;
+        gpa_display: string;
+        transcripts_url: string | null;
+      };
+      has_postgraduate: boolean;
+      postgraduate: {
+        institution_name: string;
+        completion_year: number;
+        study_area: string;
+        grading_scale: string;
+        score: string;
+        gpa_display: string;
+        transcripts_url: string | null;
+      } | null;
+    };
+    test_scores: {
+      standardised_test: string | null;
+      standardised_test_score: string | null;
+      english_proficiency_test: string | null;
+      english_proficiency_score: string | null;
+    };
+    work_experience: {
+      years: string;
+      industry: string | null;
+      current_role: string | null;
+      current_company: string | null;
+    };
+    essays: {
+      essay_1: string | null;
+      essay_2: string | null;
+      essay_3: string | null;
+    };
+    supporting_documents: string | null;
+    programs_of_interest: string[];
+    awards: {
+      available: {
+        id: string;
+        name: string;
+        value: number;
+        percentage: number;
+        currency: string;
+      }[];
+      recommended: string[];
+      assigned: string | null;
+    };
+    rounds: number[];
+    navigation: {
+      previous: { contact_id: string; name: string } | null;
+      next: { contact_id: string; name: string } | null;
+      current_position: number;
+      total_applicants: number;
+    };
+    meta: {
+      scholarship_id: string;
+      scholarship_table_id: string;
+    };
+  };
+}
+
+// Transformed profile for UI
+export interface ApplicantProfile {
+  id: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string | null;
+  gender: string;
+  dateOfBirth: string | null;
+  nationality: string;
+  countryCode: string;
+  countryOfResidence: string;
+  status: WorkflowStatus;
+  isSeedRecommended: boolean;
+  currentRound: number;
+  education: {
+    undergraduate: {
+      institution: string;
+      completionYear: number;
+      studyArea: string;
+      gradingScale: string;
+      score: string;
+      gpaDisplay: string;
+      transcriptsUrl: string | null;
+    };
+    hasPostgraduate: boolean;
+    postgraduate: {
+      institution: string;
+      completionYear: number;
+      studyArea: string;
+      gradingScale: string;
+      score: string;
+      gpaDisplay: string;
+      transcriptsUrl: string | null;
+    } | null;
+  };
+  testScores: {
+    standardizedTest: string | null;
+    standardizedTestScore: string | null;
+    englishProficiencyTest: string | null;
+    englishProficiencyScore: string | null;
+  };
+  workExperience: {
+    years: number;
+    industry: string | null;
+    currentRole: string | null;
+    currentCompany: string | null;
+  };
+  essays: {
+    essay1: string | null;
+    essay2: string | null;
+    essay3: string | null;
+  };
+  supportingDocuments: string | null;
+  programsOfInterest: string[];
+  awards: {
+    available: {
+      id: string;
+      name: string;
+      value: number;
+      percentage: number;
+      currency: string;
+    }[];
+    recommended: string[];
+    assigned: string | null;
+  };
+  rounds: number[];
+  navigation: {
+    previous: { contactId: string; name: string } | null;
+    next: { contactId: string; name: string } | null;
+    currentPosition: number;
+    totalApplicants: number;
+  };
+  meta: {
+    scholarshipId: string;
+    scholarshipTableId: string;
+  };
+}
+
+// Transformed applicant for UI (list view)
 export interface Applicant {
   id: string;
   name: string;
@@ -159,6 +326,89 @@ function transformApplicant(api: ApiApplicant): Applicant {
   };
 }
 
+function transformProfile(api: ApiProfileResponse["data"]): ApplicantProfile {
+  const { profile, education, test_scores, work_experience, essays, awards, navigation, meta } = api;
+  
+  return {
+    id: profile.contact_id,
+    name: profile.name,
+    firstName: profile.first_name,
+    lastName: profile.last_name,
+    email: profile.email,
+    phone: profile.phone,
+    gender: profile.gender,
+    dateOfBirth: profile.date_of_birth,
+    nationality: profile.nationality,
+    countryCode: getCountryCode(profile.nationality),
+    countryOfResidence: profile.country_of_residence,
+    status: normalizeStatus(profile.status),
+    isSeedRecommended: profile.recommendation_status === "recommended",
+    currentRound: profile.current_round,
+    education: {
+      undergraduate: {
+        institution: education.undergraduate.institution_name,
+        completionYear: education.undergraduate.completion_year,
+        studyArea: education.undergraduate.study_area,
+        gradingScale: education.undergraduate.grading_scale,
+        score: education.undergraduate.score,
+        gpaDisplay: education.undergraduate.gpa_display,
+        transcriptsUrl: education.undergraduate.transcripts_url,
+      },
+      hasPostgraduate: education.has_postgraduate,
+      postgraduate: education.postgraduate ? {
+        institution: education.postgraduate.institution_name,
+        completionYear: education.postgraduate.completion_year,
+        studyArea: education.postgraduate.study_area,
+        gradingScale: education.postgraduate.grading_scale,
+        score: education.postgraduate.score,
+        gpaDisplay: education.postgraduate.gpa_display,
+        transcriptsUrl: education.postgraduate.transcripts_url,
+      } : null,
+    },
+    testScores: {
+      standardizedTest: test_scores.standardised_test,
+      standardizedTestScore: test_scores.standardised_test_score,
+      englishProficiencyTest: test_scores.english_proficiency_test,
+      englishProficiencyScore: test_scores.english_proficiency_score,
+    },
+    workExperience: {
+      years: parseFloat(work_experience.years) || 0,
+      industry: work_experience.industry,
+      currentRole: work_experience.current_role,
+      currentCompany: work_experience.current_company,
+    },
+    essays: {
+      essay1: essays.essay_1,
+      essay2: essays.essay_2,
+      essay3: essays.essay_3,
+    },
+    supportingDocuments: api.supporting_documents,
+    programsOfInterest: api.programs_of_interest || [],
+    awards: {
+      available: awards.available || [],
+      recommended: awards.recommended || [],
+      assigned: awards.assigned,
+    },
+    rounds: api.rounds || [],
+    navigation: {
+      previous: navigation.previous ? {
+        contactId: navigation.previous.contact_id,
+        name: navigation.previous.name,
+      } : null,
+      next: navigation.next ? {
+        contactId: navigation.next.contact_id,
+        name: navigation.next.name,
+      } : null,
+      currentPosition: navigation.current_position,
+      totalApplicants: navigation.total_applicants,
+    },
+    meta: {
+      scholarshipId: meta.scholarship_id,
+      scholarshipTableId: meta.scholarship_table_id,
+    },
+  };
+}
+
 // ===========================================
 // API Functions
 // ===========================================
@@ -198,7 +448,7 @@ export async function fetchApplicants(): Promise<{
   };
 }
 
-export async function fetchApplicantProfile(contactId: string): Promise<unknown> {
+export async function fetchApplicantProfile(contactId: string): Promise<ApplicantProfile> {
   const token = getCookie("portal_token");
   
   if (!token) {
@@ -216,5 +466,11 @@ export async function fetchApplicantProfile(contactId: string): Promise<unknown>
     throw new Error("Failed to fetch applicant profile");
   }
 
-  return decodeObjectStrings(data);
+  const response = decodeObjectStrings(data) as ApiProfileResponse;
+
+  if (!response.success || !response.data) {
+    throw new Error("Invalid response from server");
+  }
+
+  return transformProfile(response.data);
 }
