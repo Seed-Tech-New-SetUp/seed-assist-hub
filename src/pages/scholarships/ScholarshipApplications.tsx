@@ -132,9 +132,10 @@ export default function ScholarshipApplications() {
     }, {} as Record<WorkflowStatus, number>);
   }, [meta, applicants]);
   
+  // SEED Recommended count should be based on the isSeedRecommended flag, not status
   const seedRecommendedCount = useMemo(() => 
-    meta?.status_counts?.recommended || applicants.filter(a => a.isSeedRecommended).length, 
-    [meta, applicants]
+    applicants.filter(a => a.isSeedRecommended).length, 
+    [applicants]
   );
 
   const filteredApplicants = applicants.filter(applicant => {
