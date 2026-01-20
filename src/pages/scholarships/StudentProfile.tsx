@@ -45,6 +45,67 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { fetchApplicantProfile, ApplicantProfile, WorkflowStatus } from "@/lib/api/scholarship";
 
+function normalizeExternalUrl(url: string): string {
+  const trimmed = url.trim();
+  // Avoid mixed-content blocks when the API returns http links.
+  return trimmed.replace(/^http:\/\/seedglobaleducation\.com\//i, "https://seedglobaleducation.com/");
+}
+
+type ProfileDocument = { label: string; url: string; description?: string };
+
+function parseSupportingDocuments(raw: string | null | undefined): ProfileDocument[] {
+  if (!raw) return [];
+
+  const value = raw.trim();
+  if (!value) return [];
+
+  // Most common: a single URL
+  if (/^https?:\/\//i.test(value)) {
+    return [{ label: "Supporting Document", url: normalizeExternalUrl(value) }];
+  }
+
+  // Sometimes APIs send JSON (stringified) list of urls or objects
+  if (value.startsWith("[") || value.startsWith("{")) {
+    try {
+      const parsed = JSON.parse(value) as unknown;
+      if (Array.isArray(parsed)) {
+        return parsed
+          .map((item, idx) => {
+            if (typeof item === "string") {
+              return { label: `Document ${idx + 1}`, url: normalizeExternalUrl(item) } as ProfileDocument;
+            }
+            if (item && typeof item === "object") {
+              const maybe = item as { url?: unknown; link?: unknown; name?: unknown; label?: unknown; description?: unknown };
+              const url = (typeof maybe.url === "string" ? maybe.url : typeof maybe.link === "string" ? maybe.link : "").trim();
+              if (!url) return null;
+              const label =
+                (typeof maybe.label === "string" && maybe.label.trim()) ||
+                (typeof maybe.name === "string" && maybe.name.trim()) ||
+                `Document ${idx + 1}`;
+              const description = typeof maybe.description === "string" ? maybe.description : undefined;
+              return { label, url: normalizeExternalUrl(url), description } as ProfileDocument;
+            }
+            return null;
+          })
+          .filter((x): x is ProfileDocument => Boolean(x));
+      }
+    } catch {
+      // fall through
+    }
+  }
+
+  // Fallback: split on commas/newlines if it looks like a list
+  const parts = value
+    .split(/[\n,]+/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  if (parts.length <= 1) return [];
+  return parts
+    .filter((p) => /^https?:\/\//i.test(p))
+    .map((p, idx) => ({ label: `Document ${idx + 1}`, url: normalizeExternalUrl(p) }));
+}
+
 type UIWorkflowStatus = "SHORTLISTED" | "ON_HOLD" | "REJECTED" | "WINNER" | "PENDING";
 
 const statusConfig: Record<UIWorkflowStatus, { label: string; icon: React.ElementType; color: string; buttonColor: string }> = {
@@ -242,6 +303,9 @@ export default function StudentProfile() {
   }
 
   const uiStatus = mapApiStatusToUI(profile.status);
+
+  const supportingDocs = parseSupportingDocuments(profile.supportingDocuments);
+  const resumeDocs: ProfileDocument[] = []; // placeholder if API later provides a dedicated resume field
 
   return (
     <DashboardLayout>
@@ -579,7 +643,7 @@ export default function StudentProfile() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Undergraduate Transcripts */}
-              {profile.education.undergraduate.transcriptsUrl && (
+              {profile.education.undergraduate.transcriptsUrl ? (
                 <div className="p-4 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors">
                   <div className="flex items-start gap-3">
                     <div className="p-2 bg-primary/10 rounded-lg">
@@ -591,7 +655,7 @@ export default function StudentProfile() {
                         {profile.education.undergraduate.institution}
                       </p>
                       <Button variant="outline" size="sm" className="mt-2" asChild>
-                        <a href={profile.education.undergraduate.transcriptsUrl} target="_blank" rel="noopener noreferrer">
+                        <a href={normalizeExternalUrl(profile.education.undergraduate.transcriptsUrl)} target="_blank" rel="noopener noreferrer">
                           <Download className="h-3.5 w-3.5 mr-1" />
                           View PDF
                           <ExternalLink className="h-3 w-3 ml-1" />
@@ -600,10 +664,15 @@ export default function StudentProfile() {
                     </div>
                   </div>
                 </div>
+              ) : (
+                <div className="p-4 rounded-lg border bg-muted/10">
+                  <p className="font-medium text-sm">Undergraduate Transcripts</p>
+                  <p className="text-xs text-muted-foreground mt-1">Not provided</p>
+                </div>
               )}
 
               {/* Postgraduate Transcripts */}
-              {profile.education.hasPostgraduate && profile.education.postgraduate?.transcriptsUrl && (
+              {profile.education.hasPostgraduate && profile.education.postgraduate?.transcriptsUrl ? (
                 <div className="p-4 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors">
                   <div className="flex items-start gap-3">
                     <div className="p-2 bg-primary/10 rounded-lg">
@@ -615,7 +684,7 @@ export default function StudentProfile() {
                         {profile.education.postgraduate.institution}
                       </p>
                       <Button variant="outline" size="sm" className="mt-2" asChild>
-                        <a href={profile.education.postgraduate.transcriptsUrl} target="_blank" rel="noopener noreferrer">
+                        <a href={normalizeExternalUrl(profile.education.postgraduate.transcriptsUrl)} target="_blank" rel="noopener noreferrer">
                           <Download className="h-3.5 w-3.5 mr-1" />
                           View PDF
                           <ExternalLink className="h-3 w-3 ml-1" />
@@ -624,39 +693,72 @@ export default function StudentProfile() {
                     </div>
                   </div>
                 </div>
-              )}
-
-              {/* Supporting Documents */}
-              {profile.supportingDocuments && (
-                <div className="p-4 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <FileText className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm">Supporting Documents</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        Additional application materials
-                      </p>
-                      <Button variant="outline" size="sm" className="mt-2" asChild>
-                        <a href={profile.supportingDocuments} target="_blank" rel="noopener noreferrer">
-                          <Download className="h-3.5 w-3.5 mr-1" />
-                          View Document
-                          <ExternalLink className="h-3 w-3 ml-1" />
-                        </a>
-                      </Button>
-                    </div>
-                  </div>
+              ) : (
+                <div className="p-4 rounded-lg border bg-muted/10">
+                  <p className="font-medium text-sm">Postgraduate Transcripts</p>
+                  <p className="text-xs text-muted-foreground mt-1">Not provided</p>
                 </div>
               )}
 
-              {/* No documents message */}
-              {!profile.education.undergraduate.transcriptsUrl && 
-               !(profile.education.hasPostgraduate && profile.education.postgraduate?.transcriptsUrl) && 
-               !profile.supportingDocuments && (
-                <div className="col-span-full text-center py-8 text-muted-foreground">
-                  <FileText className="h-8 w-8 mx-auto mb-2 opacity-40" />
-                  <p className="text-sm">No documents uploaded</p>
+              {/* Resume / CV (requires API field) */}
+              {resumeDocs.length > 0 ? (
+                resumeDocs.map((doc) => (
+                  <div key={doc.url} className="p-4 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-primary/10 rounded-lg">
+                        <FileText className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm">{doc.label}</p>
+                        {doc.description && (
+                          <p className="text-xs text-muted-foreground mt-0.5 truncate">{doc.description}</p>
+                        )}
+                        <Button variant="outline" size="sm" className="mt-2" asChild>
+                          <a href={doc.url} target="_blank" rel="noopener noreferrer">
+                            <Download className="h-3.5 w-3.5 mr-1" />
+                            View
+                            <ExternalLink className="h-3 w-3 ml-1" />
+                          </a>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-4 rounded-lg border bg-muted/10">
+                  <p className="font-medium text-sm">Resume / CV</p>
+                  <p className="text-xs text-muted-foreground mt-1">Not provided by API</p>
+                </div>
+              )}
+
+              {/* Supporting Documents */}
+              {supportingDocs.length > 0 ? (
+                supportingDocs.map((doc) => (
+                  <div key={doc.url} className="p-4 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-primary/10 rounded-lg">
+                        <FileText className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm">{doc.label}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {doc.description || "Additional application materials"}
+                        </p>
+                        <Button variant="outline" size="sm" className="mt-2" asChild>
+                          <a href={doc.url} target="_blank" rel="noopener noreferrer">
+                            <Download className="h-3.5 w-3.5 mr-1" />
+                            View Document
+                            <ExternalLink className="h-3 w-3 ml-1" />
+                          </a>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-4 rounded-lg border bg-muted/10">
+                  <p className="font-medium text-sm">Supporting Documents</p>
+                  <p className="text-xs text-muted-foreground mt-1">Not provided</p>
                 </div>
               )}
             </div>
@@ -692,13 +794,13 @@ export default function StudentProfile() {
           </Card>
         )}
 
-        {/* Essays if available */}
-        {(profile.essays.essay1 || profile.essays.essay2 || profile.essays.essay3) && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Essays</CardTitle>
-            </CardHeader>
-            <CardContent>
+        {/* Essays */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Essays</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(profile.essays.essay1 || profile.essays.essay2 || profile.essays.essay3) ? (
               <Tabs defaultValue={profile.essays.essay1 ? "essay1" : profile.essays.essay2 ? "essay2" : "essay3"}>
                 <TabsList>
                   {profile.essays.essay1 && <TabsTrigger value="essay1">Essay 1</TabsTrigger>}
@@ -727,9 +829,13 @@ export default function StudentProfile() {
                   </TabsContent>
                 )}
               </Tabs>
-            </CardContent>
-          </Card>
-        )}
+            ) : (
+              <div className="p-4 rounded-lg border bg-muted/10">
+                <p className="text-sm text-muted-foreground">No essays submitted in the API response for this applicant.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Awards Modal for Winner */}
         <Dialog open={showAwardsModal} onOpenChange={setShowAwardsModal}>
