@@ -72,20 +72,23 @@ export interface DeleteInvitationResponse {
 }
 
 export async function fetchUsers(authToken: string): Promise<UsersResponse> {
-  const { data, error } = await supabase.functions.invoke("users-proxy", {
-    body: null,
-    headers: {
-      Authorization: `Bearer ${authToken}`,
-    },
-  });
+  const response = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/users-proxy?action=list`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      },
+    }
+  );
 
-  if (error) {
-    console.error("Error fetching users:", error);
-    throw new Error(error.message || "Failed to fetch users");
-  }
+  const data = await response.json();
 
-  if (!data.success) {
-    throw new Error(data.message || "Failed to fetch users");
+  if (!response.ok || !data.success) {
+    console.error("Error fetching users:", data);
+    throw new Error(data.error || data.message || "Failed to fetch users");
   }
 
   // Decode UTF-8 strings in the response
@@ -96,15 +99,6 @@ export async function inviteUser(
   authToken: string,
   payload: InviteUserPayload
 ): Promise<InviteUserResponse> {
-  const { data, error } = await supabase.functions.invoke("users-proxy", {
-    body: payload,
-    headers: {
-      Authorization: `Bearer ${authToken}`,
-    },
-  });
-
-  // Append action to the URL (edge function reads from query params)
-  // We need to use the fetch directly for action parameter
   const response = await fetch(
     `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/users-proxy?action=invite`,
     {
@@ -120,8 +114,8 @@ export async function inviteUser(
 
   const result = await response.json();
 
-  if (!result.success) {
-    throw new Error(result.message || "Failed to send invitation");
+  if (!response.ok || !result.success) {
+    throw new Error(result.message || result.error || "Failed to send invitation");
   }
 
   return decodeObjectStrings(result) as InviteUserResponse;
