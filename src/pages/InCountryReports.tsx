@@ -34,6 +34,8 @@ import {
   Mail,
   MessageSquare,
   AlertCircle,
+  Download,
+  Loader2,
 } from "lucide-react";
 import {
   fetchICRReports,
@@ -42,6 +44,7 @@ import {
   activityTypeLabels,
   type ICRReport,
 } from "@/lib/api/icr";
+import { exportMultipleSheetsToXLSX } from "@/lib/utils/xlsx-export";
 
 // Icon mapping for activity types
 const activityIcons: Record<string, React.ReactNode> = {
@@ -54,6 +57,7 @@ export default function InCountryReports() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedReport, setSelectedReport] = useState<ICRReport | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [downloadingReportId, setDownloadingReportId] = useState<number | null>(null);
 
   // Fetch ICR reports
   const { data: response, isLoading, error } = useQuery({
@@ -96,6 +100,91 @@ export default function InCountryReports() {
   // The application_funnel.leads_engaged field is not used here because it may be a derived value.
   const getEngagedCount = (report: ICRReport) =>
     report.lead_engagement.reduce((sum, le) => sum + le.leads_engaged, 0);
+
+  // Download ICR report as XLSX
+  const handleDownloadReport = (report: ICRReport) => {
+    setDownloadingReportId(report.report_id);
+
+    try {
+      const monthLabel = formatReportMonth(report.report_month);
+      const totals = getReportTotals(report);
+      const funnel = report.application_funnel;
+
+      // Sheet 1: Summary
+      const summaryData = [{
+        "Month": monthLabel,
+        "Representative": report.client_name,
+        "Email": report.client_email,
+        "Status": "Published",
+        "Leads Generated": totals.totalLeads,
+        "Leads Engaged": totals.totalEngaged,
+        "Funnel - Engaged": funnel?.leads_engaged ?? 0,
+        "Funnel - Not Interested": funnel?.not_interested ?? 0,
+        "Funnel - Interested 2026": funnel?.interested_2026 ?? 0,
+        "Applications": funnel?.applications_submitted ?? 0,
+        "Admitted": funnel?.admitted ?? 0,
+        "Offers Accepted": funnel?.offers_accepted ?? 0,
+        "Enrolled": funnel?.enrolled ?? 0,
+      }];
+
+      // Sheet 2: Activities
+      const activitiesData: Array<Record<string, string | number>> = [];
+
+      // Add lead generation activities
+      report.lead_generation.forEach((lg) => {
+        activitiesData.push({
+          "Month": monthLabel,
+          "Representative": report.client_name,
+          "Activity Type": "Lead Generation",
+          "Activity": activityTypeLabels[lg.activity_type] || lg.activity_type,
+          "Count": lg.qualified_leads,
+          "Description": lg.description || "",
+        });
+      });
+
+      // Add lead engagement activities
+      report.lead_engagement.forEach((le) => {
+        activitiesData.push({
+          "Month": monthLabel,
+          "Representative": report.client_name,
+          "Activity Type": "Lead Engagement",
+          "Activity": activityTypeLabels[le.activity_type] || le.activity_type,
+          "Count": le.leads_engaged,
+          "Description": le.description || "",
+        });
+      });
+
+      // Ensure there's at least one row for Activities sheet
+      if (activitiesData.length === 0) {
+        activitiesData.push({
+          "Month": monthLabel,
+          "Representative": report.client_name,
+          "Activity Type": "",
+          "Activity": "No activities recorded",
+          "Count": 0,
+          "Description": "",
+        });
+      }
+
+      // Generate filename: ICR_Report_MonthName_Year_ReportId.xlsx
+      const [year, month] = report.report_month.split("-");
+      const date = new Date(parseInt(year), parseInt(month) - 1);
+      const monthName = date.toLocaleDateString("en-US", { month: "long" });
+      const filename = `ICR_Report_${monthName}_${year}_${report.report_id}.xlsx`;
+
+      exportMultipleSheetsToXLSX(
+        [
+          { data: summaryData, sheetName: "Summary" },
+          { data: activitiesData, sheetName: "Activities" },
+        ],
+        filename
+      );
+    } catch (err) {
+      console.error("Failed to download ICR report:", err);
+    } finally {
+      setDownloadingReportId(null);
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -278,7 +367,7 @@ export default function InCountryReports() {
                         })}
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center justify-end">
+                        <div className="flex items-center justify-end gap-2">
                           <Button
                             variant="outline"
                             size="sm"
@@ -286,6 +375,18 @@ export default function InCountryReports() {
                           >
                             <Eye className="h-4 w-4 mr-1" />
                             View
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDownloadReport(report)}
+                            disabled={downloadingReportId === report.report_id}
+                          >
+                            {downloadingReportId === report.report_id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Download className="h-4 w-4" />
+                            )}
                           </Button>
                         </div>
                       </TableCell>
