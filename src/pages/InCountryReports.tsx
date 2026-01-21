@@ -316,14 +316,14 @@ export default function InCountryReports() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Month</TableHead>
-                  <TableHead>Representative</TableHead>
-                  <TableHead className="text-right">Leads Generated</TableHead>
-                  <TableHead className="text-right">Leads Engaged</TableHead>
-                  <TableHead className="text-right">Applications</TableHead>
-                  <TableHead className="text-right">Admitted</TableHead>
-                  <TableHead>Last Updated</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-xs h-10">Month</TableHead>
+                  <TableHead className="text-xs h-10">Representative</TableHead>
+                  <TableHead className="text-xs h-10 text-right">Leads Generated</TableHead>
+                  <TableHead className="text-xs h-10 text-right">Leads Engaged</TableHead>
+                  <TableHead className="text-xs h-10 text-right">Applications</TableHead>
+                  <TableHead className="text-xs h-10 text-right">Admitted</TableHead>
+                  <TableHead className="text-xs h-10">Last Updated</TableHead>
+                  <TableHead className="text-xs h-10 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
