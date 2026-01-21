@@ -40,6 +40,7 @@ import UniversityApplications from "./pages/applications/UniversityApplications"
 import Analytics from "./pages/Analytics";
 import UserManagement from "./pages/UserManagement";
 import ReportDetail from "./pages/ReportDetail";
+import InCountryReports from "./pages/InCountryReports";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +86,9 @@ const App = () => (
 
                 {/* Analytics */}
                 <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+
+                {/* In-Country Representation */}
+                <Route path="/in-country-reports" element={<ProtectedRoute><InCountryReports /></ProtectedRoute>} />
 
                 {/* User Management */}
                 <Route path="/user-management" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />

@@ -16,6 +16,7 @@ import {
   Video,
   FileText,
   Lock,
+  Globe,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -119,6 +120,12 @@ const baseNavigation: NavItem[] = [
         ],
       },
     ],
+  },
+  {
+    title: "In-Country Representation",
+    href: "/in-country-reports",
+    icon: Globe,
+    permissionKey: "inCountryRepresentation",
   },
   {
     title: "Team Management",
