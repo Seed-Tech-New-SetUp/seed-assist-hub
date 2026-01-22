@@ -171,7 +171,54 @@ serve(async (req) => {
       });
     }
 
-    const data = await response.json();
+    // Check content type before parsing
+    const respContentType = response.headers.get('Content-Type') || '';
+    const responseText = await response.text();
+
+    // Handle non-JSON responses (e.g., HTML error pages)
+    if (!respContentType.includes('application/json')) {
+      console.error('LAE Proxy: Non-JSON response received:', responseText.substring(0, 500));
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: `Backend returned non-JSON response (status: ${response.status})`,
+          assignments: [],
+          files: []
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Handle empty response
+    if (!responseText || responseText.trim() === '') {
+      console.log('LAE Proxy: Empty response received');
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          assignments: [],
+          files: [],
+          message: 'No data available'
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Parse JSON
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('LAE Proxy: JSON parse error:', parseError, 'Response:', responseText.substring(0, 500));
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Invalid JSON response from backend',
+          assignments: [],
+          files: []
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     return new Response(
       JSON.stringify(data),
