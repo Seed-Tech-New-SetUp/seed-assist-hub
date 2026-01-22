@@ -14,7 +14,9 @@ import {
   Radio,
   FileText,
   Download,
-  Loader2
+  Loader2,
+  Building2,
+  UserCheck
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -102,6 +104,13 @@ const CountdownTimer = ({ targetDate }: { targetDate: string }) => {
   );
 };
 
+interface ApiMeta {
+  totalEvents: number;
+  totalRegistrants: number;
+  totalAttendees: number;
+  totalCities: number;
+}
+
 const BSFReports = () => {
   const navigate = useNavigate();
   const { portalToken, selectedSchool } = useAuth();
@@ -119,6 +128,7 @@ const BSFReports = () => {
     download_count?: number;
     event_type?: string;
   }>>([]);
+  const [meta, setMeta] = useState<ApiMeta | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -164,6 +174,20 @@ const BSFReports = () => {
             event_type: event.event_type,
           }));
           setApiEvents(transformedEvents);
+          
+          // Extract meta if available, otherwise calculate from events
+          if (decodedResult.data.meta) {
+            setMeta(decodedResult.data.meta);
+          } else {
+            // Calculate meta from events if not provided by API
+            const uniqueCities = new Set(transformedEvents.map((e: any) => e.city));
+            setMeta({
+              totalEvents: transformedEvents.length,
+              totalRegistrants: transformedEvents.reduce((sum: number, e: any) => sum + e.registrants, 0),
+              totalAttendees: transformedEvents.reduce((sum: number, e: any) => sum + e.attendees, 0),
+              totalCities: uniqueCities.size,
+            });
+          }
         }
       } catch (error) {
         console.error("Error fetching BSF events:", error);
@@ -248,6 +272,44 @@ const BSFReports = () => {
           <h1 className="text-2xl font-display font-bold text-foreground">Business School Festivals</h1>
           <p className="text-muted-foreground mt-1">All BSF events - upcoming, ongoing, and past</p>
         </div>
+
+        {/* Summary Stats */}
+        {meta && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10"><FileText className="h-5 w-5 text-primary" /></div>
+                  <div><p className="text-2xl font-bold text-foreground">{meta.totalEvents}</p><p className="text-xs text-muted-foreground">Total Events</p></div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-accent/10"><Building2 className="h-5 w-5 text-accent-foreground" /></div>
+                  <div><p className="text-2xl font-bold text-foreground">{meta.totalCities}</p><p className="text-xs text-muted-foreground">Cities Covered</p></div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-secondary/50"><Users className="h-5 w-5 text-secondary-foreground" /></div>
+                  <div><p className="text-2xl font-bold text-foreground">{meta.totalRegistrants.toLocaleString()}</p><p className="text-xs text-muted-foreground">Total Registrants</p></div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10"><UserCheck className="h-5 w-5 text-primary" /></div>
+                  <div><p className="text-2xl font-bold text-foreground">{meta.totalAttendees.toLocaleString()}</p><p className="text-xs text-muted-foreground">Total Attendees</p></div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Live Events */}
         {liveEvents.length > 0 && (
