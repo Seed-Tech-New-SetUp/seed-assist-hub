@@ -1,0 +1,148 @@
+import { useMemo } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+  PieChart,
+  Pie,
+  Legend,
+} from "recharts";
+
+interface ChartDataItem {
+  label: string;
+  value: number;
+}
+
+interface AnalyticsChartProps {
+  type: "bar" | "doughnut";
+  data: ChartDataItem[];
+  colors: string[];
+  onItemClick?: (label: string) => void;
+}
+
+function truncateLabel(label: string, maxLength = 25): string {
+  if (!label) return "";
+  if (label.length <= maxLength) return label;
+  return label.substring(0, maxLength - 3) + "...";
+}
+
+export function AnalyticsChart({
+  type,
+  data,
+  colors,
+  onItemClick,
+}: AnalyticsChartProps) {
+  const chartData = useMemo(
+    () =>
+      data.map((item, index) => ({
+        name: item.label,
+        value: item.value,
+        fill: colors[index % colors.length],
+      })),
+    [data, colors]
+  );
+
+  const total = useMemo(
+    () => chartData.reduce((sum, item) => sum + item.value, 0),
+    [chartData]
+  );
+
+  const handleClick = (data: { name: string }) => {
+    if (onItemClick && data.name) {
+      onItemClick(data.name);
+    }
+  };
+
+  if (type === "bar") {
+    return (
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={chartData}
+          layout="vertical"
+          margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
+        >
+          <XAxis type="number" tick={{ fontSize: 11 }} />
+          <YAxis
+            type="category"
+            dataKey="name"
+            width={150}
+            tick={{ fontSize: 11 }}
+            tickFormatter={(value) => truncateLabel(value, 20)}
+          />
+          <Tooltip
+            formatter={(value: number) => [
+              `${value.toLocaleString()} (${((value / total) * 100).toFixed(1)}%)`,
+              "Count",
+            ]}
+            contentStyle={{
+              backgroundColor: "hsl(var(--popover))",
+              borderColor: "hsl(var(--border))",
+              borderRadius: "8px",
+              fontSize: "12px",
+            }}
+          />
+          <Bar
+            dataKey="value"
+            radius={[0, 4, 4, 0]}
+            cursor="pointer"
+            onClick={(data) => handleClick(data)}
+          >
+            {chartData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.fill} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // Doughnut/Pie chart
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <PieChart>
+        <Pie
+          data={chartData}
+          cx="50%"
+          cy="50%"
+          innerRadius={60}
+          outerRadius={120}
+          paddingAngle={2}
+          dataKey="value"
+          cursor="pointer"
+          onClick={(data) => handleClick(data)}
+          label={({ name, percent }) =>
+            `${truncateLabel(name, 15)} (${(percent * 100).toFixed(0)}%)`
+          }
+          labelLine={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1 }}
+        >
+          {chartData.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.fill} />
+          ))}
+        </Pie>
+        <Tooltip
+          formatter={(value: number) => [
+            `${value.toLocaleString()} (${((value / total) * 100).toFixed(1)}%)`,
+            "Count",
+          ]}
+          contentStyle={{
+            backgroundColor: "hsl(var(--popover))",
+            borderColor: "hsl(var(--border))",
+            borderRadius: "8px",
+            fontSize: "12px",
+          }}
+        />
+        <Legend
+          formatter={(value) => (
+            <span style={{ color: "hsl(var(--foreground))", fontSize: "12px" }}>
+              {truncateLabel(value, 20)}
+            </span>
+          )}
+        />
+      </PieChart>
+    </ResponsiveContainer>
+  );
+}

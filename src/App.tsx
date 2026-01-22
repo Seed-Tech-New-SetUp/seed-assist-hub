@@ -41,6 +41,7 @@ import Analytics from "./pages/Analytics";
 import UserManagement from "./pages/UserManagement";
 import ReportDetail from "./pages/ReportDetail";
 import InCountryReports from "./pages/InCountryReports";
+import LeadAnalytics from "./pages/lae/LeadAnalytics";
 
 const queryClient = new QueryClient();
 
@@ -89,6 +90,9 @@ const App = () => (
 
                 {/* In-Country Representation */}
                 <Route path="/in-country-reports" element={<ProtectedRoute><InCountryReports /></ProtectedRoute>} />
+
+                {/* Lead Analytics Engine */}
+                <Route path="/lead-analytics" element={<ProtectedRoute><LeadAnalytics /></ProtectedRoute>} />
 
                 {/* User Management */}
                 <Route path="/user-management" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
