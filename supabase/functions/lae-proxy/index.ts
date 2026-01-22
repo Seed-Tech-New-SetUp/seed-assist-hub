@@ -229,6 +229,38 @@ serve(async (req) => {
           { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+
+      // Handle nested response structure for analytics endpoint
+      if (action === 'analytics' && data?.success && data?.data) {
+        const analyticsData = data.data;
+        return new Response(
+          JSON.stringify({ 
+            success: true,
+            total_records: analyticsData.total_records || 0,
+            columns: analyticsData.columns || { status_column: null, program_column: null },
+            filters: analyticsData.filters || { statuses: [], programs: [] },
+            status_distribution: analyticsData.status_distribution || [],
+            status_total: analyticsData.status_total || 0,
+            program_distribution: analyticsData.program_distribution || [],
+            program_total: analyticsData.program_total || 0,
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Handle nested response structure for detail endpoint
+      if (action === 'detail' && data?.success && data?.data) {
+        const detailData = data.data;
+        return new Response(
+          JSON.stringify({ 
+            success: true,
+            data: detailData.data || [],
+            columns: detailData.columns || [],
+            headers: detailData.headers || null,
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     } catch (parseError) {
       console.error('LAE Proxy: JSON parse error:', parseError, 'Response:', responseText.substring(0, 500));
       return new Response(
