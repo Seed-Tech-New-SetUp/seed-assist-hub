@@ -381,27 +381,29 @@ export default function ScholarshipApplications() {
           </CardContent>
         </Card>
 
-        {/* Bulk Actions */}
+        {/* Bulk Actions - Sticky */}
         {selectedApplicants.length > 0 && (
-          <Card className="bg-primary/5 border-primary/20">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">{selectedApplicants.length} applicant(s) selected</span>
-                <div className="flex gap-2">
-                  <Select onValueChange={(value) => handleBulkStatusChange(value as WorkflowStatus)}>
-                    <SelectTrigger className="w-[160px]">
-                      <SelectValue placeholder="Assign Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(["pending", "shortlisted", "onhold", "rejected"] as WorkflowStatus[]).map((status) => (
-                        <SelectItem key={status} value={status}>{statusConfig[status].label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+          <div className="sticky top-0 z-50">
+            <Card className="bg-primary/5 border-primary/20 shadow-lg">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">{selectedApplicants.length} applicant(s) selected</span>
+                  <div className="flex gap-2">
+                    <Select onValueChange={(value) => handleBulkStatusChange(value as WorkflowStatus)}>
+                      <SelectTrigger className="w-[160px]">
+                        <SelectValue placeholder="Assign Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(["pending", "shortlisted", "onhold", "rejected"] as WorkflowStatus[]).map((status) => (
+                          <SelectItem key={status} value={status}>{statusConfig[status].label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {/* Applicants Table */}
