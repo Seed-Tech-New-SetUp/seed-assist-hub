@@ -207,6 +207,28 @@ serve(async (req) => {
     let data;
     try {
       data = JSON.parse(responseText);
+      
+      // Handle nested response structure for assignments endpoint
+      if (action === 'assignments' && data?.data?.assignments) {
+        // Map the backend response to expected frontend format
+        const mappedAssignments = data.data.assignments.map((a: Record<string, unknown>) => ({
+          assignment_id: a.assignment_id,
+          assignment_type: a.assignment_type,
+          cycle: a.cycle || null,
+          start_date: a.created_at || null,
+          status: 'active', // Default status since backend doesn't provide it
+          view_name: a.view_name
+        }));
+        
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            assignments: mappedAssignments,
+            total: data.data.total || mappedAssignments.length
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     } catch (parseError) {
       console.error('LAE Proxy: JSON parse error:', parseError, 'Response:', responseText.substring(0, 500));
       return new Response(
