@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,114 +12,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Search, FileSpreadsheet, Users, GraduationCap, Clock } from "lucide-react";
-import { exportToXLSX } from "@/lib/utils/xlsx-export";
+import { Download, Search, FileSpreadsheet, Users, GraduationCap, Clock, RefreshCw, Loader2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import {
+  UniversityApplication,
+  fetchApplications,
+  downloadApplicationsExport,
+} from "@/lib/api/applications";
 
-interface StudentApplication {
-  id: string;
-  studentName: string;
-  email: string;
-  program: string;
-  applicationDate: string;
-  status: "pending" | "under_review" | "admitted" | "rejected" | "waitlisted";
-  nationality: string;
-  cgpa: string;
-  workExperience: string;
-}
-
-// Mock data for student applications
-const mockApplications: StudentApplication[] = [
-  {
-    id: "1",
-    studentName: "Arjun Sharma",
-    email: "arjun.sharma@email.com",
-    program: "MBA",
-    applicationDate: "2024-01-15",
-    status: "admitted",
-    nationality: "India",
-    cgpa: "3.8/4.0",
-    workExperience: "5 years",
-  },
-  {
-    id: "2",
-    studentName: "Priya Patel",
-    email: "priya.patel@email.com",
-    program: "MS Computer Science",
-    applicationDate: "2024-01-18",
-    status: "under_review",
-    nationality: "India",
-    cgpa: "3.6/4.0",
-    workExperience: "3 years",
-  },
-  {
-    id: "3",
-    studentName: "Chen Wei",
-    email: "chen.wei@email.com",
-    program: "MBA",
-    applicationDate: "2024-01-20",
-    status: "pending",
-    nationality: "China",
-    cgpa: "3.9/4.0",
-    workExperience: "6 years",
-  },
-  {
-    id: "4",
-    studentName: "Sarah Johnson",
-    email: "sarah.johnson@email.com",
-    program: "MS Finance",
-    applicationDate: "2024-01-22",
-    status: "waitlisted",
-    nationality: "USA",
-    cgpa: "3.5/4.0",
-    workExperience: "4 years",
-  },
-  {
-    id: "5",
-    studentName: "Ahmed Hassan",
-    email: "ahmed.hassan@email.com",
-    program: "MBA",
-    applicationDate: "2024-01-25",
-    status: "rejected",
-    nationality: "Egypt",
-    cgpa: "3.2/4.0",
-    workExperience: "2 years",
-  },
-  {
-    id: "6",
-    studentName: "Maria Garcia",
-    email: "maria.garcia@email.com",
-    program: "MS Data Science",
-    applicationDate: "2024-02-01",
-    status: "admitted",
-    nationality: "Spain",
-    cgpa: "3.7/4.0",
-    workExperience: "4 years",
-  },
-  {
-    id: "7",
-    studentName: "Kenji Tanaka",
-    email: "kenji.tanaka@email.com",
-    program: "MBA",
-    applicationDate: "2024-02-05",
-    status: "under_review",
-    nationality: "Japan",
-    cgpa: "3.85/4.0",
-    workExperience: "7 years",
-  },
-  {
-    id: "8",
-    studentName: "Fatima Al-Rashid",
-    email: "fatima.rashid@email.com",
-    program: "MS Marketing",
-    applicationDate: "2024-02-08",
-    status: "pending",
-    nationality: "UAE",
-    cgpa: "3.4/4.0",
-    workExperience: "3 years",
-  },
-];
-
-const statusConfig: Record<StudentApplication["status"], { label: string; className: string }> = {
+const statusConfig: Record<UniversityApplication["status"], { label: string; className: string }> = {
   pending: { label: "Pending", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
   under_review: { label: "Under Review", className: "bg-blue-500/10 text-blue-600 border-blue-500/20" },
   admitted: { label: "Admitted", className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
@@ -128,38 +29,79 @@ const statusConfig: Record<StudentApplication["status"], { label: string; classN
 };
 
 export default function UniversityApplications() {
+  const [applications, setApplications] = useState<UniversityApplication[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [stats, setStats] = useState({
+    total: 0,
+    admitted: 0,
+    pending: 0,
+  });
 
-  const filteredApplications = mockApplications.filter(
+  const loadApplications = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetchApplications({ search: searchQuery });
+      if (response.success && response.data) {
+        setApplications(response.data.applications || []);
+        if (response.data.stats) {
+          setStats({
+            total: response.data.stats.total || 0,
+            admitted: response.data.stats.admitted || 0,
+            pending: (response.data.stats.pending || 0) + (response.data.stats.under_review || 0),
+          });
+        } else {
+          // Calculate stats from data
+          const apps = response.data.applications || [];
+          setStats({
+            total: apps.length,
+            admitted: apps.filter((a) => a.status === "admitted").length,
+            pending: apps.filter((a) => a.status === "pending" || a.status === "under_review").length,
+          });
+        }
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to load applications",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [searchQuery]);
+
+  useEffect(() => {
+    loadApplications();
+  }, [loadApplications]);
+
+  // Filter locally for immediate search feedback
+  const filteredApplications = applications.filter(
     (app) =>
-      app.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.program.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.nationality.toLowerCase().includes(searchQuery.toLowerCase())
+      app.student_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.program?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.nationality?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const stats = {
-    total: mockApplications.length,
-    admitted: mockApplications.filter((a) => a.status === "admitted").length,
-    pending: mockApplications.filter((a) => a.status === "pending" || a.status === "under_review").length,
-  };
-
-  const handleDownload = () => {
-    const exportData = filteredApplications.map((app) => ({
-      "Student Name": app.studentName,
-      "Email": app.email,
-      "Program": app.program,
-      "Nationality": app.nationality,
-      "CGPA": app.cgpa,
-      "Work Experience": app.workExperience,
-      "Application Date": new Date(app.applicationDate).toLocaleDateString(),
-      "Status": statusConfig[app.status].label,
-    }));
-
-    exportToXLSX(exportData, {
-      filename: `university-applications-${new Date().toISOString().split("T")[0]}`,
-      sheetName: "Applications",
-    });
+  const handleDownload = async () => {
+    setIsExporting(true);
+    try {
+      await downloadApplicationsExport();
+      toast({
+        title: "Success",
+        description: "Export downloaded successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: error instanceof Error ? error.message : "Failed to download export",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
@@ -169,16 +111,26 @@ export default function UniversityApplications() {
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-2xl font-display font-bold text-foreground">
-              University Applications
+              Application Pipeline
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
               All student applications submitted via SEED
             </p>
           </div>
-          <Button onClick={handleDownload} className="gap-2">
-            <Download className="h-4 w-4" />
-            Download XLSX
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={loadApplications} disabled={isLoading}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
+            <Button onClick={handleDownload} disabled={isExporting} className="gap-2">
+              {isExporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              Download XLSX
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -238,53 +190,62 @@ export default function UniversityApplications() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="rounded-lg border">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead>Student Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Program</TableHead>
-                    <TableHead>Nationality</TableHead>
-                    <TableHead>CGPA</TableHead>
-                    <TableHead>Work Exp.</TableHead>
-                    <TableHead>Applied On</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredApplications.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
-                        No applications found
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredApplications.map((app) => (
-                      <TableRow key={app.id} className="hover:bg-muted/30">
-                        <TableCell className="font-medium">{app.studentName}</TableCell>
-                        <TableCell className="text-muted-foreground">{app.email}</TableCell>
-                        <TableCell>{app.program}</TableCell>
-                        <TableCell>{app.nationality}</TableCell>
-                        <TableCell>{app.cgpa}</TableCell>
-                        <TableCell>{app.workExperience}</TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {new Date(app.applicationDate).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={statusConfig[app.status].className}>
-                            {statusConfig[app.status].label}
-                          </Badge>
-                        </TableCell>
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
+                <p className="text-sm text-muted-foreground">Loading applications...</p>
+              </div>
+            ) : (
+              <>
+                <div className="rounded-lg border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/50">
+                        <TableHead>Student Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Program</TableHead>
+                        <TableHead>Nationality</TableHead>
+                        <TableHead>CGPA</TableHead>
+                        <TableHead>Work Exp.</TableHead>
+                        <TableHead>Applied On</TableHead>
+                        <TableHead>Status</TableHead>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-            <div className="mt-4 text-sm text-muted-foreground">
-              Showing {filteredApplications.length} of {mockApplications.length} applications
-            </div>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredApplications.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+                            No applications found
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        filteredApplications.map((app) => (
+                          <TableRow key={app.id} className="hover:bg-muted/30">
+                            <TableCell className="font-medium">{app.student_name}</TableCell>
+                            <TableCell className="text-muted-foreground">{app.email}</TableCell>
+                            <TableCell>{app.program}</TableCell>
+                            <TableCell>{app.nationality}</TableCell>
+                            <TableCell>{app.cgpa}</TableCell>
+                            <TableCell>{app.work_experience}</TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {app.application_date ? new Date(app.application_date).toLocaleDateString() : "-"}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className={statusConfig[app.status]?.className || ""}>
+                                {statusConfig[app.status]?.label || app.status}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+                <div className="mt-4 text-sm text-muted-foreground">
+                  Showing {filteredApplications.length} of {applications.length} applications
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
