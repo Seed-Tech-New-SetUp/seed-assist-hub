@@ -91,58 +91,14 @@ export async function downloadApplicationsExport(): Promise<void> {
     throw new Error("Authentication required");
   }
 
-  const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/applications-proxy?action=export`;
-  console.info("[applications] export: requesting", url);
-
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-    },
+  // Create a hidden form to POST with auth headers via a different approach
+  // Since we can't add headers to direct links, we'll use the proxy with token in URL
+  const baseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/applications-proxy`;
+  const params = new URLSearchParams({
+    action: "export",
+    token: token, // Pass token as query param for direct download
   });
-
-  if (!response.ok) {
-    // Try to surface backend error JSON (e.g. { success:false, error:"No school found for this client" })
-    const contentType = response.headers.get("Content-Type") || "";
-    let message = `Failed to download export (HTTP ${response.status})`;
-    try {
-      if (contentType.includes("application/json")) {
-        const err = await response.json().catch(() => null);
-        if (err?.error) message = err.error;
-        else if (err?.message) message = err.message;
-        else if (typeof err === "string") message = err;
-      } else {
-        const text = await response.text().catch(() => "");
-        if (text) message = `${message}: ${text.slice(0, 200)}`;
-      }
-    } catch {
-      // ignore parsing errors; keep generic message
-    }
-
-    console.error("[applications] export: failed", {
-      status: response.status,
-      contentType,
-    });
-    throw new Error(message);
-  }
-
-  // Download the file
-  const blob = await response.blob();
-  console.info("[applications] export: received blob", {
-    size: blob.size,
-    type: blob.type,
-  });
-
-  if (!blob || blob.size === 0) {
-    throw new Error("Downloaded file is empty (0 bytes)");
-  }
-  const objectUrl = window.URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = objectUrl;
-  a.download = `applications-export-${new Date().toISOString().split("T")[0]}.xlsx`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  window.URL.revokeObjectURL(objectUrl);
+  
+  // Open in new tab - the proxy will handle auth from query param
+  window.open(`${baseUrl}?${params.toString()}`, "_blank");
 }
