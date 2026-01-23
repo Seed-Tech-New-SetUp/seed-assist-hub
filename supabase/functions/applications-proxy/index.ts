@@ -18,8 +18,14 @@ serve(async (req) => {
     const url = new URL(req.url);
     const action = url.searchParams.get("action") || "list";
     
-    // Get authorization header
-    const authHeader = req.headers.get("Authorization");
+    // Get authorization - from header OR query param (for direct download links)
+    let authHeader = req.headers.get("Authorization");
+    const tokenFromQuery = url.searchParams.get("token");
+    
+    if (!authHeader && tokenFromQuery) {
+      authHeader = `Bearer ${tokenFromQuery}`;
+    }
+    
     if (!authHeader) {
       return new Response(
         JSON.stringify({ success: false, error: "Authorization required" }),
@@ -41,10 +47,10 @@ serve(async (req) => {
         backendUrl = `${BACKEND_BASE_URL}/index.php`;
     }
 
-    // Forward query params (except action)
+    // Forward query params (except action and token - those are for proxy use only)
     const queryParams = new URLSearchParams();
     url.searchParams.forEach((value, key) => {
-      if (key !== "action") {
+      if (key !== "action" && key !== "token") {
         queryParams.append(key, value);
       }
     });
