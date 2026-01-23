@@ -65,46 +65,51 @@ serve(async (req) => {
       body: req.method !== "GET" ? await req.text() : undefined,
     });
 
-    // Handle export action - always treat as binary
+    // Handle export action - pass through binary Excel file
     if (action === "export") {
       const contentTypeRaw = backendResponse.headers.get("Content-Type") || "";
+      const contentDisposition = backendResponse.headers.get("Content-Disposition") || "";
       const contentType = contentTypeRaw.toLowerCase();
 
-      // If backend returned JSON (often an error like { success:false, error:"..." }),
-      // do NOT force an XLSX download. Pass JSON through to the client.
+      console.log("Applications Proxy Export: backend response", {
+        status: backendResponse.status,
+        contentType: contentTypeRaw,
+        contentDisposition,
+      });
+
+      // If backend returned JSON (error response), pass it through as error
       if (contentType.includes("application/json") || contentType.includes("text/json")) {
         const text = await backendResponse.text();
+        console.log("Applications Proxy Export: JSON response (error)", text.slice(0, 200));
         return new Response(text, {
-          // Backend sometimes responds 200 even for errors; normalize to 400 so frontend treats it as failure.
           status: backendResponse.ok ? 400 : backendResponse.status,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      // If backend returned HTML/text (common for PHP fatal/error pages), convert to a safe JSON error.
+      // If backend returned HTML/text (PHP error page), convert to JSON error
       if (contentType.includes("text/html") || contentType.includes("text/plain")) {
         const text = await backendResponse.text();
+        console.log("Applications Proxy Export: HTML/text response (error)", text.slice(0, 200));
         return new Response(
           JSON.stringify({ success: false, error: "Server returned a non-file response", raw: text.slice(0, 300) }),
           {
-            status: backendResponse.ok ? 500 : backendResponse.status,
+            status: 500,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           }
         );
       }
 
-      // Otherwise treat as binary XLSX
+      // Binary file response - pass through directly
       const binaryData = await backendResponse.arrayBuffer();
+      console.log("Applications Proxy Export: Binary file received, size:", binaryData.byteLength);
+
       return new Response(binaryData, {
         status: backendResponse.status,
         headers: {
           ...corsHeaders,
-          "Content-Type": contentTypeRaw.includes("spreadsheet") || contentTypeRaw.includes("excel")
-            ? contentTypeRaw
-            : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-          "Content-Disposition":
-            backendResponse.headers.get("Content-Disposition") ||
-            `attachment; filename="applications-export-${new Date().toISOString().split("T")[0]}.xlsx"`,
+          "Content-Type": contentTypeRaw || "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          "Content-Disposition": contentDisposition || `attachment; filename="applications-export-${new Date().toISOString().split("T")[0]}.xlsx"`,
         },
       });
     }
