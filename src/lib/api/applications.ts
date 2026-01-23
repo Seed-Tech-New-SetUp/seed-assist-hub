@@ -1,32 +1,35 @@
-import { supabase } from "@/integrations/supabase/client";
 import { getCookie, AUTH_COOKIES } from "@/lib/utils/cookies";
 
 export interface UniversityApplication {
-  id: string;
-  student_name: string;
+  record_id: string;
+  name: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  program: string;
-  application_date: string;
-  status: "pending" | "under_review" | "admitted" | "rejected" | "waitlisted";
-  nationality: string;
-  cgpa: string;
-  work_experience: string;
-  phone?: string;
-  country_code?: string;
+  phone_number: string;
+  program_name: string;
+  intake: string;
+  status: string;
+  created_at: string;
 }
 
 export interface ApplicationsResponse {
   success: boolean;
   data?: {
     applications: UniversityApplication[];
-    total: number;
-    stats?: {
-      total: number;
-      admitted: number;
-      pending: number;
-      under_review: number;
-      rejected: number;
-      waitlisted: number;
+    meta?: {
+      total_applications: number;
+      filtered_count: number;
+      status_counts: Record<string, number>;
+    };
+    filter_options?: {
+      statuses: string[];
+      intakes: string[];
+      programs: string[];
+    };
+    school?: {
+      university: string;
+      school_name: string;
     };
   };
   error?: string;
@@ -56,14 +59,6 @@ export async function fetchApplications(params?: {
   if (params?.page) queryParams.append("page", params.page.toString());
   if (params?.limit) queryParams.append("limit", params.limit.toString());
 
-  const { data, error } = await supabase.functions.invoke("applications-proxy", {
-    body: null,
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  // Re-invoke with query params via URL
   const response = await fetch(
     `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/applications-proxy?${queryParams.toString()}`,
     {

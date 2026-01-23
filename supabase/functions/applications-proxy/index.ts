@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 };
 
-const BACKEND_BASE_URL = "https://seedglobaleducation.com/api/university-applications";
+const BACKEND_BASE_URL = "https://seedglobaleducation.com/api/assist/university-applications";
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -32,13 +32,13 @@ serve(async (req) => {
     
     switch (action) {
       case "list":
-        backendUrl = `${BACKEND_BASE_URL}/list.php`;
+        backendUrl = `${BACKEND_BASE_URL}/index.php`;
         break;
       case "export":
         backendUrl = `${BACKEND_BASE_URL}/export.php`;
         break;
       default:
-        backendUrl = `${BACKEND_BASE_URL}/list.php`;
+        backendUrl = `${BACKEND_BASE_URL}/index.php`;
     }
 
     // Forward query params (except action)
@@ -52,6 +52,8 @@ serve(async (req) => {
     if (queryParams.toString()) {
       backendUrl += `?${queryParams.toString()}`;
     }
+
+    console.log("Applications Proxy: Fetching from", backendUrl);
 
     // Forward request to backend
     const backendResponse = await fetch(backendUrl, {
