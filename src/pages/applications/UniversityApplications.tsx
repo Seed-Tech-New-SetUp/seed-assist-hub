@@ -20,12 +20,12 @@ import {
   downloadApplicationsExport,
 } from "@/lib/api/applications";
 
-const statusConfig: Record<UniversityApplication["status"], { label: string; className: string }> = {
-  pending: { label: "Pending", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
-  under_review: { label: "Under Review", className: "bg-blue-500/10 text-blue-600 border-blue-500/20" },
-  admitted: { label: "Admitted", className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
-  rejected: { label: "Rejected", className: "bg-red-500/10 text-red-600 border-red-500/20" },
-  waitlisted: { label: "Waitlisted", className: "bg-purple-500/10 text-purple-600 border-purple-500/20" },
+const statusConfig: Record<string, { label: string; className: string }> = {
+  Applied: { label: "Applied", className: "bg-blue-500/10 text-blue-600 border-blue-500/20" },
+  Admitted: { label: "Admitted", className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
+  Rejected: { label: "Rejected", className: "bg-red-500/10 text-red-600 border-red-500/20" },
+  Waitlisted: { label: "Waitlisted", className: "bg-purple-500/10 text-purple-600 border-purple-500/20" },
+  "Under Review": { label: "Under Review", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
 };
 
 export default function UniversityApplications() {
@@ -36,7 +36,7 @@ export default function UniversityApplications() {
   const [stats, setStats] = useState({
     total: 0,
     admitted: 0,
-    pending: 0,
+    applied: 0,
   });
 
   const loadApplications = useCallback(async () => {
@@ -44,22 +44,15 @@ export default function UniversityApplications() {
     try {
       const response = await fetchApplications({ search: searchQuery });
       if (response.success && response.data) {
-        setApplications(response.data.applications || []);
-        if (response.data.stats) {
-          setStats({
-            total: response.data.stats.total || 0,
-            admitted: response.data.stats.admitted || 0,
-            pending: (response.data.stats.pending || 0) + (response.data.stats.under_review || 0),
-          });
-        } else {
-          // Calculate stats from data
-          const apps = response.data.applications || [];
-          setStats({
-            total: apps.length,
-            admitted: apps.filter((a) => a.status === "admitted").length,
-            pending: apps.filter((a) => a.status === "pending" || a.status === "under_review").length,
-          });
-        }
+        const apps = response.data.applications || [];
+        setApplications(apps);
+        
+        // Calculate stats from data
+        setStats({
+          total: response.data.meta?.total_applications || apps.length,
+          admitted: apps.filter((a) => a.status === "Admitted").length,
+          applied: apps.filter((a) => a.status === "Applied").length,
+        });
       }
     } catch (error) {
       toast({
@@ -79,10 +72,11 @@ export default function UniversityApplications() {
   // Filter locally for immediate search feedback
   const filteredApplications = applications.filter(
     (app) =>
-      app.student_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.last_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       app.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.program?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.nationality?.toLowerCase().includes(searchQuery.toLowerCase())
+      app.program_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleDownload = async () => {
@@ -159,12 +153,12 @@ export default function UniversityApplications() {
           </Card>
           <Card>
             <CardContent className="flex items-center gap-4 p-4">
-              <div className="p-3 rounded-lg bg-amber-500/10">
-                <Clock className="h-5 w-5 text-amber-600" />
+              <div className="p-3 rounded-lg bg-blue-500/10">
+                <Clock className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">In Progress</p>
-                <p className="text-2xl font-bold text-foreground">{stats.pending}</p>
+                <p className="text-sm text-muted-foreground">Applied</p>
+                <p className="text-2xl font-bold text-foreground">{stats.applied}</p>
               </div>
             </CardContent>
           </Card>
@@ -201,37 +195,33 @@ export default function UniversityApplications() {
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/50">
-                        <TableHead>Student Name</TableHead>
+                        <TableHead>First Name</TableHead>
+                        <TableHead>Last Name</TableHead>
                         <TableHead>Email</TableHead>
-                        <TableHead>Program</TableHead>
-                        <TableHead>Nationality</TableHead>
-                        <TableHead>CGPA</TableHead>
-                        <TableHead>Work Exp.</TableHead>
-                        <TableHead>Applied On</TableHead>
+                        <TableHead>Phone Number</TableHead>
+                        <TableHead>Program Name</TableHead>
+                        <TableHead>Intake</TableHead>
                         <TableHead>Status</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filteredApplications.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+                          <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                             No applications found
                           </TableCell>
                         </TableRow>
                       ) : (
                         filteredApplications.map((app) => (
-                          <TableRow key={app.id} className="hover:bg-muted/30">
-                            <TableCell className="font-medium">{app.student_name}</TableCell>
+                          <TableRow key={app.record_id} className="hover:bg-muted/30">
+                            <TableCell className="font-medium">{app.first_name?.trim()}</TableCell>
+                            <TableCell>{app.last_name?.trim()}</TableCell>
                             <TableCell className="text-muted-foreground">{app.email}</TableCell>
-                            <TableCell>{app.program}</TableCell>
-                            <TableCell>{app.nationality}</TableCell>
-                            <TableCell>{app.cgpa}</TableCell>
-                            <TableCell>{app.work_experience}</TableCell>
-                            <TableCell className="text-muted-foreground">
-                              {app.application_date ? new Date(app.application_date).toLocaleDateString() : "-"}
-                            </TableCell>
+                            <TableCell>{app.phone_number || "-"}</TableCell>
+                            <TableCell>{app.program_name}</TableCell>
+                            <TableCell>{app.intake}</TableCell>
                             <TableCell>
-                              <Badge variant="outline" className={statusConfig[app.status]?.className || ""}>
+                              <Badge variant="outline" className={statusConfig[app.status]?.className || "bg-gray-500/10 text-gray-600 border-gray-500/20"}>
                                 {statusConfig[app.status]?.label || app.status}
                               </Badge>
                             </TableCell>
