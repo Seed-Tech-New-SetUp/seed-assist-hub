@@ -373,26 +373,29 @@ function SchoolInfoSection({ info, setInfo, isLoading, setHasChanges }: SchoolIn
         </div>
       </div>
 
-      {/* Images */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label>School Banner</Label>
-          <Input 
-            placeholder="Banner filename or URL" 
-            className="mt-1.5" 
-            value={info.school_banner || ""}
-            onChange={(e) => updateField("school_banner", e.target.value)}
-          />
-        </div>
-        <div>
-          <Label>School Logo</Label>
-          <Input 
-            placeholder="Logo filename or URL" 
-            className="mt-1.5" 
-            value={info.school_logo || ""}
-            onChange={(e) => updateField("school_logo", e.target.value)}
-          />
-        </div>
+      {/* School Banner Preview */}
+      <div>
+        <Label>School Banner</Label>
+        {info.school_banner && (
+          <div className="mt-2 rounded-lg overflow-hidden border">
+            <img 
+              src={`http://admin.seedglobaleducation.com/assets/img/school_banners/${info.school_banner}`}
+              alt="School Banner"
+              className="w-full h-48 object-cover"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Brochure Link */}
+      <div>
+        <Label>School Brochure Link</Label>
+        <Input 
+          placeholder="https://example.com/brochure.pdf" 
+          className="mt-1.5" 
+          value={info.school_brochure_link || ""}
+          onChange={(e) => updateField("school_brochure_link", e.target.value)}
+        />
       </div>
 
       {/* Programs & Stats */}
