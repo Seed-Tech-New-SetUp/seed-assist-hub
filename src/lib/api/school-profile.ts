@@ -60,6 +60,38 @@ export interface SchoolSocialMediaResponse {
   error?: string;
 }
 
+// Features/USP types
+export interface SchoolFeature {
+  usp_id?: string;
+  school_id?: string;
+  usp_title: string;
+  usp_description: string;
+  usp_image_name?: string;
+  usp_file_format?: string;
+  created_on?: string;
+  created_by?: string;
+  is_approved_by?: string;
+}
+
+export interface SchoolFeaturesResponse {
+  success: boolean;
+  data?: {
+    features: SchoolFeature[];
+    count: number;
+  };
+  error?: string;
+}
+
+export interface FeatureMutationResponse {
+  success: boolean;
+  data?: {
+    message: string;
+    feature?: SchoolFeature;
+    usp_id?: string;
+  };
+  error?: string;
+}
+
 // ============ API Helper ============
 
 async function callSchoolProfileProxy<T>(
@@ -166,4 +198,120 @@ export async function saveSchoolSocialMedia(socialMedia: SchoolSocialMedia): Pro
     socialMedia
   );
   return result.success;
+}
+
+// ============ Features API ============
+
+export async function fetchSchoolFeatures(): Promise<SchoolFeature[]> {
+  const result = await callSchoolProfileProxy<SchoolFeaturesResponse>("features-read", "GET");
+  const features = result.data?.features || [];
+  return decodeObjectStrings(features);
+}
+
+export async function createSchoolFeature(feature: {
+  usp_title: string;
+  usp_description: string;
+  usp_image?: string; // base64 data URL
+}): Promise<FeatureMutationResponse> {
+  const token = getPortalToken();
+  if (!token) {
+    handleUnauthorized("No authentication token found");
+  }
+
+  const formData = new FormData();
+  formData.append("usp_title", feature.usp_title);
+  formData.append("usp_description", feature.usp_description);
+
+  // Handle image upload if provided
+  if (feature.usp_image && feature.usp_image.startsWith("data:")) {
+    const blob = dataURLtoBlob(feature.usp_image);
+    formData.append("usp_image", blob, "feature-image.jpg");
+  }
+
+  const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/school-profile-proxy?action=features-create`;
+  
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    if (isUnauthorizedError(response.status, errorData)) {
+      handleUnauthorized(errorData.error || errorData.message);
+    }
+    throw new Error(errorData.error || `Request failed with status ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function updateSchoolFeature(feature: {
+  usp_id: string;
+  usp_title: string;
+  usp_description: string;
+  usp_image?: string; // base64 data URL (optional)
+}): Promise<FeatureMutationResponse> {
+  const token = getPortalToken();
+  if (!token) {
+    handleUnauthorized("No authentication token found");
+  }
+
+  const formData = new FormData();
+  formData.append("usp_id", feature.usp_id);
+  formData.append("usp_title", feature.usp_title);
+  formData.append("usp_description", feature.usp_description);
+
+  // Handle image upload if provided
+  if (feature.usp_image && feature.usp_image.startsWith("data:")) {
+    const blob = dataURLtoBlob(feature.usp_image);
+    formData.append("usp_image", blob, "feature-image.jpg");
+  }
+
+  const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/school-profile-proxy?action=features-update`;
+  
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    if (isUnauthorizedError(response.status, errorData)) {
+      handleUnauthorized(errorData.error || errorData.message);
+    }
+    throw new Error(errorData.error || `Request failed with status ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function deleteSchoolFeature(uspId: string): Promise<FeatureMutationResponse> {
+  const result = await callSchoolProfileProxy<FeatureMutationResponse>(
+    "features-delete",
+    "POST",
+    { usp_id: uspId }
+  );
+  return result;
+}
+
+// Helper function to convert base64 data URL to Blob
+function dataURLtoBlob(dataURL: string): Blob {
+  const arr = dataURL.split(",");
+  const mime = arr[0].match(/:(.*?);/)?.[1] || "image/jpeg";
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new Blob([u8arr], { type: mime });
 }

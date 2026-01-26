@@ -6,9 +6,14 @@ import {
   saveSchoolInfo,
   fetchSchoolSocialMedia,
   saveSchoolSocialMedia,
+  fetchSchoolFeatures,
+  createSchoolFeature,
+  updateSchoolFeature,
+  deleteSchoolFeature,
   SchoolFAQ,
   SchoolInfo,
-  SchoolSocialMedia
+  SchoolSocialMedia,
+  SchoolFeature
 } from "@/lib/api/school-profile";
 import { useToast } from "@/hooks/use-toast";
 
@@ -102,6 +107,86 @@ export function useSaveSchoolSocialMedia() {
       toast({
         title: "Error",
         description: error.message || "Failed to save social media links",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+// ============ Features Hooks ============
+
+export function useSchoolFeatures() {
+  return useQuery({
+    queryKey: ["school-features"],
+    queryFn: fetchSchoolFeatures,
+  });
+}
+
+export function useCreateSchoolFeature() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: (feature: { usp_title: string; usp_description: string; usp_image?: string }) => 
+      createSchoolFeature(feature),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["school-features"] });
+      toast({
+        title: "Feature Added",
+        description: "Your feature has been added successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add feature",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useUpdateSchoolFeature() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: (feature: { usp_id: string; usp_title: string; usp_description: string; usp_image?: string }) => 
+      updateSchoolFeature(feature),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["school-features"] });
+      toast({
+        title: "Feature Updated",
+        description: "Your feature has been updated successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update feature",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useDeleteSchoolFeature() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: (uspId: string) => deleteSchoolFeature(uspId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["school-features"] });
+      toast({
+        title: "Feature Deleted",
+        description: "Your feature has been removed successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete feature",
         variant: "destructive",
       });
     },
