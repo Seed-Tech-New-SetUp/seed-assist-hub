@@ -34,8 +34,8 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { useSchoolFAQs, useSaveSchoolFAQs, useSchoolInfo, useSaveSchoolInfo, useSchoolSocialMedia, useSaveSchoolSocialMedia } from "@/hooks/useSchoolProfile";
-import { SchoolFAQ, SchoolInfo, SchoolSocialMedia } from "@/lib/api/school-profile";
+import { useSchoolFAQs, useSaveSchoolFAQs, useSchoolInfo, useSaveSchoolInfo, useSchoolSocialMedia, useSaveSchoolSocialMedia, useSchoolFeatures, useCreateSchoolFeature, useDeleteSchoolFeature } from "@/hooks/useSchoolProfile";
+import { SchoolFAQ, SchoolInfo, SchoolSocialMedia, SchoolFeature } from "@/lib/api/school-profile";
 
 const sections = [
   { id: "info", label: "Organisation Details", icon: Building2 },
@@ -93,6 +93,11 @@ export default function SchoolProfileEdit() {
       setSocialMedia(apiSocialMedia);
     }
   }, [apiSocialMedia]);
+
+  // Features state and mutations - lifted up for global save button  
+  const { data: apiFeatures, isLoading: featuresLoading } = useSchoolFeatures();
+  const createFeature = useCreateSchoolFeature();
+  const deleteFeature = useDeleteSchoolFeature();
 
   const handleSave = (sectionId: string) => {
     // Handle section-specific save logic
@@ -249,7 +254,16 @@ export default function SchoolProfileEdit() {
                     isSaving={saveFAQs.isPending}
                   />
                 )}
-                {activeSection === "features" && <FeaturesSection />}
+                {activeSection === "features" && (
+                  <FeaturesSection 
+                    features={apiFeatures || []}
+                    isLoading={featuresLoading}
+                    onCreate={createFeature.mutate}
+                    onDelete={deleteFeature.mutate}
+                    isCreating={createFeature.isPending}
+                    isDeleting={deleteFeature.isPending}
+                  />
+                )}
                 {activeSection === "logos" && <LogosSection />}
                 {activeSection === "rankings" && <RankingsSection />}
                 {activeSection === "contact" && <ContactSection />}
@@ -656,20 +670,53 @@ function FAQsSection({ faqs, setFaqs, isLoading, hasChanges, setHasChanges, onSa
   );
 }
 
-function FeaturesSection() {
-  const [features, setFeatures] = useState<{title: string; description: string; image: string}[]>([]);
+const FEATURES_IMAGE_BASE_URL = "https://admin.seedglobaleducation.com/assets/img/school_usp/";
+
+interface FeaturesSectionProps {
+  features: SchoolFeature[];
+  isLoading: boolean;
+  onCreate: (feature: { usp_title: string; usp_description: string; usp_image?: string }) => void;
+  onDelete: (uspId: string) => void;
+  isCreating: boolean;
+  isDeleting: boolean;
+}
+
+function FeaturesSection({ features, isLoading, onCreate, onDelete, isCreating, isDeleting }: FeaturesSectionProps) {
   const [newFeature, setNewFeature] = useState({ title: "", description: "", image: "" });
 
-  const addFeature = () => {
+  const handleAddFeature = () => {
     if (newFeature.title.trim()) {
-      setFeatures([...features, { ...newFeature }]);
+      onCreate({
+        usp_title: newFeature.title,
+        usp_description: newFeature.description,
+        usp_image: newFeature.image || undefined,
+      });
       setNewFeature({ title: "", description: "", image: "" });
     }
   };
 
-  const removeFeature = (index: number) => {
-    setFeatures(features.filter((_, i) => i !== index));
+  const handleDeleteFeature = (uspId: string) => {
+    if (uspId) {
+      onDelete(uspId);
+    }
   };
+
+  const getFeatureImageUrl = (feature: SchoolFeature) => {
+    if (feature.usp_image_name) {
+      return `${FEATURES_IMAGE_BASE_URL}${feature.usp_image_name}`;
+    }
+    return "";
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-24 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -706,7 +753,10 @@ function FeaturesSection() {
               className="mt-1.5"
             />
           </div>
-          <Button onClick={addFeature} disabled={!newFeature.title.trim()}>Add Feature</Button>
+          <Button onClick={handleAddFeature} disabled={!newFeature.title.trim() || isCreating}>
+            {isCreating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            Add Feature
+          </Button>
         </CardContent>
       </Card>
       {features.length === 0 ? (
@@ -715,24 +765,37 @@ function FeaturesSection() {
         </div>
       ) : (
         <div className="space-y-3">
-          {features.map((feature, index) => (
-            <Card key={index}>
+          {features.map((feature) => (
+            <Card key={feature.usp_id}>
               <CardContent className="p-4 flex items-start justify-between gap-4">
                 <div className="flex gap-4 flex-1">
-                  {feature.image ? (
-                    <img src={feature.image} alt={feature.title} className="w-16 h-16 rounded-lg object-cover" />
+                  {getFeatureImageUrl(feature) ? (
+                    <img 
+                      src={getFeatureImageUrl(feature)} 
+                      alt={feature.usp_title} 
+                      className="w-16 h-16 rounded-lg object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "/placeholder.svg";
+                      }}
+                    />
                   ) : (
                     <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center shrink-0">
                       <Image className="h-6 w-6 text-muted-foreground" />
                     </div>
                   )}
                   <div>
-                    <h5 className="font-medium">{feature.title}</h5>
-                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                    <h5 className="font-medium">{feature.usp_title}</h5>
+                    <p className="text-sm text-muted-foreground">{feature.usp_description}</p>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" className="text-destructive" onClick={() => removeFeature(index)}>
-                  <Trash2 className="h-4 w-4" />
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-destructive" 
+                  onClick={() => handleDeleteFeature(feature.usp_id || "")}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                 </Button>
               </CardContent>
             </Card>

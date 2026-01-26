@@ -41,8 +41,17 @@ serve(async (req) => {
       case "faqs":
         backendUrl = `${BACKEND_BASE_URL}/faqs.php`;
         break;
-      case "features":
-        backendUrl = `${BACKEND_BASE_URL}/update_school_features.php`;
+      case "features-read":
+        backendUrl = `${BACKEND_BASE_URL}/features/read.php`;
+        break;
+      case "features-create":
+        backendUrl = `${BACKEND_BASE_URL}/features/create.php`;
+        break;
+      case "features-update":
+        backendUrl = `${BACKEND_BASE_URL}/features/update.php`;
+        break;
+      case "features-delete":
+        backendUrl = `${BACKEND_BASE_URL}/features/delete.php`;
         break;
       case "logos":
         backendUrl = `${BACKEND_BASE_URL}/update_logos.php`;
@@ -59,11 +68,14 @@ serve(async (req) => {
 
     console.log(`[school-profile-proxy] Action: ${action}, URL: ${backendUrl}, Method: ${req.method}`);
 
+    // Check if request is FormData (for features create/update with image)
+    const contentType = req.headers.get("Content-Type") || "";
+    const isFormData = contentType.includes("multipart/form-data");
+
     // Prepare request options
     const requestOptions: RequestInit = {
       method: req.method,
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
         apikey: req.headers.get("apikey") || "",
       },
@@ -71,9 +83,17 @@ serve(async (req) => {
 
     // For POST/PUT requests, forward the body
     if (req.method === "POST" || req.method === "PUT") {
-      const body = await req.text();
-      if (body) {
-        requestOptions.body = body;
+      if (isFormData) {
+        // Forward FormData directly for file uploads
+        const formData = await req.formData();
+        requestOptions.body = formData;
+        // Don't set Content-Type - fetch will set it with boundary
+      } else {
+        const body = await req.text();
+        if (body) {
+          requestOptions.body = body;
+          (requestOptions.headers as Record<string, string>)["Content-Type"] = "application/json";
+        }
       }
     }
 
@@ -82,11 +102,11 @@ serve(async (req) => {
     // Log response details for debugging
     console.log(`[school-profile-proxy] Response status: ${backendResponse.status}, Content-Type: ${backendResponse.headers.get("Content-Type")}`);
 
-    // Check content type
-    const contentType = backendResponse.headers.get("Content-Type") || "";
+    // Check response content type
+    const responseContentType = backendResponse.headers.get("Content-Type") || "";
 
     // Handle non-JSON (HTML error pages) gracefully
-    if (!contentType.includes("application/json")) {
+    if (!responseContentType.includes("application/json")) {
       const textBody = await backendResponse.text();
       console.error(`[school-profile-proxy] Non-JSON response (status ${backendResponse.status}): ${textBody.substring(0, 1000)}`);
 
