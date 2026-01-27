@@ -1027,7 +1027,7 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
             email: newMember.email || "",
             linkedin_url: newMember.linkedin_url || "",
             designation: newMember.designation || "",
-            organization: newMember.organization || "",
+            organization: newmember.orgnaisation || "",
             call_to_action: newMember.call_to_action || "",
             image_name: newMember.image_name || "",
           },
@@ -1199,7 +1199,7 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
                             <p className="text-sm text-muted-foreground">
                               {member.designation}
                               {member.designation && member.orgnaisation ? " at " : ""}
-                              {member.organization}
+                              {member.orgnaisation}
                             </p>
                           )}
                           <div className="flex items-center gap-3 mt-1 flex-wrap">
