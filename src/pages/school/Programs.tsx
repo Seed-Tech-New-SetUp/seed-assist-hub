@@ -9,14 +9,8 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { 
   Info,
   Sparkles,
   Users,
@@ -109,23 +103,23 @@ export default function Programs() {
   }, [programs, selectedProgram]);
 
   const handleSave = (sectionId: string) => {
-    setCompletedSections(prev => [...new Set([...prev, sectionId])]);
-    
-    const currentIndex = programSections.findIndex(s => s.id === sectionId);
+    setCompletedSections((prev) => [...new Set([...prev, sectionId])]);
+
+    const currentIndex = programSections.findIndex((s) => s.id === sectionId);
     if (currentIndex < programSections.length - 1) {
       setActiveSection(programSections[currentIndex + 1].id);
     }
   };
 
   const handleNext = () => {
-    const currentIndex = programSections.findIndex(s => s.id === activeSection);
+    const currentIndex = programSections.findIndex((s) => s.id === activeSection);
     if (currentIndex < programSections.length - 1) {
       setActiveSection(programSections[currentIndex + 1].id);
     }
   };
 
   const handlePrevious = () => {
-    const currentIndex = programSections.findIndex(s => s.id === activeSection);
+    const currentIndex = programSections.findIndex((s) => s.id === activeSection);
     if (currentIndex > 0) {
       setActiveSection(programSections[currentIndex - 1].id);
     }
@@ -138,7 +132,7 @@ export default function Programs() {
     });
   };
 
-  const selectedProgramData = programs.find(p => p.id === selectedProgram);
+  const selectedProgramData = programs.find((p) => p.id === selectedProgram);
 
   return (
     <DashboardLayout>
@@ -178,9 +172,7 @@ export default function Programs() {
                   </SelectContent>
                 </Select>
               )}
-              {selectedProgramData && (
-                <Badge variant="secondary">{selectedProgramData.university}</Badge>
-              )}
+              {selectedProgramData && <Badge variant="secondary">{selectedProgramData.university}</Badge>}
             </div>
           </CardContent>
         </Card>
@@ -192,55 +184,96 @@ export default function Programs() {
               <Card className="sticky top-6">
                 <CardContent className="p-4">
                   <nav className="space-y-1">
-                  {programSections.map((section, index) => {
-                    const isActive = activeSection === section.id;
-                    const isCompleted = completedSections.includes(section.id);
-                    return (
-                      <button
-                        key={section.id}
-                        onClick={() => setActiveSection(section.id)}
-                        className={cn(
-                          "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors text-left",
-                          isActive
-                            ? "bg-primary text-primary-foreground"
-                            : "hover:bg-muted text-muted-foreground hover:text-foreground"
-                        )}
-                      >
-                        <div className={cn(
-                          "flex items-center justify-center h-6 w-6 rounded-full text-xs font-medium",
-                          isCompleted ? "bg-green-500 text-white" : isActive ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground"
-                        )}>
-                          {isCompleted ? <Check className="h-3.5 w-3.5" /> : index + 1}
-                        </div>
-                        <span className="flex-1">{section.label}</span>
-                        {isActive && <ChevronRight className="h-4 w-4" />}
-                      </button>
-                    );
-                  })}
-                </nav>
-              </CardContent>
-            </Card>
-          </div>
+                    {programSections.map((section, index) => {
+                      const isActive = activeSection === section.id;
+                      const isCompleted = completedSections.includes(section.id);
+                      return (
+                        <button
+                          key={section.id}
+                          onClick={() => setActiveSection(section.id)}
+                          className={cn(
+                            "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors text-left",
+                            isActive
+                              ? "bg-primary text-primary-foreground"
+                              : "hover:bg-muted text-muted-foreground hover:text-foreground",
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              "flex items-center justify-center h-6 w-6 rounded-full text-xs font-medium",
+                              isCompleted
+                                ? "bg-green-500 text-white"
+                                : isActive
+                                  ? "bg-primary-foreground/20 text-primary-foreground"
+                                  : "bg-muted text-muted-foreground",
+                            )}
+                          >
+                            {isCompleted ? <Check className="h-3.5 w-3.5" /> : index + 1}
+                          </div>
+                          <span className="flex-1">{section.label}</span>
+                          {isActive && <ChevronRight className="h-4 w-4" />}
+                        </button>
+                      );
+                    })}
+                  </nav>
+                </CardContent>
+              </Card>
+            </div>
 
             {/* Form Content */}
             <div className="lg:col-span-3">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">
-                    {programSections.find(s => s.id === activeSection)?.label}
+                    {programSections.find((s) => s.id === activeSection)?.label}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {activeSection === "info" && <ProgramInfoSection programId={selectedProgram} onSave={() => handleSave("info")} />}
-                  {activeSection === "features" && <ProgramFeaturesSection programId={selectedProgram} onSave={() => handleSave("features")} />}
-                  {activeSection === "faculty" && <ProgramMembersSection programId={selectedProgram} category="faculty" title="Faculty Member" onSave={() => handleSave("faculty")} />}
-                  {activeSection === "students" && <ProgramMembersSection programId={selectedProgram} category="current_student" title="Current Student" onSave={() => handleSave("students")} />}
-                  {activeSection === "alumni" && <ProgramMembersSection programId={selectedProgram} category="alumni" title="Alumni" onSave={() => handleSave("alumni")} />}
-                  {activeSection === "rankings" && <ProgramRankingsSection programId={selectedProgram} onSave={() => handleSave("rankings")} />}
-                  {activeSection === "recruiters" && <ProgramRecruitersSection programId={selectedProgram} onSave={() => handleSave("recruiters")} />}
-                  {activeSection === "jobroles" && <ProgramJobRolesSection programId={selectedProgram} onSave={() => handleSave("jobroles")} />}
-                  {activeSection === "faqs" && <ProgramFAQsSection programId={selectedProgram} onSave={() => handleSave("faqs")} />}
-                  {activeSection === "pocs" && <ProgramPOCsSection programId={selectedProgram} onSave={() => handleSave("pocs")} />}
+                  {activeSection === "info" && (
+                    <ProgramInfoSection programId={selectedProgram} onSave={() => handleSave("info")} />
+                  )}
+                  {activeSection === "features" && (
+                    <ProgramFeaturesSection programId={selectedProgram} onSave={() => handleSave("features")} />
+                  )}
+                  {activeSection === "faculty" && (
+                    <ProgramMembersSection
+                      programId={selectedProgram}
+                      category="faculty"
+                      title="Faculty Member"
+                      onSave={() => handleSave("faculty")}
+                    />
+                  )}
+                  {activeSection === "students" && (
+                    <ProgramMembersSection
+                      programId={selectedProgram}
+                      category="current_student"
+                      title="Current Student"
+                      onSave={() => handleSave("students")}
+                    />
+                  )}
+                  {activeSection === "alumni" && (
+                    <ProgramMembersSection
+                      programId={selectedProgram}
+                      category="alumni"
+                      title="Alumni"
+                      onSave={() => handleSave("alumni")}
+                    />
+                  )}
+                  {activeSection === "rankings" && (
+                    <ProgramRankingsSection programId={selectedProgram} onSave={() => handleSave("rankings")} />
+                  )}
+                  {activeSection === "recruiters" && (
+                    <ProgramRecruitersSection programId={selectedProgram} onSave={() => handleSave("recruiters")} />
+                  )}
+                  {activeSection === "jobroles" && (
+                    <ProgramJobRolesSection programId={selectedProgram} onSave={() => handleSave("jobroles")} />
+                  )}
+                  {activeSection === "faqs" && (
+                    <ProgramFAQsSection programId={selectedProgram} onSave={() => handleSave("faqs")} />
+                  )}
+                  {activeSection === "pocs" && (
+                    <ProgramPOCsSection programId={selectedProgram} onSave={() => handleSave("pocs")} />
+                  )}
 
                   {/* Navigation Buttons */}
                   <Separator />
@@ -280,12 +313,12 @@ interface SectionProps {
 function ProgramInfoSection({ programId, onSave }: SectionProps) {
   const { data: info, isLoading } = useProgramInfo(programId);
   const saveMutation = useSaveProgramInfo();
-  
+
   const [formData, setFormData] = useState<Partial<ProgramInfo>>({
     class_size: "",
-    average_age: "",
-    average_work_experience: "",
-    median_earnings: "",
+    avg_age: "",
+    avg_work_experience: "",
+    median_earnings_after_graduation: "",
     graduation_rate: "",
     brochure_link: "",
     is_hero_program: false,
@@ -304,15 +337,18 @@ function ProgramInfoSection({ programId, onSave }: SectionProps) {
   }, [info]);
 
   const handleSave = () => {
-    saveMutation.mutate({ programId, info: formData }, {
-      onSuccess: () => onSave(),
-    });
+    saveMutation.mutate(
+      { programId, info: formData },
+      {
+        onSuccess: () => onSave(),
+      },
+    );
   };
 
   const addDiversity = () => {
     if (newDiversity.country?.trim() && newDiversity.percentage?.trim()) {
       const currentDiversity = formData.diversity || [];
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         diversity: [...currentDiversity, { country: newDiversity.country!, percentage: newDiversity.percentage! }],
       }));
@@ -322,14 +358,20 @@ function ProgramInfoSection({ programId, onSave }: SectionProps) {
 
   const removeDiversity = (index: number) => {
     const currentDiversity = formData.diversity || [];
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       diversity: currentDiversity.filter((_, i) => i !== index),
     }));
   };
 
   if (isLoading) {
-    return <div className="space-y-4"><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /></div>;
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+    );
   }
 
   return (
@@ -358,32 +400,32 @@ function ProgramInfoSection({ programId, onSave }: SectionProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <Label>Class Size</Label>
-            <Input 
-              type="text" 
-              value={formData.class_size || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, class_size: e.target.value }))}
-              className="mt-1.5" 
-              placeholder="e.g. 950" 
+            <Input
+              type="text"
+              value={formData.class_size || ""}
+              onChange={(e) => setFormData((prev) => ({ ...prev, class_size: e.target.value }))}
+              className="mt-1.5"
+              placeholder="e.g. 950"
             />
           </div>
           <div>
             <Label>Average Age</Label>
-            <Input 
-              type="text" 
-              value={formData.average_age || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, average_age: e.target.value }))}
-              className="mt-1.5" 
-              placeholder="e.g. 28" 
+            <Input
+              type="text"
+              value={formData.avg_age || ""}
+              onChange={(e) => setFormData((prev) => ({ ...prev, average_age: e.target.value }))}
+              className="mt-1.5"
+              placeholder="e.g. 28"
             />
           </div>
           <div>
             <Label>Average Work Experience</Label>
-            <Input 
-              type="text" 
-              value={formData.average_work_experience || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, average_work_experience: e.target.value }))}
-              className="mt-1.5" 
-              placeholder="e.g. 5 years" 
+            <Input
+              type="text"
+              value={formData.avg_work_experience || ""}
+              onChange={(e) => setFormData((prev) => ({ ...prev, average_work_experience: e.target.value }))}
+              className="mt-1.5"
+              placeholder="e.g. 5 years"
             />
           </div>
         </div>
@@ -397,22 +439,22 @@ function ProgramInfoSection({ programId, onSave }: SectionProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label>Median Earnings After Graduation (USD/Year)</Label>
-            <Input 
-              type="text" 
-              value={formData.median_earnings || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, median_earnings: e.target.value }))}
-              className="mt-1.5" 
-              placeholder="e.g. 175000" 
+            <Input
+              type="text"
+              value={formData.median_earnings_after_graduation || ""}
+              onChange={(e) => setFormData((prev) => ({ ...prev, median_earnings_after_graduation: e.target.value }))}
+              className="mt-1.5"
+              placeholder="e.g. 175000"
             />
           </div>
           <div>
             <Label>Graduation Rate (%)</Label>
-            <Input 
-              type="text" 
-              value={formData.graduation_rate || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, graduation_rate: e.target.value }))}
-              className="mt-1.5" 
-              placeholder="e.g. 95" 
+            <Input
+              type="text"
+              value={formData.graduation_rate || ""}
+              onChange={(e) => setFormData((prev) => ({ ...prev, graduation_rate: e.target.value }))}
+              className="mt-1.5"
+              placeholder="e.g. 95"
             />
           </div>
         </div>
@@ -426,12 +468,12 @@ function ProgramInfoSection({ programId, onSave }: SectionProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label>Program Brochure Link</Label>
-            <Input 
-              type="url" 
-              value={formData.brochure_link || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, brochure_link: e.target.value }))}
-              className="mt-1.5" 
-              placeholder="https://example.com/brochure.pdf" 
+            <Input
+              type="url"
+              value={formData.brochure_link || ""}
+              onChange={(e) => setFormData((prev) => ({ ...prev, brochure_link: e.target.value }))}
+              className="mt-1.5"
+              placeholder="https://example.com/brochure.pdf"
             />
           </div>
           <div className="flex items-center gap-3 pt-6">
@@ -439,7 +481,7 @@ function ProgramInfoSection({ programId, onSave }: SectionProps) {
               type="checkbox"
               id="is_hero_program"
               checked={formData.is_hero_program || false}
-              onChange={(e) => setFormData(prev => ({ ...prev, is_hero_program: e.target.checked }))}
+              onChange={(e) => setFormData((prev) => ({ ...prev, is_hero_program: e.target.checked }))}
               className="h-4 w-4 rounded border-input"
             />
             <Label htmlFor="is_hero_program" className="cursor-pointer">
@@ -486,22 +528,22 @@ function ProgramInfoSection({ programId, onSave }: SectionProps) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
               <div>
                 <Label>Country</Label>
-                <Input 
-                  type="text" 
-                  value={newDiversity.country || ""} 
-                  onChange={(e) => setNewDiversity(prev => ({ ...prev, country: e.target.value }))}
-                  className="mt-1.5" 
-                  placeholder="e.g. United States" 
+                <Input
+                  type="text"
+                  value={newDiversity.country || ""}
+                  onChange={(e) => setNewDiversity((prev) => ({ ...prev, country: e.target.value }))}
+                  className="mt-1.5"
+                  placeholder="e.g. United States"
                 />
               </div>
               <div>
                 <Label>Percentage (%)</Label>
-                <Input 
-                  type="text" 
-                  value={newDiversity.percentage || ""} 
-                  onChange={(e) => setNewDiversity(prev => ({ ...prev, percentage: e.target.value }))}
-                  className="mt-1.5" 
-                  placeholder="e.g. 25" 
+                <Input
+                  type="text"
+                  value={newDiversity.percentage || ""}
+                  onChange={(e) => setNewDiversity((prev) => ({ ...prev, percentage: e.target.value }))}
+                  className="mt-1.5"
+                  placeholder="e.g. 25"
                 />
               </div>
               <Button onClick={addDiversity} variant="outline">
@@ -527,7 +569,7 @@ function ProgramFeaturesSection({ programId, onSave }: SectionProps) {
   const { data: features = [], isLoading } = useProgramFeatures(programId);
   const saveMutation = useSaveProgramFeature();
   const deleteMutation = useDeleteProgramFeature();
-  
+
   const [newFeature, setNewFeature] = useState<Partial<ProgramFeature>>({ title: "", description: "", photo_url: "" });
 
   const addFeature = () => {
@@ -549,7 +591,12 @@ function ProgramFeaturesSection({ programId, onSave }: SectionProps) {
   };
 
   if (isLoading) {
-    return <div className="space-y-4"><Skeleton className="h-32 w-full" /><Skeleton className="h-20 w-full" /></div>;
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-20 w-full" />
+      </div>
+    );
   }
 
   return (
@@ -559,20 +606,20 @@ function ProgramFeaturesSection({ programId, onSave }: SectionProps) {
           <h4 className="font-medium text-sm text-muted-foreground">Add New Feature</h4>
           <div>
             <Label>Feature Title</Label>
-            <Input 
+            <Input
               value={newFeature.title || ""}
               onChange={(e) => setNewFeature({ ...newFeature, title: e.target.value })}
-              placeholder="Enter feature title..." 
-              className="mt-1.5" 
+              placeholder="Enter feature title..."
+              className="mt-1.5"
             />
           </div>
           <div>
             <Label>Feature Description</Label>
-            <Textarea 
+            <Textarea
               value={newFeature.description || ""}
               onChange={(e) => setNewFeature({ ...newFeature, description: e.target.value })}
-              placeholder="Enter feature description..." 
-              className="mt-1.5" 
+              placeholder="Enter feature description..."
+              className="mt-1.5"
               rows={3}
             />
           </div>
@@ -606,7 +653,11 @@ function ProgramFeaturesSection({ programId, onSave }: SectionProps) {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex gap-4 flex-1">
                       {feature.photo_url ? (
-                        <img src={feature.photo_url} alt={feature.title} className="w-16 h-16 rounded-lg object-cover" />
+                        <img
+                          src={feature.photo_url}
+                          alt={feature.title}
+                          className="w-16 h-16 rounded-lg object-cover"
+                        />
                       ) : (
                         <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center shrink-0">
                           <Image className="h-6 w-6 text-muted-foreground" />
@@ -634,9 +685,7 @@ function ProgramFeaturesSection({ programId, onSave }: SectionProps) {
         )}
       </div>
 
-      <Button onClick={onSave}>
-        Save & Continue
-      </Button>
+      <Button onClick={onSave}>Save & Continue</Button>
     </div>
   );
 }
@@ -653,8 +702,9 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
   const saveMutation = useSaveProgramMember();
   const deleteMutation = useDeleteProgramMember();
 
-  const defaultCategory = category === "faculty" ? "Faculty" : category === "current_student" ? "Current Student" : "Alumni";
-  
+  const defaultCategory =
+    category === "faculty" ? "Faculty" : category === "current_student" ? "Current Student" : "Alumni";
+
   const [newMember, setNewMember] = useState<Partial<ProgramMember>>({
     first_name: "",
     last_name: "",
@@ -703,7 +753,12 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
   };
 
   if (isLoading) {
-    return <div className="space-y-4"><Skeleton className="h-40 w-full" /><Skeleton className="h-20 w-full" /></div>;
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-20 w-full" />
+      </div>
+    );
   }
 
   return (
@@ -711,34 +766,34 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
       <Card className="border-dashed">
         <CardContent className="p-4 space-y-4">
           <h4 className="font-medium text-sm text-muted-foreground">Add New {title}</h4>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label>First Name</Label>
-              <Input 
+              <Input
                 value={newMember.first_name || ""}
                 onChange={(e) => setNewMember({ ...newMember, first_name: e.target.value })}
-                placeholder="First name..." 
-                className="mt-1.5" 
+                placeholder="First name..."
+                className="mt-1.5"
               />
             </div>
             <div>
               <Label>Last Name</Label>
-              <Input 
+              <Input
                 value={newMember.last_name || ""}
                 onChange={(e) => setNewMember({ ...newMember, last_name: e.target.value })}
-                placeholder="Last name..." 
-                className="mt-1.5" 
+                placeholder="Last name..."
+                className="mt-1.5"
               />
             </div>
             <div>
               <Label>Email</Label>
-              <Input 
+              <Input
                 type="email"
                 value={newMember.email || ""}
                 onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
-                placeholder="Email address..." 
-                className="mt-1.5" 
+                placeholder="Email address..."
+                className="mt-1.5"
               />
             </div>
           </div>
@@ -746,30 +801,30 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label>LinkedIn URL</Label>
-              <Input 
+              <Input
                 type="url"
                 value={newMember.linkedin_url || ""}
                 onChange={(e) => setNewMember({ ...newMember, linkedin_url: e.target.value })}
-                placeholder="https://linkedin.com/in/..." 
-                className="mt-1.5" 
+                placeholder="https://linkedin.com/in/..."
+                className="mt-1.5"
               />
             </div>
             <div>
               <Label>Designation</Label>
-              <Input 
+              <Input
                 value={newMember.designation || ""}
                 onChange={(e) => setNewMember({ ...newMember, designation: e.target.value })}
-                placeholder="Title/Position..." 
-                className="mt-1.5" 
+                placeholder="Title/Position..."
+                className="mt-1.5"
               />
             </div>
             <div>
               <Label>Organisation</Label>
-              <Input 
+              <Input
                 value={newMember.organisation || ""}
                 onChange={(e) => setNewMember({ ...newMember, organisation: e.target.value })}
-                placeholder="Organisation name..." 
-                className="mt-1.5" 
+                placeholder="Organisation name..."
+                className="mt-1.5"
               />
             </div>
           </div>
@@ -777,16 +832,12 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label>Category</Label>
-              <Input 
-                value={defaultCategory}
-                disabled
-                className="mt-1.5 bg-muted" 
-              />
+              <Input value={defaultCategory} disabled className="mt-1.5 bg-muted" />
             </div>
             <div>
               <Label>Call to Action</Label>
-              <Select 
-                value={newMember.call_to_action || "email"} 
+              <Select
+                value={newMember.call_to_action || "email"}
                 onValueChange={(value: "email" | "linkedin") => setNewMember({ ...newMember, call_to_action: value })}
               >
                 <SelectTrigger className="mt-1.5">
@@ -810,7 +861,10 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
             </div>
           </div>
 
-          <Button onClick={addMember} disabled={!newMember.first_name?.trim() || !newMember.last_name?.trim() || saveMutation.isPending}>
+          <Button
+            onClick={addMember}
+            disabled={!newMember.first_name?.trim() || !newMember.last_name?.trim() || saveMutation.isPending}
+          >
             {saveMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             <Plus className="h-4 w-4 mr-2" />
             Add {title}
@@ -819,9 +873,13 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
       </Card>
 
       <div>
-        <h4 className="font-medium text-sm text-muted-foreground mb-3">Added {title}s ({members.length})</h4>
+        <h4 className="font-medium text-sm text-muted-foreground mb-3">
+          Added {title}s ({members.length})
+        </h4>
         {members.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4 border rounded-lg">No {title.toLowerCase()}s added yet</p>
+          <p className="text-sm text-muted-foreground text-center py-4 border rounded-lg">
+            No {title.toLowerCase()}s added yet
+          </p>
         ) : (
           <div className="space-y-3">
             {members.map((member) => (
@@ -830,7 +888,11 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex gap-4 flex-1">
                       {member.profile_image ? (
-                        <img src={member.profile_image} alt={`${member.first_name} ${member.last_name}`} className="w-12 h-12 rounded-full object-cover" />
+                        <img
+                          src={member.profile_image}
+                          alt={`${member.first_name} ${member.last_name}`}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
                       ) : (
                         <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0">
                           <User className="h-5 w-5 text-muted-foreground" />
@@ -838,10 +900,16 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <h5 className="font-medium text-foreground">{member.first_name} {member.last_name}</h5>
-                          <Badge variant="secondary" className="text-xs">{defaultCategory}</Badge>
+                          <h5 className="font-medium text-foreground">
+                            {member.first_name} {member.last_name}
+                          </h5>
+                          <Badge variant="secondary" className="text-xs">
+                            {defaultCategory}
+                          </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground">{member.designation} {member.organisation && `at ${member.organisation}`}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {member.designation} {member.organisation && `at ${member.organisation}`}
+                        </p>
                         <div className="flex items-center gap-3 mt-1">
                           {member.email && (
                             <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -873,9 +941,7 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
         )}
       </div>
 
-      <Button onClick={onSave}>
-        Save & Continue
-      </Button>
+      <Button onClick={onSave}>Save & Continue</Button>
     </div>
   );
 }
@@ -917,7 +983,12 @@ function ProgramRankingsSection({ programId, onSave }: SectionProps) {
   };
 
   if (isLoading) {
-    return <div className="space-y-4"><Skeleton className="h-32 w-full" /><Skeleton className="h-20 w-full" /></div>;
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-20 w-full" />
+      </div>
+    );
   }
 
   return (
@@ -925,12 +996,12 @@ function ProgramRankingsSection({ programId, onSave }: SectionProps) {
       <Card className="border-dashed">
         <CardContent className="p-4 space-y-4">
           <h4 className="font-medium text-sm text-muted-foreground">Add New Ranking</h4>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label>Ranking Organisation</Label>
-              <Select 
-                value={newRanking.organisation || ""} 
+              <Select
+                value={newRanking.organisation || ""}
                 onValueChange={(value) => setNewRanking({ ...newRanking, organisation: value })}
               >
                 <SelectTrigger className="mt-1.5">
@@ -938,54 +1009,55 @@ function ProgramRankingsSection({ programId, onSave }: SectionProps) {
                 </SelectTrigger>
                 <SelectContent>
                   {organizations.map((org) => (
-                    <SelectItem key={org.id} value={org.name}>{org.name}</SelectItem>
+                    <SelectItem key={org.id} value={org.name}>
+                      {org.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Ranking Year</Label>
-              <Input 
+              <Input
                 value={newRanking.year || ""}
                 onChange={(e) => setNewRanking({ ...newRanking, year: e.target.value })}
-                placeholder="e.g., 2024" 
-                className="mt-1.5" 
+                placeholder="e.g., 2024"
+                className="mt-1.5"
               />
             </div>
             <div>
               <Label>Ranking Level</Label>
-              <Input 
-                value="Program"
-                disabled
-                className="mt-1.5 bg-muted" 
-              />
+              <Input value="Program" disabled className="mt-1.5 bg-muted" />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label>Rank</Label>
-              <Input 
+              <Input
                 type="number"
                 value={newRanking.rank || ""}
                 onChange={(e) => setNewRanking({ ...newRanking, rank: e.target.value })}
-                placeholder="e.g., 5" 
-                className="mt-1.5" 
+                placeholder="e.g., 5"
+                className="mt-1.5"
                 min="1"
               />
             </div>
             <div className="md:col-span-2">
               <Label>Supporting Text</Label>
-              <Input 
+              <Input
                 value={newRanking.supporting_text || ""}
                 onChange={(e) => setNewRanking({ ...newRanking, supporting_text: e.target.value })}
-                placeholder="Additional context about this ranking..." 
-                className="mt-1.5" 
+                placeholder="Additional context about this ranking..."
+                className="mt-1.5"
               />
             </div>
           </div>
 
-          <Button onClick={addRanking} disabled={!newRanking.organisation || !newRanking.year || !newRanking.rank || saveMutation.isPending}>
+          <Button
+            onClick={addRanking}
+            disabled={!newRanking.organisation || !newRanking.year || !newRanking.rank || saveMutation.isPending}
+          >
             {saveMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             <Plus className="h-4 w-4 mr-2" />
             Add Ranking
@@ -1010,7 +1082,9 @@ function ProgramRankingsSection({ programId, onSave }: SectionProps) {
                         </div>
                         <div>
                           <h5 className="font-medium text-foreground">{ranking.organisation}</h5>
-                          <p className="text-sm text-muted-foreground">{ranking.year} • {ranking.level} Level</p>
+                          <p className="text-sm text-muted-foreground">
+                            {ranking.year} • {ranking.level} Level
+                          </p>
                         </div>
                       </div>
                       {ranking.supporting_text && (
@@ -1034,9 +1108,7 @@ function ProgramRankingsSection({ programId, onSave }: SectionProps) {
         )}
       </div>
 
-      <Button onClick={onSave}>
-        Save & Continue
-      </Button>
+      <Button onClick={onSave}>Save & Continue</Button>
     </div>
   );
 }
@@ -1090,7 +1162,7 @@ function ProgramRecruitersSection({ programId, onSave }: SectionProps) {
               <Badge key={recruiter.id} variant="secondary" className="text-sm py-1.5 px-3 gap-2">
                 <Building2 className="h-3.5 w-3.5" />
                 {recruiter.company_name}
-                <button 
+                <button
                   onClick={() => recruiter.id && removeRecruiter(recruiter.id)}
                   className="ml-1 hover:text-destructive transition-colors"
                   disabled={deleteMutation.isPending}
@@ -1103,9 +1175,7 @@ function ProgramRecruitersSection({ programId, onSave }: SectionProps) {
         )}
       </div>
 
-      <Button onClick={onSave}>
-        Save & Continue
-      </Button>
+      <Button onClick={onSave}>Save & Continue</Button>
     </div>
   );
 }
@@ -1159,7 +1229,7 @@ function ProgramJobRolesSection({ programId, onSave }: SectionProps) {
               <Badge key={role.id} variant="secondary" className="text-sm py-1.5 px-3 gap-2">
                 <Briefcase className="h-3.5 w-3.5" />
                 {role.role_name}
-                <button 
+                <button
                   onClick={() => role.id && removeJobRole(role.id)}
                   className="ml-1 hover:text-destructive transition-colors"
                   disabled={deleteMutation.isPending}
@@ -1172,9 +1242,7 @@ function ProgramJobRolesSection({ programId, onSave }: SectionProps) {
         )}
       </div>
 
-      <Button onClick={onSave}>
-        Save & Continue
-      </Button>
+      <Button onClick={onSave}>Save & Continue</Button>
     </div>
   );
 }
@@ -1185,7 +1253,7 @@ function ProgramFAQsSection({ programId, onSave }: SectionProps) {
   const { data: faqs = [], isLoading } = useProgramFAQs(programId);
   const saveMutation = useSaveProgramFAQ();
   const deleteMutation = useDeleteProgramFAQ();
-  
+
   const [isAdding, setIsAdding] = useState(false);
   const [newFaq, setNewFaq] = useState({ question: "", answer: "" });
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -1200,9 +1268,9 @@ function ProgramFAQsSection({ programId, onSave }: SectionProps) {
   };
 
   const updateFaq = (faq: ProgramFAQ) => {
-    saveMutation.mutate({ 
-      programId, 
-      faq: { id: faq.id, question: editData.question, answer: editData.answer } 
+    saveMutation.mutate({
+      programId,
+      faq: { id: faq.id, question: editData.question, answer: editData.answer },
     });
     setEditingId(null);
   };
@@ -1251,12 +1319,21 @@ function ProgramFAQsSection({ programId, onSave }: SectionProps) {
               />
             </div>
             <div className="flex gap-2">
-              <Button onClick={addFaq} disabled={!newFaq.question.trim() || !newFaq.answer.trim() || saveMutation.isPending}>
+              <Button
+                onClick={addFaq}
+                disabled={!newFaq.question.trim() || !newFaq.answer.trim() || saveMutation.isPending}
+              >
                 {saveMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 <Plus className="h-4 w-4 mr-2" />
                 Add FAQ
               </Button>
-              <Button variant="outline" onClick={() => { setIsAdding(false); setNewFaq({ question: "", answer: "" }); }}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsAdding(false);
+                  setNewFaq({ question: "", answer: "" });
+                }}
+              >
                 Cancel
               </Button>
             </div>
@@ -1329,9 +1406,7 @@ function ProgramFAQsSection({ programId, onSave }: SectionProps) {
         )}
       </div>
 
-      <Button onClick={onSave}>
-        Save & Continue
-      </Button>
+      <Button onClick={onSave}>Save & Continue</Button>
     </div>
   );
 }
@@ -1429,7 +1504,10 @@ function ProgramPOCsSection({ programId, onSave }: SectionProps) {
               />
             </div>
           </div>
-          <Button onClick={addPoc} disabled={!newPoc.full_name?.trim() || !newPoc.email?.trim() || saveMutation.isPending}>
+          <Button
+            onClick={addPoc}
+            disabled={!newPoc.full_name?.trim() || !newPoc.email?.trim() || saveMutation.isPending}
+          >
             {saveMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             <Plus className="h-4 w-4 mr-2" />
             Add POC
@@ -1440,7 +1518,9 @@ function ProgramPOCsSection({ programId, onSave }: SectionProps) {
       <div>
         <h4 className="font-medium text-sm text-muted-foreground mb-3">Added Points of Contact ({pocs.length})</h4>
         {pocs.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4 border rounded-lg">No points of contact added yet</p>
+          <p className="text-sm text-muted-foreground text-center py-4 border rounded-lg">
+            No points of contact added yet
+          </p>
         ) : (
           <div className="space-y-3">
             {pocs.map((poc) => (
@@ -1453,7 +1533,9 @@ function ProgramPOCsSection({ programId, onSave }: SectionProps) {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h5 className="font-medium text-foreground">{poc.full_name}</h5>
-                        <p className="text-sm text-muted-foreground">{poc.designation} • {poc.organisation}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {poc.designation} • {poc.organisation}
+                        </p>
                         <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Mail className="h-3.5 w-3.5" />
@@ -1485,9 +1567,7 @@ function ProgramPOCsSection({ programId, onSave }: SectionProps) {
         )}
       </div>
 
-      <Button onClick={onSave}>
-        Save & Continue
-      </Button>
+      <Button onClick={onSave}>Save & Continue</Button>
     </div>
   );
 }
