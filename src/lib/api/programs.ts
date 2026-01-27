@@ -15,6 +15,12 @@ export interface Program {
   region: string;
 }
 
+export interface ProgramDiversity {
+  id?: string;
+  country: string;
+  percentage: string;
+}
+
 export interface ProgramInfo {
   school_id: string;
   school_name: string;
@@ -23,24 +29,14 @@ export interface ProgramInfo {
   program_id: string;
   program_name: string;
   program_internal_name: string;
-  tuition_fee: string;
-  application_fee: string;
-  application_deadline: string;
-  program_start_date: string;
-  program_duration: string;
   class_size: string;
-  average_work_experience: string;
-  average_gmat_score: string;
-  average_gre_score: string;
-  gmat_range: string;
-  gre_range: string;
   average_age: string;
-  percentage_international_students: string;
-  percentage_women: string;
-  employment_rate: string;
-  average_salary: string;
-  scholarship_amount: string;
+  average_work_experience: string;
+  median_earnings: string;
+  graduation_rate: string;
   brochure_link: string;
+  is_hero_program: boolean;
+  diversity: ProgramDiversity[];
 }
 
 export interface ProgramFeature {

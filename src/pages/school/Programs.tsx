@@ -68,6 +68,7 @@ import {
 } from "@/hooks/usePrograms";
 import type {
   ProgramInfo,
+  ProgramDiversity,
   ProgramFeature,
   ProgramMember,
   ProgramRanking,
@@ -281,29 +282,24 @@ function ProgramInfoSection({ programId, onSave }: SectionProps) {
   const saveMutation = useSaveProgramInfo();
   
   const [formData, setFormData] = useState<Partial<ProgramInfo>>({
-    tuition_fee: "",
-    application_fee: "",
-    application_deadline: "",
-    program_start_date: "",
-    program_duration: "",
     class_size: "",
-    average_work_experience: "",
-    average_gmat_score: "",
-    average_gre_score: "",
-    gmat_range: "",
-    gre_range: "",
     average_age: "",
-    percentage_international_students: "",
-    percentage_women: "",
-    employment_rate: "",
-    average_salary: "",
-    scholarship_amount: "",
+    average_work_experience: "",
+    median_earnings: "",
+    graduation_rate: "",
     brochure_link: "",
+    is_hero_program: false,
+    diversity: [],
   });
+
+  const [newDiversity, setNewDiversity] = useState<Partial<ProgramDiversity>>({ country: "", percentage: "" });
 
   useEffect(() => {
     if (info) {
-      setFormData(info);
+      setFormData({
+        ...info,
+        diversity: info.diversity || [],
+      });
     }
   }, [info]);
 
@@ -311,6 +307,25 @@ function ProgramInfoSection({ programId, onSave }: SectionProps) {
     saveMutation.mutate({ programId, info: formData }, {
       onSuccess: () => onSave(),
     });
+  };
+
+  const addDiversity = () => {
+    if (newDiversity.country?.trim() && newDiversity.percentage?.trim()) {
+      const currentDiversity = formData.diversity || [];
+      setFormData(prev => ({
+        ...prev,
+        diversity: [...currentDiversity, { country: newDiversity.country!, percentage: newDiversity.percentage! }],
+      }));
+      setNewDiversity({ country: "", percentage: "" });
+    }
+  };
+
+  const removeDiversity = (index: number) => {
+    const currentDiversity = formData.diversity || [];
+    setFormData(prev => ({
+      ...prev,
+      diversity: currentDiversity.filter((_, i) => i !== index),
+    }));
   };
 
   if (isLoading) {
@@ -337,79 +352,10 @@ function ProgramInfoSection({ programId, onSave }: SectionProps) {
         </div>
       )}
 
-      {/* Fees & Dates */}
-      <div>
-        <h4 className="font-medium mb-3">Fees & Timeline</h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <Label>Tuition Fee ({info?.currency || "USD"})</Label>
-            <Input 
-              type="text" 
-              value={formData.tuition_fee || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, tuition_fee: e.target.value }))}
-              className="mt-1.5" 
-              placeholder="e.g. 75000" 
-            />
-          </div>
-          <div>
-            <Label>Application Fee ({info?.currency || "USD"})</Label>
-            <Input 
-              type="text" 
-              value={formData.application_fee || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, application_fee: e.target.value }))}
-              className="mt-1.5" 
-              placeholder="e.g. 250" 
-            />
-          </div>
-          <div>
-            <Label>Scholarship Amount ({info?.currency || "USD"})</Label>
-            <Input 
-              type="text" 
-              value={formData.scholarship_amount || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, scholarship_amount: e.target.value }))}
-              className="mt-1.5" 
-              placeholder="e.g. 50000" 
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          <div>
-            <Label>Application Deadline</Label>
-            <Input 
-              type="date" 
-              value={formData.application_deadline || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, application_deadline: e.target.value }))}
-              className="mt-1.5" 
-            />
-          </div>
-          <div>
-            <Label>Program Start Date</Label>
-            <Input 
-              type="date" 
-              value={formData.program_start_date || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, program_start_date: e.target.value }))}
-              className="mt-1.5" 
-            />
-          </div>
-          <div>
-            <Label>Program Duration</Label>
-            <Input 
-              type="text" 
-              value={formData.program_duration || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, program_duration: e.target.value }))}
-              className="mt-1.5" 
-              placeholder="e.g. 2 years" 
-            />
-          </div>
-        </div>
-      </div>
-
-      <Separator />
-
       {/* Class Profile */}
       <div>
         <h4 className="font-medium mb-3">Class Profile</h4>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <Label>Class Size</Label>
             <Input 
@@ -431,28 +377,6 @@ function ProgramInfoSection({ programId, onSave }: SectionProps) {
             />
           </div>
           <div>
-            <Label>% International Students</Label>
-            <Input 
-              type="text" 
-              value={formData.percentage_international_students || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, percentage_international_students: e.target.value }))}
-              className="mt-1.5" 
-              placeholder="e.g. 35" 
-            />
-          </div>
-          <div>
-            <Label>% Women</Label>
-            <Input 
-              type="text" 
-              value={formData.percentage_women || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, percentage_women: e.target.value }))}
-              className="mt-1.5" 
-              placeholder="e.g. 42" 
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-          <div>
             <Label>Average Work Experience</Label>
             <Input 
               type="text" 
@@ -467,94 +391,126 @@ function ProgramInfoSection({ programId, onSave }: SectionProps) {
 
       <Separator />
 
-      {/* Test Scores */}
+      {/* Outcomes */}
       <div>
-        <h4 className="font-medium mb-3">Test Scores</h4>
+        <h4 className="font-medium mb-3">Outcomes</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label>Average GMAT Score</Label>
+            <Label>Median Earnings After Graduation (USD/Year)</Label>
             <Input 
               type="text" 
-              value={formData.average_gmat_score || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, average_gmat_score: e.target.value }))}
-              className="mt-1.5" 
-              placeholder="e.g. 730" 
-            />
-          </div>
-          <div>
-            <Label>GMAT Range</Label>
-            <Input 
-              type="text" 
-              value={formData.gmat_range || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, gmat_range: e.target.value }))}
-              className="mt-1.5" 
-              placeholder="e.g. 680-780" 
-            />
-          </div>
-          <div>
-            <Label>Average GRE Score</Label>
-            <Input 
-              type="text" 
-              value={formData.average_gre_score || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, average_gre_score: e.target.value }))}
-              className="mt-1.5" 
-              placeholder="e.g. 325" 
-            />
-          </div>
-          <div>
-            <Label>GRE Range</Label>
-            <Input 
-              type="text" 
-              value={formData.gre_range || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, gre_range: e.target.value }))}
-              className="mt-1.5" 
-              placeholder="e.g. 315-335" 
-            />
-          </div>
-        </div>
-      </div>
-
-      <Separator />
-
-      {/* Employment Outcomes */}
-      <div>
-        <h4 className="font-medium mb-3">Employment Outcomes</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label>Employment Rate (%)</Label>
-            <Input 
-              type="text" 
-              value={formData.employment_rate || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, employment_rate: e.target.value }))}
-              className="mt-1.5" 
-              placeholder="e.g. 95" 
-            />
-          </div>
-          <div>
-            <Label>Average Salary ({info?.currency || "USD"})</Label>
-            <Input 
-              type="text" 
-              value={formData.average_salary || ""} 
-              onChange={(e) => setFormData(prev => ({ ...prev, average_salary: e.target.value }))}
+              value={formData.median_earnings || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, median_earnings: e.target.value }))}
               className="mt-1.5" 
               placeholder="e.g. 175000" 
             />
           </div>
+          <div>
+            <Label>Graduation Rate (%)</Label>
+            <Input 
+              type="text" 
+              value={formData.graduation_rate || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, graduation_rate: e.target.value }))}
+              className="mt-1.5" 
+              placeholder="e.g. 95" 
+            />
+          </div>
         </div>
       </div>
 
       <Separator />
 
-      {/* Brochure */}
+      {/* Brochure & Hero Program */}
       <div>
-        <Label>Program Brochure Link</Label>
-        <Input 
-          type="url" 
-          value={formData.brochure_link || ""} 
-          onChange={(e) => setFormData(prev => ({ ...prev, brochure_link: e.target.value }))}
-          className="mt-1.5" 
-          placeholder="https://example.com/brochure.pdf" 
-        />
+        <h4 className="font-medium mb-3">Program Settings</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label>Program Brochure Link</Label>
+            <Input 
+              type="url" 
+              value={formData.brochure_link || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, brochure_link: e.target.value }))}
+              className="mt-1.5" 
+              placeholder="https://example.com/brochure.pdf" 
+            />
+          </div>
+          <div className="flex items-center gap-3 pt-6">
+            <input
+              type="checkbox"
+              id="is_hero_program"
+              checked={formData.is_hero_program || false}
+              onChange={(e) => setFormData(prev => ({ ...prev, is_hero_program: e.target.checked }))}
+              className="h-4 w-4 rounded border-input"
+            />
+            <Label htmlFor="is_hero_program" className="cursor-pointer">
+              Mark as Hero Program
+            </Label>
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Program Diversity */}
+      <div>
+        <h4 className="font-medium mb-3">Program Diversity</h4>
+        <p className="text-sm text-muted-foreground mb-4">
+          Add countries and their percentage representation in the program.
+        </p>
+
+        {/* Existing Diversity Entries */}
+        {formData.diversity && formData.diversity.length > 0 && (
+          <div className="space-y-2 mb-4">
+            {formData.diversity.map((item, index) => (
+              <div key={index} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                <div className="flex-1">
+                  <span className="font-medium">{item.country}</span>
+                </div>
+                <Badge variant="secondary">{item.percentage}%</Badge>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeDiversity(index)}
+                  className="h-8 w-8 text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Add New Diversity Entry */}
+        <Card className="border-dashed">
+          <CardContent className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              <div>
+                <Label>Country</Label>
+                <Input 
+                  type="text" 
+                  value={newDiversity.country || ""} 
+                  onChange={(e) => setNewDiversity(prev => ({ ...prev, country: e.target.value }))}
+                  className="mt-1.5" 
+                  placeholder="e.g. United States" 
+                />
+              </div>
+              <div>
+                <Label>Percentage (%)</Label>
+                <Input 
+                  type="text" 
+                  value={newDiversity.percentage || ""} 
+                  onChange={(e) => setNewDiversity(prev => ({ ...prev, percentage: e.target.value }))}
+                  className="mt-1.5" 
+                  placeholder="e.g. 25" 
+                />
+              </div>
+              <Button onClick={addDiversity} variant="outline">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Country
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Button onClick={handleSave} disabled={saveMutation.isPending}>
