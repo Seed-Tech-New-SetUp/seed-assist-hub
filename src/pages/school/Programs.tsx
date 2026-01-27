@@ -571,19 +571,19 @@ function ProgramFeaturesSection({ programId, onSave }: SectionProps) {
   const saveMutation = useSaveProgramFeature();
   const deleteMutation = useDeleteProgramFeature();
 
-  const [newFeature, setNewFeature] = useState<Partial<ProgramFeature>>({ title: "", description: "", photo_url: "" });
+  const [newFeature, setNewFeature] = useState<Partial<ProgramFeature>>({ usp_title: "", usp_description: "", usp_image_name: "" });
 
   const addFeature = () => {
-    if (newFeature.title?.trim()) {
+    if (newFeature.usp_title?.trim()) {
       saveMutation.mutate({
         programId,
         feature: {
-          title: newFeature.title || "",
-          description: newFeature.description || "",
-          photo_url: newFeature.photo_url || "",
+          usp_title: newFeature.usp_title || "",
+          usp_description: newFeature.usp_description || "",
+          usp_image_name: newFeature.usp_image_name || "",
         },
       });
-      setNewFeature({ title: "", description: "", photo_url: "" });
+      setNewFeature({ usp_title: "", usp_description: "", usp_image_name: "" });
     }
   };
 
@@ -608,8 +608,8 @@ function ProgramFeaturesSection({ programId, onSave }: SectionProps) {
           <div>
             <Label>Feature Title</Label>
             <Input
-              value={newFeature.title || ""}
-              onChange={(e) => setNewFeature({ ...newFeature, title: e.target.value })}
+              value={newFeature.usp_title || ""}
+              onChange={(e) => setNewFeature({ ...newFeature, usp_title: e.target.value })}
               placeholder="Enter feature title..."
               className="mt-1.5"
             />
@@ -617,8 +617,8 @@ function ProgramFeaturesSection({ programId, onSave }: SectionProps) {
           <div>
             <Label>Feature Description</Label>
             <Textarea
-              value={newFeature.description || ""}
-              onChange={(e) => setNewFeature({ ...newFeature, description: e.target.value })}
+              value={newFeature.usp_description || ""}
+              onChange={(e) => setNewFeature({ ...newFeature, usp_description: e.target.value })}
               placeholder="Enter feature description..."
               className="mt-1.5"
               rows={3}
@@ -627,14 +627,14 @@ function ProgramFeaturesSection({ programId, onSave }: SectionProps) {
           <div>
             <Label>Feature Photo</Label>
             <ImageUpload
-              value={newFeature.photo_url || ""}
-              onChange={(url) => setNewFeature({ ...newFeature, photo_url: url })}
+              value={newFeature.usp_image_name || ""}
+              onChange={(url) => setNewFeature({ ...newFeature, usp_image_name: url })}
               placeholder="Click to upload feature photo"
               aspectRatio="video"
               className="mt-1.5"
             />
           </div>
-          <Button onClick={addFeature} disabled={!newFeature.title?.trim() || saveMutation.isPending}>
+          <Button onClick={addFeature} disabled={!newFeature.usp_title?.trim() || saveMutation.isPending}>
             {saveMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             <Plus className="h-4 w-4 mr-2" />
             Add Feature
@@ -649,14 +649,14 @@ function ProgramFeaturesSection({ programId, onSave }: SectionProps) {
         ) : (
           <div className="space-y-3">
             {features.map((feature) => (
-              <Card key={feature.id}>
+              <Card key={feature.usp_id}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex gap-4 flex-1">
-                      {feature.photo_url ? (
+                      {feature.usp_image_name ? (
                         <img
-                          src={feature.photo_url}
-                          alt={feature.title}
+                          src={`https://assist.seedglobaleducation.com/program_usp_uploads/${feature.usp_image_name}`}
+                          alt={feature.usp_title}
                           className="w-16 h-16 rounded-lg object-cover"
                         />
                       ) : (
@@ -665,15 +665,15 @@ function ProgramFeaturesSection({ programId, onSave }: SectionProps) {
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <h5 className="font-medium text-foreground">{feature.title}</h5>
-                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{feature.description}</p>
+                        <h5 className="font-medium text-foreground">{feature.usp_title}</h5>
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{feature.usp_description}</p>
                       </div>
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
                       className="text-destructive shrink-0"
-                      onClick={() => feature.id && removeFeature(feature.id)}
+                      onClick={() => feature.usp_id && removeFeature(feature.usp_id)}
                       disabled={deleteMutation.isPending}
                     >
                       <Trash2 className="h-4 w-4" />

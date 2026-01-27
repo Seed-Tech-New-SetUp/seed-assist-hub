@@ -47,8 +47,8 @@ serve(async (req) => {
         backendUrl = `${PROGRAM_PROFILE_URL}/info.php?program_id=${programId}`;
         break;
       case "features":
-        // Get/update program features (USP)
-        backendUrl = `${PROGRAMS_BASE_URL}/add_program_usp.php?program_id=${programId}`;
+        // Get/update program features (USP) - uses new endpoint structure
+        backendUrl = `${PROGRAM_PROFILE_URL}/features/read.php?program_id=${programId}`;
         break;
       case "members":
         // Get/update program members (faculty, students, alumni)
