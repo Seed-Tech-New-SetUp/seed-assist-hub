@@ -18,6 +18,10 @@ import {
   createSchoolRanking,
   updateSchoolRanking,
   deleteSchoolRanking,
+  fetchSchoolPOCs,
+  createSchoolPOC,
+  updateSchoolPOC,
+  deleteSchoolPOC,
   SchoolInfo,
   SchoolFAQ,
   SchoolSocialMedia,
@@ -217,6 +221,58 @@ export function useDeleteSchoolRanking() {
       deleteSchoolRanking(ranking),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["school-rankings"] });
+    },
+  });
+}
+
+// ============ POCs Hooks ============
+
+export function useSchoolPOCs() {
+  return useQuery({
+    queryKey: ["school-pocs"],
+    queryFn: fetchSchoolPOCs,
+  });
+}
+
+export function useCreateSchoolPOC() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (poc: {
+      name: string;
+      designation: string;
+      organisation: string;
+      email: string;
+      phone: string;
+    }) => createSchoolPOC(poc),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["school-pocs"] });
+    },
+  });
+}
+
+export function useUpdateSchoolPOC() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (poc: {
+      poc_id: string;
+      name: string;
+      designation: string;
+      organisation: string;
+      email: string;
+      phone: string;
+    }) => updateSchoolPOC(poc),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["school-pocs"] });
+    },
+  });
+}
+
+export function useDeleteSchoolPOC() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (pocId: string) => deleteSchoolPOC(pocId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["school-pocs"] });
     },
   });
 }
