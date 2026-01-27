@@ -6,9 +6,13 @@ import { handleUnauthorized, isUnauthorizedError } from "@/lib/utils/auth-handle
 
 export interface Program {
   id: string;
-  name: string;
-  type: string;
-  is_hero?: boolean;
+  program_name: string;
+  program_internal_name: string;
+  school_id: string;
+  school_internal_name: string;
+  school_name: string;
+  university: string;
+  region: string;
 }
 
 export interface ProgramInfo {
@@ -131,7 +135,7 @@ async function callProgramsProxy<T>(
 // ============ Program List ============
 
 export async function fetchPrograms(): Promise<Program[]> {
-  const result = await callProgramsProxy<{ success: boolean; data?: { programs: Program[] } }>("list");
+  const result = await callProgramsProxy<{ success: boolean; data?: { programs: Program[]; count?: number } }>("list");
   return result.data?.programs || [];
 }
 
