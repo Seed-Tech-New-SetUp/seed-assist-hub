@@ -35,8 +35,8 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { useSchoolFAQs, useSaveSchoolFAQs, useSchoolInfo, useSaveSchoolInfo, useSchoolSocialMedia, useSaveSchoolSocialMedia, useSchoolFeatures, useCreateSchoolFeature, useUpdateSchoolFeature, useDeleteSchoolFeature, useSchoolLogos, useCreateSchoolLogo, useUpdateSchoolLogo, useDeleteSchoolLogo } from "@/hooks/useSchoolProfile";
-import { SchoolFAQ, SchoolInfo, SchoolSocialMedia, SchoolFeature, SchoolLogo, calculateLogoRatio } from "@/lib/api/school-profile";
+import { useSchoolFAQs, useSaveSchoolFAQs, useSchoolInfo, useSaveSchoolInfo, useSchoolSocialMedia, useSaveSchoolSocialMedia, useSchoolFeatures, useCreateSchoolFeature, useUpdateSchoolFeature, useDeleteSchoolFeature, useSchoolLogos, useCreateSchoolLogo, useUpdateSchoolLogo, useDeleteSchoolLogo, useSchoolRankings, useCreateSchoolRanking, useUpdateSchoolRanking, useDeleteSchoolRanking } from "@/hooks/useSchoolProfile";
+import { SchoolFAQ, SchoolInfo, SchoolSocialMedia, SchoolFeature, SchoolLogo, SchoolRanking, RankingOrganization, calculateLogoRatio } from "@/lib/api/school-profile";
 
 const sections = [
   { id: "info", label: "Organisation Details", icon: Building2 },
@@ -1083,8 +1083,125 @@ function LogosSection() {
 }
 
 function RankingsSection() {
+  const { data: rankingsData, isLoading } = useSchoolRankings();
+  const createRanking = useCreateSchoolRanking();
+  const updateRanking = useUpdateSchoolRanking();
+  const deleteRanking = useDeleteSchoolRanking();
+
+  const [formData, setFormData] = useState({
+    ranking_organisation: "",
+    ranking_year: "",
+    level: "School",
+    rank: "",
+    minimum_range: "",
+    maximum_range: "",
+    supporting_text: "",
+  });
+  const [useRange, setUseRange] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editData, setEditData] = useState<{
+    description_id: string;
+    ranking_org_id: string;
+    ranking_addition_id: string;
+    ranking_organisation: string;
+    ranking_year: string;
+    level: string;
+    rank: string;
+    minimum_range: string;
+    maximum_range: string;
+    supporting_text: string;
+  } | null>(null);
+
+  const rankings = rankingsData?.rankings || [];
+  const organizations = rankingsData?.organizations || [];
+
+  const resetForm = () => {
+    setFormData({
+      ranking_organisation: "",
+      ranking_year: "",
+      level: "School",
+      rank: "",
+      minimum_range: "",
+      maximum_range: "",
+      supporting_text: "",
+    });
+    setUseRange(false);
+  };
+
+  const handleCreate = () => {
+    if (!formData.ranking_organisation || !formData.ranking_year) {
+      return;
+    }
+
+    createRanking.mutate(
+      {
+        ranking_organisation: formData.ranking_organisation,
+        ranking_year: formData.ranking_year,
+        level: formData.level,
+        rank: useRange ? "" : formData.rank,
+        minimum_range: useRange ? formData.minimum_range : "",
+        maximum_range: useRange ? formData.maximum_range : "",
+        supporting_text: formData.supporting_text,
+      },
+      {
+        onSuccess: () => {
+          resetForm();
+        },
+      }
+    );
+  };
+
+  const handleStartEdit = (ranking: SchoolRanking) => {
+    setEditingId(ranking.description_id || null);
+    setEditData({
+      description_id: ranking.description_id || "",
+      ranking_org_id: ranking.ranking_org_id || "",
+      ranking_addition_id: ranking.ranking_addition_id || "",
+      ranking_organisation: ranking.ranking_org_id || "",
+      ranking_year: ranking.ranking_year || "",
+      level: ranking.level || "School",
+      rank: ranking.rank || "",
+      minimum_range: ranking.minimum_range || "",
+      maximum_range: ranking.maximum_range || "",
+      supporting_text: ranking.supporting_text || "",
+    });
+  };
+
+  const handleUpdate = () => {
+    if (!editData) return;
+    updateRanking.mutate(editData, {
+      onSuccess: () => {
+        setEditingId(null);
+        setEditData(null);
+      },
+    });
+  };
+
+  const handleDelete = (ranking: SchoolRanking) => {
+    if (!ranking.description_id || !ranking.ranking_org_id || !ranking.ranking_addition_id) return;
+    deleteRanking.mutate({
+      description_id: ranking.description_id,
+      ranking_org_id: ranking.ranking_org_id,
+      ranking_addition_id: ranking.ranking_addition_id,
+    });
+  };
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 10 }, (_, i) => currentYear - i);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-24 w-full" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
+      {/* Add New Ranking Form */}
       <Card>
         <CardHeader>
           <CardTitle className="text-sm">Add Ranking</CardTitle>
@@ -1093,36 +1210,284 @@ function RankingsSection() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Organization</Label>
-              <Input placeholder="e.g., Financial Times" className="mt-1.5" />
+              <Select
+                value={formData.ranking_organisation}
+                onValueChange={(value) => setFormData((prev) => ({ ...prev, ranking_organisation: value }))}
+              >
+                <SelectTrigger className="mt-1.5">
+                  <SelectValue placeholder="Select organization" />
+                </SelectTrigger>
+                <SelectContent>
+                  {organizations.map((org) => (
+                    <SelectItem key={org.ranking_org_id} value={org.ranking_org_id}>
+                      {org.ranking_org_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Year</Label>
-              <Select>
+              <Select
+                value={formData.ranking_year}
+                onValueChange={(value) => setFormData((prev) => ({ ...prev, ranking_year: value }))}
+              >
                 <SelectTrigger className="mt-1.5">
                   <SelectValue placeholder="Select year" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="2024">2024</SelectItem>
-                  <SelectItem value="2023">2023</SelectItem>
-                  <SelectItem value="2022">2022</SelectItem>
+                  {years.map((year) => (
+                    <SelectItem key={year} value={String(year)}>
+                      {year}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
+
           <div>
-            <Label>Rank</Label>
-            <Input type="number" placeholder="1" className="mt-1.5" />
+            <Label>Level</Label>
+            <Select
+              value={formData.level}
+              onValueChange={(value) => setFormData((prev) => ({ ...prev, level: value }))}
+            >
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder="Select level" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="School">School</SelectItem>
+                <SelectItem value="Program">Program</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="use-range"
+                checked={useRange}
+                onChange={(e) => setUseRange(e.target.checked)}
+                className="rounded border-input"
+              />
+              <Label htmlFor="use-range" className="cursor-pointer">Use range (e.g., 9-20)</Label>
+            </div>
+
+            {useRange ? (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Minimum Rank</Label>
+                  <Input
+                    type="number"
+                    placeholder="9"
+                    className="mt-1.5"
+                    value={formData.minimum_range}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, minimum_range: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label>Maximum Rank</Label>
+                  <Input
+                    type="number"
+                    placeholder="20"
+                    className="mt-1.5"
+                    value={formData.maximum_range}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, maximum_range: e.target.value }))}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <Label>Rank</Label>
+                <Input
+                  type="number"
+                  placeholder="1"
+                  className="mt-1.5"
+                  value={formData.rank}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, rank: e.target.value }))}
+                />
+              </div>
+            )}
+          </div>
+
           <div>
             <Label>Supporting Text</Label>
-            <Textarea placeholder="Additional details..." className="mt-1.5" />
+            <Textarea
+              placeholder="Additional details..."
+              className="mt-1.5"
+              value={formData.supporting_text}
+              onChange={(e) => setFormData((prev) => ({ ...prev, supporting_text: e.target.value }))}
+            />
           </div>
-          <Button>Add Ranking</Button>
+          <Button onClick={handleCreate} disabled={createRanking.isPending || !formData.ranking_organisation || !formData.ranking_year}>
+            {createRanking.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            Add Ranking
+          </Button>
         </CardContent>
       </Card>
-      <div className="text-sm text-muted-foreground text-center py-4">
-        No rankings added yet
-      </div>
+
+      {/* Rankings List */}
+      {rankings.length > 0 ? (
+        <div className="space-y-3">
+          {rankings.map((ranking) => (
+            <Card key={`${ranking.description_id}-${ranking.ranking_org_id}-${ranking.ranking_addition_id}`}>
+              <CardContent className="p-4">
+                {editingId === ranking.description_id && editData ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Organization</Label>
+                        <Select
+                          value={editData.ranking_organisation}
+                          onValueChange={(value) => setEditData((prev) => prev ? { ...prev, ranking_organisation: value } : null)}
+                        >
+                          <SelectTrigger className="mt-1.5">
+                            <SelectValue placeholder="Select organization" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {organizations.map((org) => (
+                              <SelectItem key={org.ranking_org_id} value={org.ranking_org_id}>
+                                {org.ranking_org_name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Year</Label>
+                        <Select
+                          value={editData.ranking_year}
+                          onValueChange={(value) => setEditData((prev) => prev ? { ...prev, ranking_year: value } : null)}
+                        >
+                          <SelectTrigger className="mt-1.5">
+                            <SelectValue placeholder="Select year" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {years.map((year) => (
+                              <SelectItem key={year} value={String(year)}>
+                                {year}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Level</Label>
+                      <Select
+                        value={editData.level}
+                        onValueChange={(value) => setEditData((prev) => prev ? { ...prev, level: value } : null)}
+                      >
+                        <SelectTrigger className="mt-1.5">
+                          <SelectValue placeholder="Select level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="School">School</SelectItem>
+                          <SelectItem value="Program">Program</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <Label>Rank</Label>
+                        <Input
+                          type="number"
+                          value={editData.rank}
+                          onChange={(e) => setEditData((prev) => prev ? { ...prev, rank: e.target.value } : null)}
+                          className="mt-1.5"
+                        />
+                      </div>
+                      <div>
+                        <Label>Min Range</Label>
+                        <Input
+                          type="number"
+                          value={editData.minimum_range}
+                          onChange={(e) => setEditData((prev) => prev ? { ...prev, minimum_range: e.target.value } : null)}
+                          className="mt-1.5"
+                        />
+                      </div>
+                      <div>
+                        <Label>Max Range</Label>
+                        <Input
+                          type="number"
+                          value={editData.maximum_range}
+                          onChange={(e) => setEditData((prev) => prev ? { ...prev, maximum_range: e.target.value } : null)}
+                          className="mt-1.5"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Supporting Text</Label>
+                      <Textarea
+                        value={editData.supporting_text}
+                        onChange={(e) => setEditData((prev) => prev ? { ...prev, supporting_text: e.target.value } : null)}
+                        className="mt-1.5"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={handleUpdate} disabled={updateRanking.isPending}>
+                        {updateRanking.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                        Save
+                      </Button>
+                      <Button variant="outline" onClick={() => { setEditingId(null); setEditData(null); }}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{ranking.ranking_org_name}</span>
+                        <span className="text-sm text-muted-foreground">({ranking.ranking_year})</span>
+                        <span className="text-xs bg-muted px-2 py-0.5 rounded">{ranking.level}</span>
+                      </div>
+                      <div className="text-lg font-semibold text-primary">
+                        {ranking.rank ? (
+                          `#${ranking.rank}`
+                        ) : ranking.minimum_range && ranking.maximum_range ? (
+                          `#${ranking.minimum_range} - #${ranking.maximum_range}`
+                        ) : (
+                          "N/A"
+                        )}
+                      </div>
+                      {ranking.supporting_text && (
+                        <p className="text-sm text-muted-foreground">{ranking.supporting_text}</p>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleStartEdit(ranking)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(ranking)}
+                        disabled={deleteRanking.isPending}
+                      >
+                        {deleteRanking.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="text-sm text-muted-foreground text-center py-8 border rounded-lg">
+          No rankings added yet. Add your first ranking above.
+        </div>
+      )}
     </div>
   );
 }
