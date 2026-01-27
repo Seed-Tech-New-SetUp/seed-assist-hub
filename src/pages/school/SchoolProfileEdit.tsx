@@ -1517,10 +1517,13 @@ function RankingsSection() {
                 ) : (
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{ranking.ranking_org_name}</span>
-                        <span className="text-sm text-muted-foreground">({ranking.ranking_year})</span>
-                        <span className="text-xs bg-muted px-2 py-0.5 rounded">{ranking.level}</span>
+                    <div className="flex items-center gap-2">
+                        <span className="font-medium">
+                          {ranking.ranking_org_name}
+                          {ranking.ranking_year && (
+                            <span className="text-muted-foreground font-normal"> ({ranking.ranking_year})</span>
+                          )}
+                        </span>
                       </div>
                       <div className="text-lg font-semibold text-primary">
                         {ranking.rank ? (
