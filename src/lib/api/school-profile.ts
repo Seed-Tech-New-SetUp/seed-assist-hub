@@ -123,6 +123,45 @@ export interface LogoMutationResponse {
   error?: string;
 }
 
+// Rankings types
+export interface RankingOrganization {
+  ranking_org_id: string;
+  ranking_org_name: string;
+  ranking_org_logo?: string;
+}
+
+export interface SchoolRanking {
+  description_id?: string;
+  ranking_org_id?: string;
+  ranking_addition_id?: string;
+  ranking_org_name?: string;
+  ranking_org_logo?: string;
+  ranking_year?: string;
+  level?: string;
+  rank?: string;
+  minimum_range?: string;
+  maximum_range?: string;
+  supporting_text?: string;
+}
+
+export interface SchoolRankingsResponse {
+  success: boolean;
+  data?: {
+    rankings: SchoolRanking[];
+    ranking_organizations: RankingOrganization[];
+  };
+  error?: string;
+}
+
+export interface RankingMutationResponse {
+  success: boolean;
+  data?: {
+    message: string;
+    ranking?: SchoolRanking;
+  };
+  error?: string;
+}
+
 // ============ API Helper ============
 
 async function callSchoolProfileProxy<T>(
@@ -485,4 +524,63 @@ export function calculateLogoRatio(width: number, height: number): string {
     const ratio = Math.round(height / width);
     return `1:${ratio}`;
   }
+}
+
+// ============ Rankings API ============
+
+export async function fetchSchoolRankings(): Promise<{ rankings: SchoolRanking[]; organizations: RankingOrganization[] }> {
+  const result = await callSchoolProfileProxy<SchoolRankingsResponse>("rankings-read", "GET");
+  const rankings = decodeObjectStrings(result.data?.rankings || []);
+  const organizations = decodeObjectStrings(result.data?.ranking_organizations || []);
+  return { rankings, organizations };
+}
+
+export async function createSchoolRanking(ranking: {
+  ranking_organisation: string;
+  ranking_year: string;
+  level: string;
+  rank?: string;
+  minimum_range?: string;
+  maximum_range?: string;
+  supporting_text?: string;
+}): Promise<RankingMutationResponse> {
+  const result = await callSchoolProfileProxy<RankingMutationResponse>(
+    "rankings-create",
+    "POST",
+    ranking
+  );
+  return result;
+}
+
+export async function updateSchoolRanking(ranking: {
+  description_id: string;
+  ranking_org_id: string;
+  ranking_addition_id: string;
+  ranking_organisation: string;
+  ranking_year: string;
+  level: string;
+  rank?: string;
+  minimum_range?: string;
+  maximum_range?: string;
+  supporting_text?: string;
+}): Promise<RankingMutationResponse> {
+  const result = await callSchoolProfileProxy<RankingMutationResponse>(
+    "rankings-update",
+    "POST",
+    ranking
+  );
+  return result;
+}
+
+export async function deleteSchoolRanking(ranking: {
+  description_id: string;
+  ranking_org_id: string;
+  ranking_addition_id: string;
+}): Promise<RankingMutationResponse> {
+  const result = await callSchoolProfileProxy<RankingMutationResponse>(
+    "rankings-delete",
+    "POST",
+    ranking
+  );
+  return result;
 }

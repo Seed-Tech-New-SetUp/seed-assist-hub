@@ -65,8 +65,17 @@ serve(async (req) => {
       case "logos-delete":
         backendUrl = `${BACKEND_BASE_URL}/logos/delete.php`;
         break;
-      case "rankings":
-        backendUrl = `${BACKEND_BASE_URL}/update_school_rankings.php`;
+      case "rankings-read":
+        backendUrl = `${BACKEND_BASE_URL}/rankings/read.php`;
+        break;
+      case "rankings-create":
+        backendUrl = `${BACKEND_BASE_URL}/rankings/create.php`;
+        break;
+      case "rankings-update":
+        backendUrl = `${BACKEND_BASE_URL}/rankings/update.php`;
+        break;
+      case "rankings-delete":
+        backendUrl = `${BACKEND_BASE_URL}/rankings/delete.php`;
         break;
       case "pocs":
         backendUrl = `${BACKEND_BASE_URL}/update_school_poc.php`;

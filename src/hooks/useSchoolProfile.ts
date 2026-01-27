@@ -14,11 +14,17 @@ import {
   createSchoolLogo,
   updateSchoolLogo,
   deleteSchoolLogo,
+  fetchSchoolRankings,
+  createSchoolRanking,
+  updateSchoolRanking,
+  deleteSchoolRanking,
   SchoolFAQ,
   SchoolInfo,
   SchoolSocialMedia,
   SchoolFeature,
-  SchoolLogo
+  SchoolLogo,
+  SchoolRanking,
+  RankingOrganization
 } from "@/lib/api/school-profile";
 import { useToast } from "@/hooks/use-toast";
 
@@ -272,6 +278,107 @@ export function useDeleteSchoolLogo() {
       toast({
         title: "Error",
         description: error.message || "Failed to delete logo",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+// ============ Rankings Hooks ============
+
+export function useSchoolRankings() {
+  return useQuery({
+    queryKey: ["school-rankings"],
+    queryFn: fetchSchoolRankings,
+  });
+}
+
+export function useCreateSchoolRanking() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: (ranking: {
+      ranking_organisation: string;
+      ranking_year: string;
+      level: string;
+      rank?: string;
+      minimum_range?: string;
+      maximum_range?: string;
+      supporting_text?: string;
+    }) => createSchoolRanking(ranking),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["school-rankings"] });
+      toast({
+        title: "Ranking Added",
+        description: "Your ranking has been added successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add ranking",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useUpdateSchoolRanking() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: (ranking: {
+      description_id: string;
+      ranking_org_id: string;
+      ranking_addition_id: string;
+      ranking_organisation: string;
+      ranking_year: string;
+      level: string;
+      rank?: string;
+      minimum_range?: string;
+      maximum_range?: string;
+      supporting_text?: string;
+    }) => updateSchoolRanking(ranking),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["school-rankings"] });
+      toast({
+        title: "Ranking Updated",
+        description: "Your ranking has been updated successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update ranking",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useDeleteSchoolRanking() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: (ranking: {
+      description_id: string;
+      ranking_org_id: string;
+      ranking_addition_id: string;
+    }) => deleteSchoolRanking(ranking),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["school-rankings"] });
+      toast({
+        title: "Ranking Deleted",
+        description: "Your ranking has been removed successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete ranking",
         variant: "destructive",
       });
     },
