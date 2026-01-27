@@ -59,6 +59,7 @@ export default function SchoolProfileEdit() {
   const saveInfo = useSaveSchoolInfo();
   const [schoolInfo, setSchoolInfo] = useState<SchoolInfo>({});
   const [infoHasChanges, setInfoHasChanges] = useState(false);
+  const [bannerPreview, setBannerPreview] = useState<string>("");
 
   // Initialize School Info from API data
   useEffect(() => {
@@ -235,6 +236,8 @@ export default function SchoolProfileEdit() {
                     setInfo={setSchoolInfo}
                     isLoading={infoLoading}
                     setHasChanges={setInfoHasChanges}
+                    bannerPreview={bannerPreview}
+                    setBannerPreview={setBannerPreview}
                   />
                 )}
                 {activeSection === "social" && (
@@ -320,9 +323,11 @@ interface SchoolInfoSectionProps {
   setInfo: React.Dispatch<React.SetStateAction<SchoolInfo>>;
   isLoading: boolean;
   setHasChanges: React.Dispatch<React.SetStateAction<boolean>>;
+  bannerPreview: string;
+  setBannerPreview: React.Dispatch<React.SetStateAction<string>>;
 }
 
-function SchoolInfoSection({ info, setInfo, isLoading, setHasChanges }: SchoolInfoSectionProps) {
+function SchoolInfoSection({ info, setInfo, isLoading, setHasChanges, bannerPreview, setBannerPreview }: SchoolInfoSectionProps) {
   const updateField = (field: keyof SchoolInfo, value: string | number) => {
     setInfo(prev => ({ ...prev, [field]: value }));
     setHasChanges(true);
@@ -448,9 +453,9 @@ function SchoolInfoSection({ info, setInfo, isLoading, setHasChanges }: SchoolIn
             </div>
           )}
           <ImageUpload
-            value=""
+            value={bannerPreview}
             onChange={(url) => {
-              // For now, just update the field - actual upload would need backend integration
+              setBannerPreview(url);
               updateField("school_banner", url);
             }}
             placeholder={info.school_banner ? "Click to replace banner" : "Click to upload banner"}
