@@ -77,8 +77,17 @@ serve(async (req) => {
       case "rankings-delete":
         backendUrl = `${BACKEND_BASE_URL}/rankings/delete.php`;
         break;
-      case "pocs":
-        backendUrl = `${BACKEND_BASE_URL}/update_school_poc.php`;
+      case "pocs-read":
+        backendUrl = `${BACKEND_BASE_URL}/pocs/read.php`;
+        break;
+      case "pocs-create":
+        backendUrl = `${BACKEND_BASE_URL}/pocs/create.php`;
+        break;
+      case "pocs-update":
+        backendUrl = `${BACKEND_BASE_URL}/pocs/update.php`;
+        break;
+      case "pocs-delete":
+        backendUrl = `${BACKEND_BASE_URL}/pocs/delete.php`;
         break;
       default:
         backendUrl = `${BACKEND_BASE_URL}/update_general_info.php`;

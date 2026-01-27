@@ -565,3 +565,72 @@ export async function deleteSchoolRanking(ranking: {
   const result = await callSchoolProfileProxy<RankingMutationResponse>("rankings-delete", "POST", ranking);
   return result;
 }
+
+// ============ POCs Types ============
+
+export interface SchoolPOC {
+  poc_id?: string;
+  school_id?: string;
+  name: string;
+  designation: string;
+  organisation: string;
+  email: string;
+  phone: string;
+  created_on?: string;
+  created_by?: string;
+}
+
+export interface SchoolPOCsResponse {
+  success: boolean;
+  data?: {
+    pocs: SchoolPOC[];
+    count: number;
+  };
+  error?: string;
+}
+
+export interface POCMutationResponse {
+  success: boolean;
+  data?: {
+    message: string;
+    poc?: SchoolPOC;
+    poc_id?: string;
+  };
+  error?: string;
+}
+
+// ============ POCs API ============
+
+export async function fetchSchoolPOCs(): Promise<SchoolPOC[]> {
+  const result = await callSchoolProfileProxy<SchoolPOCsResponse>("pocs-read", "GET");
+  const pocs = result.data?.pocs || [];
+  return decodeObjectStrings(pocs);
+}
+
+export async function createSchoolPOC(poc: {
+  name: string;
+  designation: string;
+  organisation: string;
+  email: string;
+  phone: string;
+}): Promise<POCMutationResponse> {
+  const result = await callSchoolProfileProxy<POCMutationResponse>("pocs-create", "POST", poc);
+  return result;
+}
+
+export async function updateSchoolPOC(poc: {
+  poc_id: string;
+  name: string;
+  designation: string;
+  organisation: string;
+  email: string;
+  phone: string;
+}): Promise<POCMutationResponse> {
+  const result = await callSchoolProfileProxy<POCMutationResponse>("pocs-update", "POST", poc);
+  return result;
+}
+
+export async function deleteSchoolPOC(pocId: string): Promise<POCMutationResponse> {
+  const result = await callSchoolProfileProxy<POCMutationResponse>("pocs-delete", "POST", { poc_id: pocId });
+  return result;
+}

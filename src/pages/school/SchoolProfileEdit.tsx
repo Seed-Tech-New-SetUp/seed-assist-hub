@@ -52,6 +52,10 @@ import {
   useCreateSchoolRanking,
   useUpdateSchoolRanking,
   useDeleteSchoolRanking,
+  useSchoolPOCs,
+  useCreateSchoolPOC,
+  useUpdateSchoolPOC,
+  useDeleteSchoolPOC,
 } from "@/hooks/useSchoolProfile";
 import {
   SchoolFAQ,
@@ -61,6 +65,7 @@ import {
   SchoolLogo,
   SchoolRanking,
   RankingOrganization,
+  SchoolPOC,
   calculateLogoRatio,
 } from "@/lib/api/school-profile";
 
@@ -303,7 +308,7 @@ export default function SchoolProfileEdit() {
                 )}
                 {activeSection === "logos" && <LogosSection />}
                 {activeSection === "rankings" && <RankingsSection />}
-                {activeSection === "contact" && <ContactSection />}
+                {activeSection === "contact" && <POCsSection />}
                 {activeSection === "programs" && <ProgramsSection />}
 
                 {/* Navigation Buttons */}
@@ -1620,33 +1625,286 @@ function RankingsSection() {
   );
 }
 
-function ContactSection() {
+function POCsSection() {
+  const { data: pocs, isLoading } = useSchoolPOCs();
+  const createPOC = useCreateSchoolPOC();
+  const updatePOC = useUpdateSchoolPOC();
+  const deletePOC = useDeleteSchoolPOC();
+  const { toast } = useToast();
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    designation: "",
+    organisation: "",
+    email: "",
+    phone: "",
+  });
+  const [editData, setEditData] = useState<{
+    poc_id: string;
+    name: string;
+    designation: string;
+    organisation: string;
+    email: string;
+    phone: string;
+  } | null>(null);
+
+  const handleCreate = () => {
+    if (!formData.name.trim() || !formData.email.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Name and email are required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createPOC.mutate(formData, {
+      onSuccess: () => {
+        toast({ title: "Success", description: "Contact added successfully." });
+        setFormData({ name: "", designation: "", organisation: "", email: "", phone: "" });
+      },
+      onError: (error) => {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      },
+    });
+  };
+
+  const handleStartEdit = (poc: SchoolPOC) => {
+    setEditingId(poc.poc_id || null);
+    setEditData({
+      poc_id: poc.poc_id || "",
+      name: poc.name,
+      designation: poc.designation,
+      organisation: poc.organisation,
+      email: poc.email,
+      phone: poc.phone,
+    });
+  };
+
+  const handleUpdate = () => {
+    if (!editData) return;
+
+    updatePOC.mutate(editData, {
+      onSuccess: () => {
+        toast({ title: "Success", description: "Contact updated successfully." });
+        setEditingId(null);
+        setEditData(null);
+      },
+      onError: (error) => {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      },
+    });
+  };
+
+  const handleDelete = (pocId: string) => {
+    deletePOC.mutate(pocId, {
+      onSuccess: () => {
+        toast({ title: "Success", description: "Contact deleted successfully." });
+      },
+      onError: (error) => {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      },
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-24 w-full" />
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label>Contact Name</Label>
-          <Input placeholder="Full name" className="mt-1.5" />
+    <div className="space-y-6">
+      {/* Add New POC Form */}
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-base">Add New Contact</CardTitle>
+          <CardDescription>Add a point of contact for your organisation</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Name *</Label>
+              <Input
+                placeholder="Full name"
+                className="mt-1.5"
+                value={formData.name}
+                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>Designation</Label>
+              <Input
+                placeholder="Job title"
+                className="mt-1.5"
+                value={formData.designation}
+                onChange={(e) => setFormData((prev) => ({ ...prev, designation: e.target.value }))}
+              />
+            </div>
+          </div>
+          <div>
+            <Label>Organization</Label>
+            <Input
+              placeholder="Organization name"
+              className="mt-1.5"
+              value={formData.organisation}
+              onChange={(e) => setFormData((prev) => ({ ...prev, organisation: e.target.value }))}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Email *</Label>
+              <Input
+                type="email"
+                placeholder="email@example.com"
+                className="mt-1.5"
+                value={formData.email}
+                onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>Phone</Label>
+              <Input
+                type="tel"
+                placeholder="+1 (555) 123-4567"
+                className="mt-1.5"
+                value={formData.phone}
+                onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
+              />
+            </div>
+          </div>
+          <Button onClick={handleCreate} disabled={createPOC.isPending}>
+            {createPOC.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            Add Contact
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* POCs List */}
+      {pocs && pocs.length > 0 ? (
+        <div className="space-y-3">
+          {pocs.map((poc) => (
+            <Card key={poc.poc_id}>
+              <CardContent className="p-4">
+                {editingId === poc.poc_id && editData ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Name</Label>
+                        <Input
+                          value={editData.name}
+                          onChange={(e) => setEditData((prev) => (prev ? { ...prev, name: e.target.value } : null))}
+                          className="mt-1.5"
+                        />
+                      </div>
+                      <div>
+                        <Label>Designation</Label>
+                        <Input
+                          value={editData.designation}
+                          onChange={(e) =>
+                            setEditData((prev) => (prev ? { ...prev, designation: e.target.value } : null))
+                          }
+                          className="mt-1.5"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Organization</Label>
+                      <Input
+                        value={editData.organisation}
+                        onChange={(e) =>
+                          setEditData((prev) => (prev ? { ...prev, organisation: e.target.value } : null))
+                        }
+                        className="mt-1.5"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Email</Label>
+                        <Input
+                          type="email"
+                          value={editData.email}
+                          onChange={(e) => setEditData((prev) => (prev ? { ...prev, email: e.target.value } : null))}
+                          className="mt-1.5"
+                        />
+                      </div>
+                      <div>
+                        <Label>Phone</Label>
+                        <Input
+                          type="tel"
+                          value={editData.phone}
+                          onChange={(e) => setEditData((prev) => (prev ? { ...prev, phone: e.target.value } : null))}
+                          className="mt-1.5"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={handleUpdate} disabled={updatePOC.isPending}>
+                        {updatePOC.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                        Save
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setEditingId(null);
+                          setEditData(null);
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <div className="font-medium">{poc.name}</div>
+                      {poc.designation && (
+                        <div className="text-sm text-muted-foreground">
+                          {poc.designation}
+                          {poc.organisation && ` at ${poc.organisation}`}
+                        </div>
+                      )}
+                      <div className="flex flex-wrap gap-4 text-sm">
+                        {poc.email && (
+                          <a href={`mailto:${poc.email}`} className="text-primary hover:underline">
+                            {poc.email}
+                          </a>
+                        )}
+                        {poc.phone && <span className="text-muted-foreground">{poc.phone}</span>}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="icon" onClick={() => handleStartEdit(poc)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => poc.poc_id && handleDelete(poc.poc_id)}
+                        disabled={deletePOC.isPending}
+                      >
+                        {deletePOC.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
         </div>
-        <div>
-          <Label>Designation</Label>
-          <Input placeholder="Job title" className="mt-1.5" />
+      ) : (
+        <div className="text-sm text-muted-foreground text-center py-8 border rounded-lg">
+          No contacts added yet. Add your first contact above.
         </div>
-      </div>
-      <div>
-        <Label>Organization</Label>
-        <Input placeholder="Organization name" className="mt-1.5" />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label>Email</Label>
-          <Input type="email" placeholder="email@example.com" className="mt-1.5" />
-        </div>
-        <div>
-          <Label>Phone</Label>
-          <Input type="tel" placeholder="Phone number" className="mt-1.5" />
-        </div>
-      </div>
+      )}
     </div>
   );
 }
