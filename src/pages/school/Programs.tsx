@@ -582,7 +582,11 @@ function ProgramFeaturesSection({ programId, onSave }: SectionProps) {
   const saveMutation = useSaveProgramFeature();
   const deleteMutation = useDeleteProgramFeature();
 
-  const [newFeature, setNewFeature] = useState<Partial<ProgramFeature>>({ usp_title: "", usp_description: "", usp_image_name: "" });
+  const [newFeature, setNewFeature] = useState<Partial<ProgramFeature>>({
+    usp_title: "",
+    usp_description: "",
+    usp_image_name: "",
+  });
   const [editingFeature, setEditingFeature] = useState<ProgramFeature | null>(null);
   const [deleteConfirmFeature, setDeleteConfirmFeature] = useState<ProgramFeature | null>(null);
 
@@ -602,7 +606,7 @@ function ProgramFeaturesSection({ programId, onSave }: SectionProps) {
           },
           {
             onSuccess: () => setEditingFeature(null),
-          }
+          },
         );
       }
     } else {
@@ -642,7 +646,7 @@ function ProgramFeaturesSection({ programId, onSave }: SectionProps) {
         { programId, featureId: deleteConfirmFeature.usp_id },
         {
           onSuccess: () => setDeleteConfirmFeature(null),
-        }
+        },
       );
     }
   };
@@ -730,10 +734,7 @@ function ProgramFeaturesSection({ programId, onSave }: SectionProps) {
             />
           </div>
           <div className="flex gap-2">
-            <Button
-              onClick={handleSaveFeature}
-              disabled={!formFeature.usp_title?.trim() || saveMutation.isPending}
-            >
+            <Button onClick={handleSaveFeature} disabled={!formFeature.usp_title?.trim() || saveMutation.isPending}>
               {saveMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {isEditing ? (
                 <>
@@ -829,7 +830,16 @@ interface MemberFormProps {
   defaultCategory: string;
 }
 
-function MemberForm({ member, onChange, onSave, onCancel, isEditing, isSaving, title, defaultCategory }: MemberFormProps) {
+function MemberForm({
+  member,
+  onChange,
+  onSave,
+  onCancel,
+  isEditing,
+  isSaving,
+  title,
+  defaultCategory,
+}: MemberFormProps) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1036,7 +1046,7 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
               image_name: "",
             });
           },
-        }
+        },
       );
     }
   };
@@ -1064,7 +1074,7 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
           onSuccess: () => {
             cancelEditing();
           },
-        }
+        },
       );
     }
   };
@@ -1075,7 +1085,7 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
         { programId, category, memberId: deleteConfirmMember.member_id },
         {
           onSuccess: () => setDeleteConfirmMember(null),
-        }
+        },
       );
     }
   };
@@ -1097,7 +1107,8 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {title}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {deleteConfirmMember?.first_name} {deleteConfirmMember?.last_name}? This action cannot be undone.
+              Are you sure you want to delete {deleteConfirmMember?.first_name} {deleteConfirmMember?.last_name}? This
+              action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1177,14 +1188,18 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <h5 className="font-medium text-foreground">{member.first_name} {member.last_name}</h5>
+                            <h5 className="font-medium text-foreground">
+                              {member.first_name} {member.last_name}
+                            </h5>
                             <Badge variant="secondary" className="text-xs">
                               {defaultCategory}
                             </Badge>
                           </div>
-                          {(member.designation || member.organization) && (
+                          {(member.designation || member.orgnaisation) && (
                             <p className="text-sm text-muted-foreground">
-                              {member.designation}{member.designation && member.organization ? " at " : ""}{member.organization}
+                              {member.designation}
+                              {member.designation && member.orgnaisation ? " at " : ""}
+                              {member.organization}
                             </p>
                           )}
                           <div className="flex items-center gap-3 mt-1 flex-wrap">
@@ -1204,9 +1219,7 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
                               </a>
                             )}
                             {member.call_to_action && (
-                              <span className="text-xs text-primary font-medium">
-                                {member.call_to_action}
-                              </span>
+                              <span className="text-xs text-primary font-medium">{member.call_to_action}</span>
                             )}
                           </div>
                         </div>
