@@ -54,6 +54,23 @@ export interface ProgramFeature {
   is_approved_by?: string;
 }
 
+// Backend uses "organisation" (British spelling), we normalize to "organization" internally
+export interface ProgramMemberBackend {
+  member_id?: string;
+  program_id?: string;
+  category: "faculty" | "current_student" | "alumni";
+  first_name: string;
+  last_name: string;
+  email: string;
+  linkedin_url: string;
+  designation: string;
+  organisation: string; // Backend spelling
+  call_to_action: string;
+  image_name?: string;
+  created_on?: string;
+  created_by?: string;
+}
+
 export interface ProgramMember {
   member_id?: string;
   program_id?: string;
@@ -63,7 +80,7 @@ export interface ProgramMember {
   email: string;
   linkedin_url: string;
   designation: string;
-  organization: string;
+  organization: string; // Normalized frontend spelling
   call_to_action: string;
   image_name?: string;
   created_on?: string;
@@ -329,12 +346,16 @@ export async function fetchProgramMembers(
   programId: string,
   category: "faculty" | "current_student" | "alumni"
 ): Promise<ProgramMember[]> {
-  const result = await callProgramsProxy<{ success: boolean; data?: { members: ProgramMember[] } }>(
+  const result = await callProgramsProxy<{ success: boolean; data?: { members: ProgramMemberBackend[] } }>(
     "members",
     "GET",
     { program_id: programId, category }
   );
-  return result.data?.members || [];
+  // Normalize "organisation" from backend to "organization" for frontend
+  return (result.data?.members || []).map((m) => ({
+    ...m,
+    organization: m.organisation || "",
+  }));
 }
 
 export async function saveProgramMember(

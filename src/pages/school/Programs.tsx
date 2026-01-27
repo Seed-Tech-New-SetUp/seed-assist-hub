@@ -816,6 +816,145 @@ function ProgramFeaturesSection({ programId, onSave }: SectionProps) {
   );
 }
 
+// ============ Member Form Component ============
+
+interface MemberFormProps {
+  member: Partial<ProgramMember>;
+  onChange: (member: Partial<ProgramMember>) => void;
+  onSave: () => void;
+  onCancel?: () => void;
+  isEditing: boolean;
+  isSaving: boolean;
+  title: string;
+  defaultCategory: string;
+}
+
+function MemberForm({ member, onChange, onSave, onCancel, isEditing, isSaving, title, defaultCategory }: MemberFormProps) {
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label>First Name *</Label>
+          <Input
+            value={member?.first_name || ""}
+            onChange={(e) => onChange({ ...member, first_name: e.target.value })}
+            placeholder="First name..."
+            className="mt-1.5"
+          />
+        </div>
+        <div>
+          <Label>Last Name *</Label>
+          <Input
+            value={member?.last_name || ""}
+            onChange={(e) => onChange({ ...member, last_name: e.target.value })}
+            placeholder="Last name..."
+            className="mt-1.5"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label>Email</Label>
+          <Input
+            type="email"
+            value={member?.email || ""}
+            onChange={(e) => onChange({ ...member, email: e.target.value })}
+            placeholder="Email address..."
+            className="mt-1.5"
+          />
+        </div>
+        <div>
+          <Label>LinkedIn URL</Label>
+          <Input
+            type="url"
+            value={member?.linkedin_url || ""}
+            onChange={(e) => onChange({ ...member, linkedin_url: e.target.value })}
+            placeholder="https://linkedin.com/in/..."
+            className="mt-1.5"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label>Designation</Label>
+          <Input
+            value={member?.designation || ""}
+            onChange={(e) => onChange({ ...member, designation: e.target.value })}
+            placeholder="Title/Position..."
+            className="mt-1.5"
+          />
+        </div>
+        <div>
+          <Label>Organization</Label>
+          <Input
+            value={member?.organization || ""}
+            onChange={(e) => onChange({ ...member, organization: e.target.value })}
+            placeholder="Organization name..."
+            className="mt-1.5"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label>Call to Action</Label>
+          <Select
+            value={member?.call_to_action || ""}
+            onValueChange={(value) => onChange({ ...member, call_to_action: value })}
+          >
+            <SelectTrigger className="mt-1.5">
+              <SelectValue placeholder="Select action..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="email">Email</SelectItem>
+              <SelectItem value="linkedin">LinkedIn</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Category</Label>
+          <Input value={defaultCategory} disabled className="mt-1.5 bg-muted" />
+        </div>
+      </div>
+
+      <div>
+        <Label>Profile Photo</Label>
+        <ImageUpload
+          value={member?.image_name || ""}
+          onChange={(url) => onChange({ ...member, image_name: url })}
+          placeholder="Upload photo"
+          aspectRatio="square"
+          className="mt-1.5 h-[80px] w-[80px]"
+        />
+      </div>
+
+      <div className="flex gap-2">
+        <Button onClick={onSave} disabled={!member?.first_name?.trim() || !member?.last_name?.trim() || isSaving}>
+          {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+          {isEditing ? (
+            <>
+              <Check className="h-4 w-4 mr-2" />
+              Update {title}
+            </>
+          ) : (
+            <>
+              <Plus className="h-4 w-4 mr-2" />
+              Add {title}
+            </>
+          )}
+        </Button>
+        {isEditing && onCancel && (
+          <Button variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ============ Program Members Section (Faculty, Students, Alumni) ============
 
 interface MembersSectionProps extends SectionProps {
@@ -843,64 +982,87 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
     image_name: "",
   });
 
-  const [editingMember, setEditingMember] = useState<ProgramMember | null>(null);
+  // Track editing member by ID for inline editing
+  const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
+  const [editingMemberData, setEditingMemberData] = useState<Partial<ProgramMember>>({});
   const [deleteConfirmMember, setDeleteConfirmMember] = useState<ProgramMember | null>(null);
-
-  const isEditing = !!editingMember;
-  const formMember = isEditing ? editingMember : newMember;
 
   const startEditing = (member: ProgramMember) => {
     // Convert stored image_name to full URL for display
     const imageUrl = member.image_name
       ? `https://assist.seedglobaleducation.com/school_member_uploads/${member.image_name}`
       : "";
-    setEditingMember({
+    setEditingMemberId(member.member_id || null);
+    setEditingMemberData({
       ...member,
       image_name: imageUrl,
     });
   };
 
   const cancelEditing = () => {
-    setEditingMember(null);
+    setEditingMemberId(null);
+    setEditingMemberData({});
   };
 
-  const handleSaveMember = () => {
-    const memberData = isEditing ? editingMember : newMember;
-    if (memberData?.first_name?.trim() && memberData?.last_name?.trim()) {
+  const handleSaveNewMember = () => {
+    if (newMember?.first_name?.trim() && newMember?.last_name?.trim()) {
       saveMutation.mutate(
         {
           programId,
           category,
           member: {
-            member_id: memberData.member_id,
             category,
-            first_name: memberData.first_name || "",
-            last_name: memberData.last_name || "",
-            email: memberData.email || "",
-            linkedin_url: memberData.linkedin_url || "",
-            designation: memberData.designation || "",
-            organization: memberData.organization || "",
-            call_to_action: memberData.call_to_action || "",
-            image_name: memberData.image_name || "",
+            first_name: newMember.first_name || "",
+            last_name: newMember.last_name || "",
+            email: newMember.email || "",
+            linkedin_url: newMember.linkedin_url || "",
+            designation: newMember.designation || "",
+            organization: newMember.organization || "",
+            call_to_action: newMember.call_to_action || "",
+            image_name: newMember.image_name || "",
           },
         },
         {
           onSuccess: () => {
-            if (isEditing) {
-              setEditingMember(null);
-            } else {
-              setNewMember({
-                first_name: "",
-                last_name: "",
-                email: "",
-                linkedin_url: "",
-                designation: "",
-                organization: "",
-                call_to_action: "",
-                category,
-                image_name: "",
-              });
-            }
+            setNewMember({
+              first_name: "",
+              last_name: "",
+              email: "",
+              linkedin_url: "",
+              designation: "",
+              organization: "",
+              call_to_action: "",
+              category,
+              image_name: "",
+            });
+          },
+        }
+      );
+    }
+  };
+
+  const handleSaveEditingMember = () => {
+    if (editingMemberData?.first_name?.trim() && editingMemberData?.last_name?.trim()) {
+      saveMutation.mutate(
+        {
+          programId,
+          category,
+          member: {
+            member_id: editingMemberData.member_id,
+            category,
+            first_name: editingMemberData.first_name || "",
+            last_name: editingMemberData.last_name || "",
+            email: editingMemberData.email || "",
+            linkedin_url: editingMemberData.linkedin_url || "",
+            designation: editingMemberData.designation || "",
+            organization: editingMemberData.organization || "",
+            call_to_action: editingMemberData.call_to_action || "",
+            image_name: editingMemberData.image_name || "",
+          },
+        },
+        {
+          onSuccess: () => {
+            cancelEditing();
           },
         }
       );
@@ -950,166 +1112,23 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Add New Member Form */}
       <Card className="border-dashed">
         <CardContent className="p-4 space-y-4">
-          <h4 className="font-medium text-sm text-muted-foreground">
-            {isEditing ? `Edit ${title}` : `Add New ${title}`}
-          </h4>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>First Name *</Label>
-              <Input
-                value={formMember?.first_name || ""}
-                onChange={(e) =>
-                  isEditing
-                    ? setEditingMember({ ...editingMember!, first_name: e.target.value })
-                    : setNewMember({ ...newMember, first_name: e.target.value })
-                }
-                placeholder="First name..."
-                className="mt-1.5"
-              />
-            </div>
-            <div>
-              <Label>Last Name *</Label>
-              <Input
-                value={formMember?.last_name || ""}
-                onChange={(e) =>
-                  isEditing
-                    ? setEditingMember({ ...editingMember!, last_name: e.target.value })
-                    : setNewMember({ ...newMember, last_name: e.target.value })
-                }
-                placeholder="Last name..."
-                className="mt-1.5"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Email</Label>
-              <Input
-                type="email"
-                value={formMember?.email || ""}
-                onChange={(e) =>
-                  isEditing
-                    ? setEditingMember({ ...editingMember!, email: e.target.value })
-                    : setNewMember({ ...newMember, email: e.target.value })
-                }
-                placeholder="Email address..."
-                className="mt-1.5"
-              />
-            </div>
-            <div>
-              <Label>LinkedIn URL</Label>
-              <Input
-                type="url"
-                value={formMember?.linkedin_url || ""}
-                onChange={(e) =>
-                  isEditing
-                    ? setEditingMember({ ...editingMember!, linkedin_url: e.target.value })
-                    : setNewMember({ ...newMember, linkedin_url: e.target.value })
-                }
-                placeholder="https://linkedin.com/in/..."
-                className="mt-1.5"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Designation</Label>
-              <Input
-                value={formMember?.designation || ""}
-                onChange={(e) =>
-                  isEditing
-                    ? setEditingMember({ ...editingMember!, designation: e.target.value })
-                    : setNewMember({ ...newMember, designation: e.target.value })
-                }
-                placeholder="Title/Position..."
-                className="mt-1.5"
-              />
-            </div>
-            <div>
-              <Label>Organization</Label>
-              <Input
-                value={formMember?.organization || ""}
-                onChange={(e) =>
-                  isEditing
-                    ? setEditingMember({ ...editingMember!, organization: e.target.value })
-                    : setNewMember({ ...newMember, organization: e.target.value })
-                }
-                placeholder="Organization name..."
-                className="mt-1.5"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Call to Action</Label>
-              <Select
-                value={formMember?.call_to_action || ""}
-                onValueChange={(value) =>
-                  isEditing
-                    ? setEditingMember({ ...editingMember!, call_to_action: value })
-                    : setNewMember({ ...newMember, call_to_action: value })
-                }
-              >
-                <SelectTrigger className="mt-1.5">
-                  <SelectValue placeholder="Select action..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="email">Email</SelectItem>
-                  <SelectItem value="linkedin">LinkedIn</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Category</Label>
-              <Input value={defaultCategory} disabled className="mt-1.5 bg-muted" />
-            </div>
-          </div>
-
-          <div>
-            <Label>Profile Photo</Label>
-            <ImageUpload
-              value={formMember?.image_name || ""}
-              onChange={(url) =>
-                isEditing
-                  ? setEditingMember({ ...editingMember!, image_name: url })
-                  : setNewMember({ ...newMember, image_name: url })
-              }
-              placeholder="Upload photo"
-              aspectRatio="square"
-              className="mt-1.5 h-[80px] w-[80px]"
-            />
-          </div>
-
-          <div className="flex gap-2">
-            <Button onClick={handleSaveMember} disabled={!formMember?.first_name?.trim() || !formMember?.last_name?.trim() || saveMutation.isPending}>
-              {saveMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {isEditing ? (
-                <>
-                  <Check className="h-4 w-4 mr-2" />
-                  Update {title}
-                </>
-              ) : (
-                <>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add {title}
-                </>
-              )}
-            </Button>
-            {isEditing && (
-              <Button variant="outline" onClick={cancelEditing}>
-                Cancel
-              </Button>
-            )}
-          </div>
+          <h4 className="font-medium text-sm text-muted-foreground">Add New {title}</h4>
+          <MemberForm
+            member={newMember}
+            onChange={setNewMember}
+            onSave={handleSaveNewMember}
+            isEditing={false}
+            isSaving={saveMutation.isPending && !editingMemberId}
+            title={title}
+            defaultCategory={defaultCategory}
+          />
         </CardContent>
       </Card>
 
+      {/* Members List */}
       <div>
         <h4 className="font-medium text-sm text-muted-foreground mb-3">
           Added {title}s ({members.length})
@@ -1123,78 +1142,96 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
             {members.map((member) => (
               <Card key={member.member_id}>
                 <CardContent className="p-4">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex gap-4 flex-1">
-                      {member.image_name ? (
-                        <img
-                          src={`https://assist.seedglobaleducation.com/school_member_uploads/${member.image_name}`}
-                          alt={`${member.first_name} ${member.last_name}`}
-                          className="w-12 h-12 rounded-full object-cover"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = "/placeholder.svg";
-                          }}
-                        />
-                      ) : (
-                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0">
-                          <User className="h-5 w-5 text-muted-foreground" />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h5 className="font-medium text-foreground">{member.first_name} {member.last_name}</h5>
-                          <Badge variant="secondary" className="text-xs">
-                            {defaultCategory}
-                          </Badge>
-                        </div>
-                        {(member.designation || member.organization) && (
-                          <p className="text-sm text-muted-foreground">
-                            {member.designation}{member.designation && member.organization ? " at " : ""}{member.organization}
-                          </p>
+                  {editingMemberId === member.member_id ? (
+                    /* Inline Edit Form */
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-sm text-muted-foreground">Edit {title}</h4>
+                      <MemberForm
+                        member={editingMemberData}
+                        onChange={setEditingMemberData}
+                        onSave={handleSaveEditingMember}
+                        onCancel={cancelEditing}
+                        isEditing={true}
+                        isSaving={saveMutation.isPending && editingMemberId === member.member_id}
+                        title={title}
+                        defaultCategory={defaultCategory}
+                      />
+                    </div>
+                  ) : (
+                    /* Display Mode */
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex gap-4 flex-1">
+                        {member.image_name ? (
+                          <img
+                            src={`https://assist.seedglobaleducation.com/school_member_uploads/${member.image_name}`}
+                            alt={`${member.first_name} ${member.last_name}`}
+                            className="w-12 h-12 rounded-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "/placeholder.svg";
+                            }}
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0">
+                            <User className="h-5 w-5 text-muted-foreground" />
+                          </div>
                         )}
-                        <div className="flex items-center gap-3 mt-1 flex-wrap">
-                          {member.email && (
-                            <span className="text-xs text-muted-foreground flex items-center gap-1">
-                              <Mail className="h-3 w-3" /> {member.email}
-                            </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h5 className="font-medium text-foreground">{member.first_name} {member.last_name}</h5>
+                            <Badge variant="secondary" className="text-xs">
+                              {defaultCategory}
+                            </Badge>
+                          </div>
+                          {(member.designation || member.organization) && (
+                            <p className="text-sm text-muted-foreground">
+                              {member.designation}{member.designation && member.organization ? " at " : ""}{member.organization}
+                            </p>
                           )}
-                          {member.linkedin_url && (
-                            <a
-                              href={member.linkedin_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-muted-foreground flex items-center gap-1 hover:text-primary"
-                            >
-                              <Linkedin className="h-3 w-3" /> LinkedIn
-                            </a>
-                          )}
-                          {member.call_to_action && (
-                            <span className="text-xs text-primary font-medium">
-                              {member.call_to_action}
-                            </span>
-                          )}
+                          <div className="flex items-center gap-3 mt-1 flex-wrap">
+                            {member.email && (
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Mail className="h-3 w-3" /> {member.email}
+                              </span>
+                            )}
+                            {member.linkedin_url && (
+                              <a
+                                href={member.linkedin_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-muted-foreground flex items-center gap-1 hover:text-primary"
+                              >
+                                <Linkedin className="h-3 w-3" /> LinkedIn
+                              </a>
+                            )}
+                            {member.call_to_action && (
+                              <span className="text-xs text-primary font-medium">
+                                {member.call_to_action}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
+                      <div className="flex gap-1 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => startEditing(member)}
+                          disabled={saveMutation.isPending}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive"
+                          onClick={() => setDeleteConfirmMember(member)}
+                          disabled={deleteMutation.isPending}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex gap-1 shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => startEditing(member)}
-                        disabled={saveMutation.isPending}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive"
-                        onClick={() => setDeleteConfirmMember(member)}
-                        disabled={deleteMutation.isPending}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
