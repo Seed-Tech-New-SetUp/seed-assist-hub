@@ -450,7 +450,7 @@ export default function StudentProfile() {
                 <h1 className="text-2xl font-display font-bold">{profile.name}</h1>
                 <div className="flex gap-2">
                   {profile.isSeedRecommended && (
-                    <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+                    <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20 whitespace-nowrap">
                       <Star className="h-3 w-3 mr-1" />
                       SEED Recommended
                     </Badge>
