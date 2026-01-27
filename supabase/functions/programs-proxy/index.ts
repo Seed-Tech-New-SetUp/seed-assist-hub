@@ -43,8 +43,8 @@ serve(async (req) => {
         backendUrl = PROGRAM_PROFILE_URL;
         break;
       case "info":
-        // Get/update program information
-        backendUrl = `${PROGRAMS_BASE_URL}/update_program_information.php?program_id=${programId}`;
+        // Get/update program information - use new endpoint
+        backendUrl = `${PROGRAM_PROFILE_URL}/info.php?program_id=${programId}`;
         break;
       case "features":
         // Get/update program features (USP)
