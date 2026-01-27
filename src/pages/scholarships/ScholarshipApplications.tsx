@@ -328,7 +328,7 @@ export default function ScholarshipApplications() {
                 </div>
                 <div>
                   <p className="text-xl font-bold">{seedRecommendedCount}</p>
-                  <p className="text-[10px] text-muted-foreground leading-tight">SEED Recommended</p>
+                  <p className="text-[10px] text-muted-foreground leading-tight whitespace-nowrap">SEED Recommended</p>
                 </div>
               </div>
             </CardContent>
@@ -468,9 +468,9 @@ export default function ScholarshipApplications() {
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
                             {applicant.isSeedRecommended && (
-                              <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+                              <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20 whitespace-nowrap">
                                 <Star className="h-3 w-3 mr-1" />
-                                SEED
+                                SEED Recommended
                               </Badge>
                             )}
                             <Badge variant="outline" className={status.color}>
