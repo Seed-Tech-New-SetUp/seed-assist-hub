@@ -316,9 +316,9 @@ function ProgramInfoSection({ programId, onSave }: SectionProps) {
 
   const [formData, setFormData] = useState<Partial<ProgramInfo>>({
     class_size: "",
-    avg_age: "",
-    avg_work_experience: "",
-    median_earnings_after_graduation: "",
+    average_age: "",
+    average_work_experience: "",
+    median_earnings: "",
     graduation_rate: "",
     brochure_link: "",
     is_hero_program: false,
@@ -412,7 +412,7 @@ function ProgramInfoSection({ programId, onSave }: SectionProps) {
             <Label>Average Age</Label>
             <Input
               type="text"
-              value={formData.avg_age || ""}
+              value={formData.average_age || ""}
               onChange={(e) => setFormData((prev) => ({ ...prev, average_age: e.target.value }))}
               className="mt-1.5"
               placeholder="e.g. 28"
@@ -422,7 +422,7 @@ function ProgramInfoSection({ programId, onSave }: SectionProps) {
             <Label>Average Work Experience</Label>
             <Input
               type="text"
-              value={formData.avg_work_experience || ""}
+              value={formData.average_work_experience || ""}
               onChange={(e) => setFormData((prev) => ({ ...prev, average_work_experience: e.target.value }))}
               className="mt-1.5"
               placeholder="e.g. 5 years"
@@ -441,8 +441,8 @@ function ProgramInfoSection({ programId, onSave }: SectionProps) {
             <Label>Median Earnings After Graduation (USD/Year)</Label>
             <Input
               type="text"
-              value={formData.median_earnings_after_graduation || ""}
-              onChange={(e) => setFormData((prev) => ({ ...prev, median_earnings_after_graduation: e.target.value }))}
+              value={formData.median_earnings || ""}
+              onChange={(e) => setFormData((prev) => ({ ...prev, median_earnings: e.target.value }))}
               className="mt-1.5"
               placeholder="e.g. 175000"
             />
