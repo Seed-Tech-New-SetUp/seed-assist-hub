@@ -650,35 +650,36 @@ function ProgramFeaturesSection({ programId, onSave }: SectionProps) {
           <div className="space-y-3">
             {features.map((feature) => (
               <Card key={feature.usp_id}>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex gap-4 flex-1">
-                      {feature.usp_image_name ? (
-                        <img
-                          src={`https://assist.seedglobaleducation.com/program_usp_uploads/${feature.usp_image_name}`}
-                          alt={feature.usp_title}
-                          className="w-16 h-16 rounded-lg object-cover"
-                        />
-                      ) : (
-                        <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                          <Image className="h-6 w-6 text-muted-foreground" />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <h5 className="font-medium text-foreground">{feature.usp_title}</h5>
-                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{feature.usp_description}</p>
+                <CardContent className="p-4 flex items-start justify-between gap-4">
+                  <div className="flex gap-3 flex-1">
+                    {feature.usp_image_name ? (
+                      <img
+                        src={`https://assist.seedglobaleducation.com/program_usp_uploads/${feature.usp_image_name}`}
+                        alt={feature.usp_title}
+                        className="w-16 h-16 rounded object-cover shrink-0"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = "/placeholder.svg";
+                        }}
+                      />
+                    ) : (
+                      <div className="w-16 h-16 rounded bg-muted flex items-center justify-center shrink-0">
+                        <Image className="h-6 w-6 text-muted-foreground" />
                       </div>
+                    )}
+                    <div>
+                      <h5 className="font-medium">{feature.usp_title}</h5>
+                      <p className="text-sm text-muted-foreground">{feature.usp_description}</p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-destructive shrink-0"
-                      onClick={() => feature.usp_id && removeFeature(feature.usp_id)}
-                      disabled={deleteMutation.isPending}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive shrink-0"
+                    onClick={() => feature.usp_id && removeFeature(feature.usp_id)}
+                    disabled={deleteMutation.isPending}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </CardContent>
               </Card>
             ))}
