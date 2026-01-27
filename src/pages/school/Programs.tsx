@@ -171,14 +171,14 @@ export default function Programs() {
                   <SelectContent>
                     {programs.map((program) => (
                       <SelectItem key={program.id} value={program.id}>
-                        {program.name}
+                        {program.program_name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               )}
-              {selectedProgramData?.type && (
-                <Badge variant="secondary">{selectedProgramData.type}</Badge>
+              {selectedProgramData && (
+                <Badge variant="secondary">{selectedProgramData.university}</Badge>
               )}
             </div>
           </CardContent>

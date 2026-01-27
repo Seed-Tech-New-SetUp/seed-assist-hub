@@ -6,7 +6,9 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const BACKEND_BASE_URL = "https://seedglobaleducation.com/api/assist/programs";
+const BACKEND_BASE_URL = "https://seedglobaleducation.com/api/assist";
+const PROGRAMS_BASE_URL = `${BACKEND_BASE_URL}/programs`;
+const PROGRAM_PROFILE_URL = `${BACKEND_BASE_URL}/program-profile`;
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -37,47 +39,47 @@ serve(async (req) => {
     // Route to appropriate PHP endpoint based on action
     switch (action) {
       case "list":
-        // List all programs for the school
-        backendUrl = `${BACKEND_BASE_URL}/list.php`;
+        // List all programs for the school (new endpoint)
+        backendUrl = PROGRAM_PROFILE_URL;
         break;
       case "info":
         // Get/update program information
-        backendUrl = `${BACKEND_BASE_URL}/update_program_information.php?program_id=${programId}`;
+        backendUrl = `${PROGRAMS_BASE_URL}/update_program_information.php?program_id=${programId}`;
         break;
       case "features":
         // Get/update program features (USP)
-        backendUrl = `${BACKEND_BASE_URL}/add_program_usp.php?program_id=${programId}`;
+        backendUrl = `${PROGRAMS_BASE_URL}/add_program_usp.php?program_id=${programId}`;
         break;
       case "members":
         // Get/update program members (faculty, students, alumni)
-        backendUrl = `${BACKEND_BASE_URL}/update_program_member.php?program_id=${programId}&category=${category}`;
+        backendUrl = `${PROGRAMS_BASE_URL}/update_program_member.php?program_id=${programId}&category=${category}`;
         break;
       case "rankings":
         // Get/update program rankings
-        backendUrl = `${BACKEND_BASE_URL}/update_program_rankings.php?program_id=${programId}&level=${level || "Program"}`;
+        backendUrl = `${PROGRAMS_BASE_URL}/update_program_rankings.php?program_id=${programId}&level=${level || "Program"}`;
         break;
       case "recruiters":
         // Get/update program recruiters
-        backendUrl = `${BACKEND_BASE_URL}/update_program_recruiters.php?program_id=${programId}`;
+        backendUrl = `${PROGRAMS_BASE_URL}/update_program_recruiters.php?program_id=${programId}`;
         break;
       case "jobroles":
         // Get/update program job roles
-        backendUrl = `${BACKEND_BASE_URL}/update_program_job_roles.php?program_id=${programId}`;
+        backendUrl = `${PROGRAMS_BASE_URL}/update_program_job_roles.php?program_id=${programId}`;
         break;
       case "faqs":
         // Get/update program FAQs
-        backendUrl = `${BACKEND_BASE_URL}/update_program_faqs.php?program_id=${programId}`;
+        backendUrl = `${PROGRAMS_BASE_URL}/update_program_faqs.php?program_id=${programId}`;
         break;
       case "pocs":
         // Get/update program points of contact
-        backendUrl = `${BACKEND_BASE_URL}/update_program_poc.php?program_id=${programId}`;
+        backendUrl = `${PROGRAMS_BASE_URL}/update_program_poc.php?program_id=${programId}`;
         break;
       case "ranking-orgs":
         // Get ranking organizations list
-        backendUrl = `${BACKEND_BASE_URL}/ranking_organizations.php`;
+        backendUrl = `${PROGRAMS_BASE_URL}/ranking_organizations.php`;
         break;
       default:
-        backendUrl = `${BACKEND_BASE_URL}/list.php`;
+        backendUrl = PROGRAM_PROFILE_URL;
     }
 
     console.log(`[programs-proxy] Action: ${action}, URL: ${backendUrl}, Method: ${req.method}`);
