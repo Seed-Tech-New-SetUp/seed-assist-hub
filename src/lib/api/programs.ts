@@ -16,15 +16,31 @@ export interface Program {
 }
 
 export interface ProgramInfo {
+  school_id: string;
+  school_name: string;
+  university: string;
+  currency: string;
+  program_id: string;
   program_name: string;
-  class_size: number;
-  average_age: number;
-  average_work_experience: number;
-  median_earnings: number;
-  graduation_rate: number;
+  program_internal_name: string;
+  tuition_fee: string;
+  application_fee: string;
+  application_deadline: string;
+  program_start_date: string;
+  program_duration: string;
+  class_size: string;
+  average_work_experience: string;
+  average_gmat_score: string;
+  average_gre_score: string;
+  gmat_range: string;
+  gre_range: string;
+  average_age: string;
+  percentage_international_students: string;
+  percentage_women: string;
+  employment_rate: string;
+  average_salary: string;
+  scholarship_amount: string;
   brochure_link: string;
-  is_hero_program: boolean;
-  diversity: { country: string; percentage: number }[];
 }
 
 export interface ProgramFeature {
@@ -142,12 +158,12 @@ export async function fetchPrograms(): Promise<Program[]> {
 // ============ Program Information ============
 
 export async function fetchProgramInfo(programId: string): Promise<ProgramInfo | null> {
-  const result = await callProgramsProxy<{ success: boolean; data?: ProgramInfo }>(
+  const result = await callProgramsProxy<{ success: boolean; data?: { program: ProgramInfo } }>(
     "info",
     "GET",
     { program_id: programId }
   );
-  return result.data || null;
+  return result.data?.program || null;
 }
 
 export async function saveProgramInfo(programId: string, info: Partial<ProgramInfo>): Promise<boolean> {
@@ -155,7 +171,7 @@ export async function saveProgramInfo(programId: string, info: Partial<ProgramIn
     "info",
     "POST",
     { program_id: programId },
-    info
+    { program_id: programId, ...info }
   );
   return result.success;
 }

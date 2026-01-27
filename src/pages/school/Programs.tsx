@@ -281,15 +281,24 @@ function ProgramInfoSection({ programId, onSave }: SectionProps) {
   const saveMutation = useSaveProgramInfo();
   
   const [formData, setFormData] = useState<Partial<ProgramInfo>>({
-    program_name: "",
-    class_size: 0,
-    average_age: 0,
-    average_work_experience: 0,
-    median_earnings: 0,
-    graduation_rate: 0,
+    tuition_fee: "",
+    application_fee: "",
+    application_deadline: "",
+    program_start_date: "",
+    program_duration: "",
+    class_size: "",
+    average_work_experience: "",
+    average_gmat_score: "",
+    average_gre_score: "",
+    gmat_range: "",
+    gre_range: "",
+    average_age: "",
+    percentage_international_students: "",
+    percentage_women: "",
+    employment_rate: "",
+    average_salary: "",
+    scholarship_amount: "",
     brochure_link: "",
-    is_hero_program: false,
-    diversity: [],
   });
 
   useEffect(() => {
@@ -304,118 +313,239 @@ function ProgramInfoSection({ programId, onSave }: SectionProps) {
     });
   };
 
-  const addDiversity = () => {
-    setFormData(prev => ({
-      ...prev,
-      diversity: [...(prev.diversity || []), { country: "", percentage: 0 }],
-    }));
-  };
-
-  const removeDiversity = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      diversity: (prev.diversity || []).filter((_, i) => i !== index),
-    }));
-  };
-
-  const updateDiversity = (index: number, field: string, value: string | number) => {
-    setFormData(prev => ({
-      ...prev,
-      diversity: (prev.diversity || []).map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
-      ),
-    }));
-  };
-
   if (isLoading) {
     return <div className="space-y-4"><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /></div>;
   }
 
   return (
     <div className="space-y-6">
+      {/* Read-only Program Info */}
+      {info && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg">
+          <div>
+            <Label className="text-xs text-muted-foreground">Program Name</Label>
+            <p className="font-medium">{info.program_name}</p>
+          </div>
+          <div>
+            <Label className="text-xs text-muted-foreground">School</Label>
+            <p className="font-medium">{info.school_name}</p>
+          </div>
+          <div>
+            <Label className="text-xs text-muted-foreground">University</Label>
+            <p className="font-medium">{info.university}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Fees & Dates */}
       <div>
-        <Label>Program Name</Label>
-        <Input 
-          value={formData.program_name || ""} 
-          onChange={(e) => setFormData(prev => ({ ...prev, program_name: e.target.value }))}
-          className="mt-1.5" 
-          placeholder="Enter program name..." 
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <Label>Class Size</Label>
-          <Input 
-            type="number" 
-            value={formData.class_size || ""} 
-            onChange={(e) => setFormData(prev => ({ ...prev, class_size: parseInt(e.target.value) || 0 }))}
-            className="mt-1.5" 
-            placeholder="Enter class size..." 
-          />
+        <h4 className="font-medium mb-3">Fees & Timeline</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <Label>Tuition Fee ({info?.currency || "USD"})</Label>
+            <Input 
+              type="text" 
+              value={formData.tuition_fee || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, tuition_fee: e.target.value }))}
+              className="mt-1.5" 
+              placeholder="e.g. 75000" 
+            />
+          </div>
+          <div>
+            <Label>Application Fee ({info?.currency || "USD"})</Label>
+            <Input 
+              type="text" 
+              value={formData.application_fee || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, application_fee: e.target.value }))}
+              className="mt-1.5" 
+              placeholder="e.g. 250" 
+            />
+          </div>
+          <div>
+            <Label>Scholarship Amount ({info?.currency || "USD"})</Label>
+            <Input 
+              type="text" 
+              value={formData.scholarship_amount || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, scholarship_amount: e.target.value }))}
+              className="mt-1.5" 
+              placeholder="e.g. 50000" 
+            />
+          </div>
         </div>
-        <div>
-          <Label>Average Age</Label>
-          <Input 
-            type="number" 
-            value={formData.average_age || ""} 
-            onChange={(e) => setFormData(prev => ({ ...prev, average_age: parseInt(e.target.value) || 0 }))}
-            className="mt-1.5" 
-            placeholder="Enter average age..." 
-          />
-        </div>
-        <div>
-          <Label>Average Work Experience (Years)</Label>
-          <Input 
-            type="number" 
-            value={formData.average_work_experience || ""} 
-            onChange={(e) => setFormData(prev => ({ ...prev, average_work_experience: parseFloat(e.target.value) || 0 }))}
-            className="mt-1.5" 
-            placeholder="Enter avg work exp..." 
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <Label>Median Earnings After Graduation (USD/Year)</Label>
-          <Input 
-            type="number" 
-            value={formData.median_earnings || ""} 
-            onChange={(e) => setFormData(prev => ({ ...prev, median_earnings: parseInt(e.target.value) || 0 }))}
-            className="mt-1.5" 
-            placeholder="Enter median earnings..." 
-          />
-        </div>
-        <div>
-          <Label>Graduation Rate (%)</Label>
-          <Input 
-            type="number" 
-            value={formData.graduation_rate || ""} 
-            onChange={(e) => setFormData(prev => ({ ...prev, graduation_rate: parseFloat(e.target.value) || 0 }))}
-            className="mt-1.5" 
-            placeholder="Enter graduation rate..." 
-            min="0" 
-            max="100" 
-          />
-        </div>
-        <div>
-          <Label>Is this a Hero Program?</Label>
-          <Select 
-            value={formData.is_hero_program ? "yes" : "no"}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, is_hero_program: value === "yes" }))}
-          >
-            <SelectTrigger className="mt-1.5">
-              <SelectValue placeholder="Select..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="yes">Yes</SelectItem>
-              <SelectItem value="no">No</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          <div>
+            <Label>Application Deadline</Label>
+            <Input 
+              type="date" 
+              value={formData.application_deadline || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, application_deadline: e.target.value }))}
+              className="mt-1.5" 
+            />
+          </div>
+          <div>
+            <Label>Program Start Date</Label>
+            <Input 
+              type="date" 
+              value={formData.program_start_date || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, program_start_date: e.target.value }))}
+              className="mt-1.5" 
+            />
+          </div>
+          <div>
+            <Label>Program Duration</Label>
+            <Input 
+              type="text" 
+              value={formData.program_duration || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, program_duration: e.target.value }))}
+              className="mt-1.5" 
+              placeholder="e.g. 2 years" 
+            />
+          </div>
         </div>
       </div>
 
+      <Separator />
+
+      {/* Class Profile */}
+      <div>
+        <h4 className="font-medium mb-3">Class Profile</h4>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <Label>Class Size</Label>
+            <Input 
+              type="text" 
+              value={formData.class_size || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, class_size: e.target.value }))}
+              className="mt-1.5" 
+              placeholder="e.g. 950" 
+            />
+          </div>
+          <div>
+            <Label>Average Age</Label>
+            <Input 
+              type="text" 
+              value={formData.average_age || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, average_age: e.target.value }))}
+              className="mt-1.5" 
+              placeholder="e.g. 28" 
+            />
+          </div>
+          <div>
+            <Label>% International Students</Label>
+            <Input 
+              type="text" 
+              value={formData.percentage_international_students || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, percentage_international_students: e.target.value }))}
+              className="mt-1.5" 
+              placeholder="e.g. 35" 
+            />
+          </div>
+          <div>
+            <Label>% Women</Label>
+            <Input 
+              type="text" 
+              value={formData.percentage_women || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, percentage_women: e.target.value }))}
+              className="mt-1.5" 
+              placeholder="e.g. 42" 
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div>
+            <Label>Average Work Experience</Label>
+            <Input 
+              type="text" 
+              value={formData.average_work_experience || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, average_work_experience: e.target.value }))}
+              className="mt-1.5" 
+              placeholder="e.g. 5 years" 
+            />
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Test Scores */}
+      <div>
+        <h4 className="font-medium mb-3">Test Scores</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label>Average GMAT Score</Label>
+            <Input 
+              type="text" 
+              value={formData.average_gmat_score || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, average_gmat_score: e.target.value }))}
+              className="mt-1.5" 
+              placeholder="e.g. 730" 
+            />
+          </div>
+          <div>
+            <Label>GMAT Range</Label>
+            <Input 
+              type="text" 
+              value={formData.gmat_range || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, gmat_range: e.target.value }))}
+              className="mt-1.5" 
+              placeholder="e.g. 680-780" 
+            />
+          </div>
+          <div>
+            <Label>Average GRE Score</Label>
+            <Input 
+              type="text" 
+              value={formData.average_gre_score || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, average_gre_score: e.target.value }))}
+              className="mt-1.5" 
+              placeholder="e.g. 325" 
+            />
+          </div>
+          <div>
+            <Label>GRE Range</Label>
+            <Input 
+              type="text" 
+              value={formData.gre_range || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, gre_range: e.target.value }))}
+              className="mt-1.5" 
+              placeholder="e.g. 315-335" 
+            />
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Employment Outcomes */}
+      <div>
+        <h4 className="font-medium mb-3">Employment Outcomes</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label>Employment Rate (%)</Label>
+            <Input 
+              type="text" 
+              value={formData.employment_rate || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, employment_rate: e.target.value }))}
+              className="mt-1.5" 
+              placeholder="e.g. 95" 
+            />
+          </div>
+          <div>
+            <Label>Average Salary ({info?.currency || "USD"})</Label>
+            <Input 
+              type="text" 
+              value={formData.average_salary || ""} 
+              onChange={(e) => setFormData(prev => ({ ...prev, average_salary: e.target.value }))}
+              className="mt-1.5" 
+              placeholder="e.g. 175000" 
+            />
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Brochure */}
       <div>
         <Label>Program Brochure Link</Label>
         <Input 
@@ -423,53 +553,8 @@ function ProgramInfoSection({ programId, onSave }: SectionProps) {
           value={formData.brochure_link || ""} 
           onChange={(e) => setFormData(prev => ({ ...prev, brochure_link: e.target.value }))}
           className="mt-1.5" 
-          placeholder="Enter brochure URL..." 
+          placeholder="https://example.com/brochure.pdf" 
         />
-      </div>
-
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <Label>Program Diversity (Country-wise)</Label>
-          <Button variant="outline" size="sm" onClick={addDiversity}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Country
-          </Button>
-        </div>
-        <div className="space-y-2">
-          {(formData.diversity || []).map((item, index) => (
-            <div key={index} className="flex gap-2 items-center">
-              <Input
-                value={item.country}
-                onChange={(e) => updateDiversity(index, "country", e.target.value)}
-                placeholder="Country name..."
-                className="flex-1"
-              />
-              <div className="flex items-center gap-1">
-                <Input
-                  type="number"
-                  value={item.percentage}
-                  onChange={(e) => updateDiversity(index, "percentage", parseFloat(e.target.value) || 0)}
-                  placeholder="%"
-                  className="w-20"
-                  min="0"
-                  max="100"
-                />
-                <span className="text-muted-foreground">%</span>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-destructive shrink-0"
-                onClick={() => removeDiversity(index)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
-        {(formData.diversity || []).length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-2">No diversity data added yet</p>
-        )}
       </div>
 
       <Button onClick={handleSave} disabled={saveMutation.isPending}>
