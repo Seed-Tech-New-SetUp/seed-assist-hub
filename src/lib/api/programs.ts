@@ -54,7 +54,7 @@ export interface ProgramFeature {
   is_approved_by?: string;
 }
 
-// Backend uses "organisation" (British spelling) and we keep the same spelling in the UI to avoid confusion
+// Backend uses "orgnaisation" (typo in DB) - we match it exactly to avoid confusion
 export interface ProgramMemberBackend {
   member_id?: string;
   program_id?: string;
@@ -64,7 +64,7 @@ export interface ProgramMemberBackend {
   email: string;
   linkedin_url: string;
   designation: string;
-  organisation: string; // Backend spelling
+  orgnaisation: string; // Backend spelling (typo in DB)
   call_to_action: string;
   image_name?: string;
   created_on?: string;
@@ -80,7 +80,7 @@ export interface ProgramMember {
   email: string;
   linkedin_url: string;
   designation: string;
-  organisation: string;
+  orgnaisation: string; // Backend spelling (typo in DB)
   call_to_action: string;
   image_name?: string;
   created_on?: string;
@@ -89,7 +89,7 @@ export interface ProgramMember {
 
 export interface ProgramRanking {
   id?: string;
-  organisation: string;
+  orgnaisation: string;
   year: string;
   level: string;
   rank: string;
@@ -116,7 +116,7 @@ export interface ProgramPOC {
   id?: string;
   full_name: string;
   designation: string;
-  organisation: string;
+  orgnaisation: string;
   contact_no: string;
   email: string;
 }
@@ -353,7 +353,7 @@ export async function fetchProgramMembers(
   );
   return (result.data?.members || []).map((m) => ({
     ...m,
-    organisation: m.organisation || "",
+    orgnaisation: m.orgnaisation || "",
   }));
 }
 
@@ -388,7 +388,7 @@ export async function saveProgramMember(
     formData.append("email", member.email);
     formData.append("linkedin_url", member.linkedin_url || "");
     formData.append("designation", member.designation || "");
-    formData.append("organisation", member.organisation || "");
+    formData.append("orgnaisation", member.orgnaisation || "");
     formData.append("call_to_action", member.call_to_action || "");
     
     if (isUpdate && member.member_id) {
@@ -440,7 +440,7 @@ export async function saveProgramMember(
         email: member.email,
         linkedin_url: member.linkedin_url || "",
         designation: member.designation || "",
-        organisation: member.organisation || "",
+        orgnaisation: member.orgnaisation || "",
         call_to_action: member.call_to_action || "",
       }),
     };

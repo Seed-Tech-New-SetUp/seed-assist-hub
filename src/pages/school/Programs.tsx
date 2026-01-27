@@ -899,8 +899,8 @@ function MemberForm({
         <div>
             <Label>Organisation</Label>
           <Input
-              value={member?.organisation || ""}
-              onChange={(e) => onChange({ ...member, organisation: e.target.value })}
+              value={member?.orgnaisation || ""}
+              onChange={(e) => onChange({ ...member, orgnaisation: e.target.value })}
               placeholder="Organisation name..."
             className="mt-1.5"
           />
@@ -986,7 +986,7 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
     email: "",
     linkedin_url: "",
     designation: "",
-    organisation: "",
+    orgnaisation: "",
     call_to_action: "",
     category,
     image_name: "",
@@ -1027,7 +1027,7 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
             email: newMember.email || "",
             linkedin_url: newMember.linkedin_url || "",
             designation: newMember.designation || "",
-            organisation: newMember.organisation || "",
+            orgnaisation: newMember.orgnaisation || "",
             call_to_action: newMember.call_to_action || "",
             image_name: newMember.image_name || "",
           },
@@ -1040,7 +1040,7 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
               email: "",
               linkedin_url: "",
               designation: "",
-              organisation: "",
+              orgnaisation: "",
               call_to_action: "",
               category,
               image_name: "",
@@ -1065,7 +1065,7 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
             email: editingMemberData.email || "",
             linkedin_url: editingMemberData.linkedin_url || "",
             designation: editingMemberData.designation || "",
-            organisation: editingMemberData.organisation || "",
+            orgnaisation: editingMemberData.orgnaisation || "",
             call_to_action: editingMemberData.call_to_action || "",
             image_name: editingMemberData.image_name || "",
           },
@@ -1195,11 +1195,11 @@ function ProgramMembersSection({ programId, category, title, onSave }: MembersSe
                               {defaultCategory}
                             </Badge>
                           </div>
-                          {(member.designation || member.organisation) && (
+                          {(member.designation || member.orgnaisation) && (
                             <p className="text-sm text-muted-foreground">
                               {member.designation}
-                              {member.designation && member.organisation ? " at " : ""}
-                              {member.organisation}
+                              {member.designation && member.orgnaisation ? " at " : ""}
+                              {member.orgnaisation}
                             </p>
                           )}
                           <div className="flex items-center gap-3 mt-1 flex-wrap">
@@ -1265,7 +1265,7 @@ function ProgramRankingsSection({ programId, onSave }: SectionProps) {
   const deleteMutation = useDeleteProgramRanking();
 
   const [newRanking, setNewRanking] = useState<Partial<ProgramRanking>>({
-    organisation: "",
+    orgnaisation: "",
     year: "",
     level: "Program",
     rank: "",
@@ -1273,18 +1273,18 @@ function ProgramRankingsSection({ programId, onSave }: SectionProps) {
   });
 
   const addRanking = () => {
-    if (newRanking.organisation && newRanking.year && newRanking.rank) {
+    if (newRanking.orgnaisation && newRanking.year && newRanking.rank) {
       saveMutation.mutate({
         programId,
         ranking: {
-          organisation: newRanking.organisation || "",
+          orgnaisation: newRanking.orgnaisation || "",
           year: newRanking.year || "",
           level: "Program",
           rank: newRanking.rank || "",
           supporting_text: newRanking.supporting_text || "",
         },
       });
-      setNewRanking({ organisation: "", year: "", level: "Program", rank: "", supporting_text: "" });
+      setNewRanking({ orgnaisation: "", year: "", level: "Program", rank: "", supporting_text: "" });
     }
   };
 
@@ -1311,8 +1311,8 @@ function ProgramRankingsSection({ programId, onSave }: SectionProps) {
             <div>
               <Label>Ranking Organisation</Label>
               <Select
-                value={newRanking.organisation || ""}
-                onValueChange={(value) => setNewRanking({ ...newRanking, organisation: value })}
+                value={newRanking.orgnaisation || ""}
+                onValueChange={(value) => setNewRanking({ ...newRanking, orgnaisation: value })}
               >
                 <SelectTrigger className="mt-1.5">
                   <SelectValue placeholder="Select organisation..." />
@@ -1366,7 +1366,7 @@ function ProgramRankingsSection({ programId, onSave }: SectionProps) {
 
           <Button
             onClick={addRanking}
-            disabled={!newRanking.organisation || !newRanking.year || !newRanking.rank || saveMutation.isPending}
+            disabled={!newRanking.orgnaisation || !newRanking.year || !newRanking.rank || saveMutation.isPending}
           >
             {saveMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             <Plus className="h-4 w-4 mr-2" />
@@ -1391,7 +1391,7 @@ function ProgramRankingsSection({ programId, onSave }: SectionProps) {
                           #{ranking.rank}
                         </div>
                         <div>
-                          <h5 className="font-medium text-foreground">{ranking.organisation}</h5>
+                          <h5 className="font-medium text-foreground">{ranking.orgnaisation}</h5>
                           <p className="text-sm text-muted-foreground">
                             {ranking.year} • {ranking.level} Level
                           </p>
@@ -1731,7 +1731,7 @@ function ProgramPOCsSection({ programId, onSave }: SectionProps) {
   const [newPoc, setNewPoc] = useState<Partial<ProgramPOC>>({
     full_name: "",
     designation: "",
-    organisation: "",
+    orgnaisation: "",
     contact_no: "",
     email: "",
   });
@@ -1743,12 +1743,12 @@ function ProgramPOCsSection({ programId, onSave }: SectionProps) {
         poc: {
           full_name: newPoc.full_name || "",
           designation: newPoc.designation || "",
-          organisation: newPoc.organisation || "",
+          orgnaisation: newPoc.orgnaisation || "",
           contact_no: newPoc.contact_no || "",
           email: newPoc.email || "",
         },
       });
-      setNewPoc({ full_name: "", designation: "", organisation: "", contact_no: "", email: "" });
+      setNewPoc({ full_name: "", designation: "", orgnaisation: "", contact_no: "", email: "" });
     }
   };
 
@@ -1787,8 +1787,8 @@ function ProgramPOCsSection({ programId, onSave }: SectionProps) {
             <div>
               <Label>Organisation (School)</Label>
               <Input
-                value={newPoc.organisation || ""}
-                onChange={(e) => setNewPoc({ ...newPoc, organisation: e.target.value })}
+                value={newPoc.orgnaisation || ""}
+                onChange={(e) => setNewPoc({ ...newPoc, orgnaisation: e.target.value })}
                 placeholder="Enter organisation..."
                 className="mt-1.5"
               />
@@ -1844,7 +1844,7 @@ function ProgramPOCsSection({ programId, onSave }: SectionProps) {
                       <div className="flex-1 min-w-0">
                         <h5 className="font-medium text-foreground">{poc.full_name}</h5>
                         <p className="text-sm text-muted-foreground">
-                          {poc.designation} • {poc.organisation}
+                          {poc.designation} • {poc.orgnaisation}
                         </p>
                         <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">
