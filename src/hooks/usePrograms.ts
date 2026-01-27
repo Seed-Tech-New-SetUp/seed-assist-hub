@@ -18,8 +18,7 @@ import {
   fetchProgramJobRoles,
   saveProgramJobRoles,
   fetchProgramFAQs,
-  saveProgramFAQ,
-  deleteProgramFAQ,
+  saveProgramFAQs,
   fetchProgramPOCs,
   saveProgramPOC,
   deleteProgramPOC,
@@ -285,33 +284,16 @@ export function useProgramFAQs(programId: string | null) {
   });
 }
 
-export function useSaveProgramFAQ() {
+export function useSaveProgramFAQs() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: ({ programId, faq }: { programId: string; faq: ProgramFAQ }) =>
-      saveProgramFAQ(programId, faq),
+    mutationFn: ({ programId, faqs }: { programId: string; faqs: ProgramFAQ[] }) =>
+      saveProgramFAQs(programId, faqs),
     onSuccess: (_, { programId }) => {
       queryClient.invalidateQueries({ queryKey: ["program-faqs", programId] });
-      toast({ title: "Success", description: "FAQ saved successfully." });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    },
-  });
-}
-
-export function useDeleteProgramFAQ() {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: ({ programId, faqId }: { programId: string; faqId: string }) =>
-      deleteProgramFAQ(programId, faqId),
-    onSuccess: (_, { programId }) => {
-      queryClient.invalidateQueries({ queryKey: ["program-faqs", programId] });
-      toast({ title: "Success", description: "FAQ removed." });
+      toast({ title: "Success", description: "FAQs updated successfully." });
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });

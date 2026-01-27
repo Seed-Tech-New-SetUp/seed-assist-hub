@@ -104,7 +104,7 @@ export type ProgramRecruiter = string;
 export type ProgramJobRole = string;
 
 export interface ProgramFAQ {
-  id?: string;
+  faq_id?: string;
   question: string;
   answer: string;
 }
@@ -609,22 +609,14 @@ export async function fetchProgramFAQs(programId: string): Promise<ProgramFAQ[]>
   return result.data?.faqs || [];
 }
 
-export async function saveProgramFAQ(programId: string, faq: ProgramFAQ): Promise<boolean> {
+// Save all FAQs at once (batch update - replaces existing, creates new)
+// FAQs with faq_id will be updated, FAQs without faq_id will be created
+export async function saveProgramFAQs(programId: string, faqs: ProgramFAQ[]): Promise<boolean> {
   const result = await callProgramsProxy<{ success: boolean }>(
     "faqs",
     "POST",
-    { program_id: programId },
-    faq
-  );
-  return result.success;
-}
-
-export async function deleteProgramFAQ(programId: string, faqId: string): Promise<boolean> {
-  const result = await callProgramsProxy<{ success: boolean }>(
-    "faqs",
-    "DELETE",
-    { program_id: programId },
-    { id: faqId }
+    {},
+    { program_id: programId, faqs }
   );
   return result.success;
 }

@@ -63,8 +63,7 @@ import {
   useProgramJobRoles,
   useSaveProgramJobRoles,
   useProgramFAQs,
-  useSaveProgramFAQ,
-  useDeleteProgramFAQ,
+  useSaveProgramFAQs,
   useProgramPOCs,
   useSaveProgramPOC,
   useDeleteProgramPOC,
@@ -1703,36 +1702,47 @@ function ProgramJobRolesSection({ programId, onSave }: SectionProps) {
 
 function ProgramFAQsSection({ programId, onSave }: SectionProps) {
   const { data: faqs = [], isLoading } = useProgramFAQs(programId);
-  const saveMutation = useSaveProgramFAQ();
-  const deleteMutation = useDeleteProgramFAQ();
+  const saveMutation = useSaveProgramFAQs();
 
+  const [localFaqs, setLocalFaqs] = useState<ProgramFAQ[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [newFaq, setNewFaq] = useState({ question: "", answer: "" });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState({ question: "", answer: "" });
 
+  // Sync local state with fetched data
+  useEffect(() => {
+    setLocalFaqs(faqs);
+  }, [faqs]);
+
   const addFaq = () => {
     if (newFaq.question.trim() && newFaq.answer.trim()) {
-      saveMutation.mutate({ programId, faq: newFaq });
+      // Add new FAQ without faq_id (backend will create it)
+      const updatedFaqs = [...localFaqs, { question: newFaq.question, answer: newFaq.answer }];
+      setLocalFaqs(updatedFaqs);
+      saveMutation.mutate({ programId, faqs: updatedFaqs });
       setNewFaq({ question: "", answer: "" });
       setIsAdding(false);
     }
   };
 
   const updateFaq = (faq: ProgramFAQ) => {
-    saveMutation.mutate({
-      programId,
-      faq: { id: faq.id, question: editData.question, answer: editData.answer },
-    });
+    const updatedFaqs = localFaqs.map((f) =>
+      f.faq_id === faq.faq_id ? { ...f, question: editData.question, answer: editData.answer } : f
+    );
+    setLocalFaqs(updatedFaqs);
+    saveMutation.mutate({ programId, faqs: updatedFaqs });
     setEditingId(null);
   };
 
   const removeFaq = (faqId: string) => {
-    deleteMutation.mutate({ programId, faqId });
+    const updatedFaqs = localFaqs.filter((f) => f.faq_id !== faqId);
+    setLocalFaqs(updatedFaqs);
+    saveMutation.mutate({ programId, faqs: updatedFaqs });
   };
 
   const startEditing = (faq: ProgramFAQ) => {
-    setEditingId(faq.id || null);
+    setEditingId(faq.faq_id || null);
     setEditData({ question: faq.question, answer: faq.answer });
   };
 
@@ -1794,17 +1804,17 @@ function ProgramFAQsSection({ programId, onSave }: SectionProps) {
       )}
 
       <div>
-        <h4 className="font-medium text-sm text-muted-foreground mb-3">Added FAQs ({faqs.length})</h4>
-        {faqs.length === 0 ? (
+        <h4 className="font-medium text-sm text-muted-foreground mb-3">Added FAQs ({localFaqs.length})</h4>
+        {localFaqs.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4 border rounded-lg">No FAQs added yet</p>
         ) : (
           <div className="space-y-3">
-            {faqs.map((faq) => (
-              <Card key={faq.id}>
+            {localFaqs.map((faq, index) => (
+              <Card key={faq.faq_id || `new-${index}`}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 space-y-3">
-                      {editingId === faq.id ? (
+                      {editingId === faq.faq_id ? (
                         <>
                           <div>
                             <Label>Question</Label>
@@ -1835,21 +1845,25 @@ function ProgramFAQsSection({ programId, onSave }: SectionProps) {
                             <p className="font-medium text-foreground">{faq.question}</p>
                             <p className="text-sm text-muted-foreground mt-1">{faq.answer}</p>
                           </div>
-                          <Button size="sm" variant="outline" onClick={() => startEditing(faq)}>
-                            Edit
-                          </Button>
+                          {faq.faq_id && (
+                            <Button size="sm" variant="outline" onClick={() => startEditing(faq)}>
+                              Edit
+                            </Button>
+                          )}
                         </>
                       )}
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-destructive shrink-0"
-                      onClick={() => faq.id && removeFaq(faq.id)}
-                      disabled={deleteMutation.isPending}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {faq.faq_id && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive shrink-0"
+                        onClick={() => removeFaq(faq.faq_id!)}
+                        disabled={saveMutation.isPending}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
