@@ -101,7 +101,10 @@ serve(async (req) => {
           : `${PROGRAM_PROFILE_URL}/job_roles.php`;
         break;
       case "faqs":
-        backendUrl = `${PROGRAMS_BASE_URL}/update_program_faqs.php?program_id=${programId}`;
+        // Single-file endpoint for GET & POST (batch update with faq_id)
+        backendUrl = req.method === "GET" 
+          ? `${PROGRAM_PROFILE_URL}/faqs.php?program_id=${programId}`
+          : `${PROGRAM_PROFILE_URL}/faqs.php`;
         break;
       case "pocs":
         backendUrl = `${PROGRAMS_BASE_URL}/update_program_poc.php?program_id=${programId}`;
