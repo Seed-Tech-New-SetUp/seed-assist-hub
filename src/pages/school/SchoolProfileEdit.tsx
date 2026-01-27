@@ -6,13 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ImageUpload } from "@/components/ui/image-upload";
@@ -20,13 +14,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { 
-  Building2, 
-  Globe, 
-  HelpCircle, 
-  Image as ImageIcon, 
-  Star, 
-  Trophy, 
+import {
+  Building2,
+  Globe,
+  HelpCircle,
+  Image as ImageIcon,
+  Star,
+  Trophy,
   Phone,
   GraduationCap,
   ChevronRight,
@@ -39,8 +33,36 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { useSchoolFAQs, useSaveSchoolFAQs, useSchoolInfo, useSaveSchoolInfo, useSchoolSocialMedia, useSaveSchoolSocialMedia, useSchoolFeatures, useCreateSchoolFeature, useUpdateSchoolFeature, useDeleteSchoolFeature, useSchoolLogos, useCreateSchoolLogo, useUpdateSchoolLogo, useDeleteSchoolLogo, useSchoolRankings, useCreateSchoolRanking, useUpdateSchoolRanking, useDeleteSchoolRanking } from "@/hooks/useSchoolProfile";
-import { SchoolFAQ, SchoolInfo, SchoolSocialMedia, SchoolFeature, SchoolLogo, SchoolRanking, RankingOrganization, calculateLogoRatio } from "@/lib/api/school-profile";
+import {
+  useSchoolFAQs,
+  useSaveSchoolFAQs,
+  useSchoolInfo,
+  useSaveSchoolInfo,
+  useSchoolSocialMedia,
+  useSaveSchoolSocialMedia,
+  useSchoolFeatures,
+  useCreateSchoolFeature,
+  useUpdateSchoolFeature,
+  useDeleteSchoolFeature,
+  useSchoolLogos,
+  useCreateSchoolLogo,
+  useUpdateSchoolLogo,
+  useDeleteSchoolLogo,
+  useSchoolRankings,
+  useCreateSchoolRanking,
+  useUpdateSchoolRanking,
+  useDeleteSchoolRanking,
+} from "@/hooks/useSchoolProfile";
+import {
+  SchoolFAQ,
+  SchoolInfo,
+  SchoolSocialMedia,
+  SchoolFeature,
+  SchoolLogo,
+  SchoolRanking,
+  RankingOrganization,
+  calculateLogoRatio,
+} from "@/lib/api/school-profile";
 
 const sections = [
   { id: "info", label: "Organisation Details", icon: Building2 },
@@ -57,7 +79,7 @@ export default function SchoolProfileEdit() {
   const [activeSection, setActiveSection] = useState("info");
   const [completedSections, setCompletedSections] = useState<string[]>([]);
   const { toast } = useToast();
-  
+
   // School Info state and mutation - lifted up for global save button
   const { data: apiInfo, isLoading: infoLoading } = useSchoolInfo();
   const saveInfo = useSaveSchoolInfo();
@@ -100,7 +122,7 @@ export default function SchoolProfileEdit() {
     }
   }, [apiSocialMedia]);
 
-  // Features state and mutations - lifted up for global save button  
+  // Features state and mutations - lifted up for global save button
   const { data: apiFeatures, isLoading: featuresLoading } = useSchoolFeatures();
   const createFeature = useCreateSchoolFeature();
   const updateFeature = useUpdateSchoolFeature();
@@ -112,9 +134,9 @@ export default function SchoolProfileEdit() {
       saveInfo.mutate(schoolInfo, {
         onSuccess: () => {
           setInfoHasChanges(false);
-          setCompletedSections(prev => [...new Set([...prev, sectionId])]);
+          setCompletedSections((prev) => [...new Set([...prev, sectionId])]);
           // Auto-advance to next section
-          const currentIndex = sections.findIndex(s => s.id === sectionId);
+          const currentIndex = sections.findIndex((s) => s.id === sectionId);
           if (currentIndex < sections.length - 1) {
             setActiveSection(sections[currentIndex + 1].id);
           }
@@ -124,13 +146,13 @@ export default function SchoolProfileEdit() {
     }
 
     if (sectionId === "faqs") {
-      const validFaqs = faqs.filter(faq => faq.question.trim() || faq.answer.trim());
+      const validFaqs = faqs.filter((faq) => faq.question.trim() || faq.answer.trim());
       saveFAQs.mutate(validFaqs, {
         onSuccess: () => {
           setFaqsHasChanges(false);
-          setCompletedSections(prev => [...new Set([...prev, sectionId])]);
+          setCompletedSections((prev) => [...new Set([...prev, sectionId])]);
           // Auto-advance to next section
-          const currentIndex = sections.findIndex(s => s.id === sectionId);
+          const currentIndex = sections.findIndex((s) => s.id === sectionId);
           if (currentIndex < sections.length - 1) {
             setActiveSection(sections[currentIndex + 1].id);
           }
@@ -143,9 +165,9 @@ export default function SchoolProfileEdit() {
       saveSocialMedia.mutate(socialMedia, {
         onSuccess: () => {
           setSocialHasChanges(false);
-          setCompletedSections(prev => [...new Set([...prev, sectionId])]);
+          setCompletedSections((prev) => [...new Set([...prev, sectionId])]);
           // Auto-advance to next section
-          const currentIndex = sections.findIndex(s => s.id === sectionId);
+          const currentIndex = sections.findIndex((s) => s.id === sectionId);
           if (currentIndex < sections.length - 1) {
             setActiveSection(sections[currentIndex + 1].id);
           }
@@ -153,30 +175,30 @@ export default function SchoolProfileEdit() {
       });
       return;
     }
-    
+
     // Default save behavior for other sections
-    setCompletedSections(prev => [...new Set([...prev, sectionId])]);
+    setCompletedSections((prev) => [...new Set([...prev, sectionId])]);
     toast({
       title: "Section Saved",
       description: "Your changes have been saved successfully.",
     });
-    
+
     // Auto-advance to next section
-    const currentIndex = sections.findIndex(s => s.id === sectionId);
+    const currentIndex = sections.findIndex((s) => s.id === sectionId);
     if (currentIndex < sections.length - 1) {
       setActiveSection(sections[currentIndex + 1].id);
     }
   };
 
   const handleNext = () => {
-    const currentIndex = sections.findIndex(s => s.id === activeSection);
+    const currentIndex = sections.findIndex((s) => s.id === activeSection);
     if (currentIndex < sections.length - 1) {
       setActiveSection(sections[currentIndex + 1].id);
     }
   };
 
   const handlePrevious = () => {
-    const currentIndex = sections.findIndex(s => s.id === activeSection);
+    const currentIndex = sections.findIndex((s) => s.id === activeSection);
     if (currentIndex > 0) {
       setActiveSection(sections[currentIndex - 1].id);
     }
@@ -207,13 +229,19 @@ export default function SchoolProfileEdit() {
                         "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors text-left",
                         isActive
                           ? "bg-primary text-primary-foreground"
-                          : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                          : "hover:bg-muted text-muted-foreground hover:text-foreground",
                       )}
                     >
-                      <div className={cn(
-                        "flex items-center justify-center h-6 w-6 rounded-full text-xs font-medium",
-                        isCompleted ? "bg-green-500 text-white" : isActive ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground"
-                      )}>
+                      <div
+                        className={cn(
+                          "flex items-center justify-center h-6 w-6 rounded-full text-xs font-medium",
+                          isCompleted
+                            ? "bg-green-500 text-white"
+                            : isActive
+                              ? "bg-primary-foreground/20 text-primary-foreground"
+                              : "bg-muted text-muted-foreground",
+                        )}
+                      >
                         {isCompleted ? <Check className="h-3.5 w-3.5" /> : index + 1}
                       </div>
                       <span className="flex-1">{section.label}</span>
@@ -229,13 +257,11 @@ export default function SchoolProfileEdit() {
           <div className="lg:col-span-3">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">
-                  {sections.find(s => s.id === activeSection)?.label}
-                </CardTitle>
+                <CardTitle className="text-lg">{sections.find((s) => s.id === activeSection)?.label}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 {activeSection === "info" && (
-                  <SchoolInfoSection 
+                  <SchoolInfoSection
                     info={schoolInfo}
                     setInfo={setSchoolInfo}
                     isLoading={infoLoading}
@@ -245,7 +271,7 @@ export default function SchoolProfileEdit() {
                   />
                 )}
                 {activeSection === "social" && (
-                  <SocialMediaSection 
+                  <SocialMediaSection
                     socialMedia={socialMedia}
                     setSocialMedia={setSocialMedia}
                     isLoading={socialLoading}
@@ -253,7 +279,7 @@ export default function SchoolProfileEdit() {
                   />
                 )}
                 {activeSection === "faqs" && (
-                  <FAQsSection 
+                  <FAQsSection
                     faqs={faqs}
                     setFaqs={setFaqs}
                     isLoading={faqsLoading}
@@ -264,7 +290,7 @@ export default function SchoolProfileEdit() {
                   />
                 )}
                 {activeSection === "features" && (
-                  <FeaturesSection 
+                  <FeaturesSection
                     features={apiFeatures || []}
                     isLoading={featuresLoading}
                     onCreate={createFeature.mutate}
@@ -283,15 +309,11 @@ export default function SchoolProfileEdit() {
                 {/* Navigation Buttons */}
                 <Separator />
                 <div className="flex justify-between">
-                  <Button
-                    variant="outline"
-                    onClick={handlePrevious}
-                    disabled={activeSection === sections[0].id}
-                  >
+                  <Button variant="outline" onClick={handlePrevious} disabled={activeSection === sections[0].id}>
                     Previous
                   </Button>
                   <div className="flex gap-2">
-                    <Button 
+                    <Button
                       onClick={() => handleSave(activeSection)}
                       disabled={
                         (activeSection === "info" && saveInfo.isPending) ||
@@ -331,9 +353,16 @@ interface SchoolInfoSectionProps {
   setBannerPreview: React.Dispatch<React.SetStateAction<string>>;
 }
 
-function SchoolInfoSection({ info, setInfo, isLoading, setHasChanges, bannerPreview, setBannerPreview }: SchoolInfoSectionProps) {
+function SchoolInfoSection({
+  info,
+  setInfo,
+  isLoading,
+  setHasChanges,
+  bannerPreview,
+  setBannerPreview,
+}: SchoolInfoSectionProps) {
   const updateField = (field: keyof SchoolInfo, value: string | number) => {
-    setInfo(prev => ({ ...prev, [field]: value }));
+    setInfo((prev) => ({ ...prev, [field]: value }));
     setHasChanges(true);
   };
 
@@ -358,18 +387,18 @@ function SchoolInfoSection({ info, setInfo, isLoading, setHasChanges, bannerPrev
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label>School Name</Label>
-          <Input 
-            placeholder="School name" 
-            className="mt-1.5" 
+          <Input
+            placeholder="School name"
+            className="mt-1.5"
             value={info.school_name || ""}
             onChange={(e) => updateField("school_name", e.target.value)}
           />
         </div>
         <div>
           <Label>University</Label>
-          <Input 
-            placeholder="University name" 
-            className="mt-1.5" 
+          <Input
+            placeholder="University name"
+            className="mt-1.5"
             value={info.university || ""}
             onChange={(e) => updateField("university", e.target.value)}
           />
@@ -391,10 +420,7 @@ function SchoolInfoSection({ info, setInfo, isLoading, setHasChanges, bannerPrev
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label>Currency</Label>
-          <Select 
-            value={info.currency || ""} 
-            onValueChange={(value) => updateField("currency", value)}
-          >
+          <Select value={info.currency || ""} onValueChange={(value) => updateField("currency", value)}>
             <SelectTrigger className="mt-1.5">
               <SelectValue placeholder="Select currency" />
             </SelectTrigger>
@@ -410,27 +436,27 @@ function SchoolInfoSection({ info, setInfo, isLoading, setHasChanges, bannerPrev
         </div>
         <div>
           <Label>City</Label>
-          <Input 
-            placeholder="City" 
-            className="mt-1.5" 
+          <Input
+            placeholder="City"
+            className="mt-1.5"
             value={info.city || ""}
             onChange={(e) => updateField("city", e.target.value)}
           />
         </div>
         <div>
           <Label>State</Label>
-          <Input 
-            placeholder="State/Province" 
-            className="mt-1.5" 
+          <Input
+            placeholder="State/Province"
+            className="mt-1.5"
             value={info.state || ""}
             onChange={(e) => updateField("state", e.target.value)}
           />
         </div>
         <div>
           <Label>Country</Label>
-          <Input 
-            placeholder="Country" 
-            className="mt-1.5" 
+          <Input
+            placeholder="Country"
+            className="mt-1.5"
             value={info.country || ""}
             onChange={(e) => updateField("country", e.target.value)}
           />
@@ -443,8 +469,11 @@ function SchoolInfoSection({ info, setInfo, isLoading, setHasChanges, bannerPrev
         <div className="mt-2 space-y-3">
           {(bannerPreview || info.school_banner) && (
             <div className="rounded-lg overflow-hidden border relative group">
-              <img 
-                src={bannerPreview || `http://admin.seedglobaleducation.com/assets/img/school_banners/${info.school_banner}`}
+              <img
+                src={
+                  bannerPreview ||
+                  `http://admin.seedglobaleducation.com/assets/img/school_banners/${info.school_banner}`
+                }
                 alt="School Banner"
                 className="w-full h-48 object-cover"
                 onError={(e) => {
@@ -452,7 +481,9 @@ function SchoolInfoSection({ info, setInfo, isLoading, setHasChanges, bannerPrev
                 }}
               />
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <span className="text-white text-sm font-medium">{bannerPreview ? "New Banner" : "Current Banner"}</span>
+                <span className="text-white text-sm font-medium">
+                  {bannerPreview ? "New Banner" : "Current Banner"}
+                </span>
               </div>
             </div>
           )}
@@ -475,9 +506,9 @@ function SchoolInfoSection({ info, setInfo, isLoading, setHasChanges, bannerPrev
       {/* Brochure Link */}
       <div>
         <Label>School Brochure Link</Label>
-        <Input 
-          placeholder="https://example.com/brochure.pdf" 
-          className="mt-1.5" 
+        <Input
+          placeholder="https://example.com/brochure.pdf"
+          className="mt-1.5"
           value={info.school_brochure_link || ""}
           onChange={(e) => updateField("school_brochure_link", e.target.value)}
         />
@@ -487,35 +518,34 @@ function SchoolInfoSection({ info, setInfo, isLoading, setHasChanges, bannerPrev
       <div className="grid grid-cols-3 gap-4">
         <div>
           <Label>Graduate/PhD Programs</Label>
-          <Input 
-            type="number" 
-            placeholder="25" 
-            className="mt-1.5" 
+          <Input
+            type="number"
+            placeholder="25"
+            className="mt-1.5"
             value={info.graduate_phd_programs || ""}
             onChange={(e) => updateField("graduate_phd_programs", e.target.value)}
           />
         </div>
         <div>
           <Label>International Students %</Label>
-          <Input 
-            type="number" 
-            placeholder="35" 
-            className="mt-1.5" 
+          <Input
+            type="number"
+            placeholder="35"
+            className="mt-1.5"
             value={info.international_students || ""}
             onChange={(e) => updateField("international_students", e.target.value)}
           />
         </div>
         <div>
           <Label>Scholarship Amount</Label>
-          <Input 
-            placeholder="3 Million USD" 
-            className="mt-1.5" 
+          <Input
+            placeholder="3 Million USD"
+            className="mt-1.5"
             value={info.scholarship_amount || ""}
             onChange={(e) => updateField("scholarship_amount", e.target.value)}
           />
         </div>
       </div>
-
     </div>
   );
 }
@@ -529,7 +559,7 @@ interface SocialMediaSectionProps {
 
 function SocialMediaSection({ socialMedia, setSocialMedia, isLoading, setHasChanges }: SocialMediaSectionProps) {
   const updateField = (field: keyof SchoolSocialMedia, value: string) => {
-    setSocialMedia(prev => ({ ...prev, [field]: value }));
+    setSocialMedia((prev) => ({ ...prev, [field]: value }));
     setHasChanges(true);
   };
 
@@ -548,36 +578,36 @@ function SocialMediaSection({ socialMedia, setSocialMedia, isLoading, setHasChan
     <div className="space-y-4">
       <div>
         <Label>Instagram URL</Label>
-        <Input 
-          placeholder="https://instagram.com/..." 
-          className="mt-1.5" 
+        <Input
+          placeholder="https://instagram.com/..."
+          className="mt-1.5"
           value={socialMedia.instagram || ""}
           onChange={(e) => updateField("instagram", e.target.value)}
         />
       </div>
       <div>
         <Label>X (Twitter) URL</Label>
-        <Input 
-          placeholder="https://x.com/..." 
-          className="mt-1.5" 
+        <Input
+          placeholder="https://x.com/..."
+          className="mt-1.5"
           value={socialMedia.twitter || ""}
           onChange={(e) => updateField("twitter", e.target.value)}
         />
       </div>
       <div>
         <Label>LinkedIn URL</Label>
-        <Input 
-          placeholder="https://linkedin.com/..." 
-          className="mt-1.5" 
+        <Input
+          placeholder="https://linkedin.com/..."
+          className="mt-1.5"
           value={socialMedia.linkedin || ""}
           onChange={(e) => updateField("linkedin", e.target.value)}
         />
       </div>
       <div>
         <Label>YouTube URL</Label>
-        <Input 
-          placeholder="https://youtube.com/..." 
-          className="mt-1.5" 
+        <Input
+          placeholder="https://youtube.com/..."
+          className="mt-1.5"
           value={socialMedia.youtube || ""}
           onChange={(e) => updateField("youtube", e.target.value)}
         />
@@ -645,8 +675,8 @@ function FAQsSection({ faqs, setFaqs, isLoading, hasChanges, setHasChanges, onSa
               <div className="flex-1 space-y-3">
                 <div>
                   <Label>Question</Label>
-                  <Input 
-                    placeholder="Enter question..." 
+                  <Input
+                    placeholder="Enter question..."
                     className="mt-1.5"
                     value={faq.question}
                     onChange={(e) => updateFaq(index, "question", e.target.value)}
@@ -654,20 +684,15 @@ function FAQsSection({ faqs, setFaqs, isLoading, hasChanges, setHasChanges, onSa
                 </div>
                 <div>
                   <Label>Answer</Label>
-                  <Textarea 
-                    placeholder="Enter answer..." 
+                  <Textarea
+                    placeholder="Enter answer..."
                     className="mt-1.5"
                     value={faq.answer}
                     onChange={(e) => updateFaq(index, "answer", e.target.value)}
                   />
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-destructive"
-                onClick={() => removeFaq(index)}
-              >
+              <Button variant="ghost" size="icon" className="text-destructive" onClick={() => removeFaq(index)}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
@@ -696,7 +721,16 @@ interface FeaturesSectionProps {
   isDeleting: boolean;
 }
 
-function FeaturesSection({ features, isLoading, onCreate, onUpdate, onDelete, isCreating, isUpdating, isDeleting }: FeaturesSectionProps) {
+function FeaturesSection({
+  features,
+  isLoading,
+  onCreate,
+  onUpdate,
+  onDelete,
+  isCreating,
+  isUpdating,
+  isDeleting,
+}: FeaturesSectionProps) {
   const [featureForm, setFeatureForm] = useState({ title: "", description: "", image: "" });
   const [editingFeatureId, setEditingFeatureId] = useState<string | null>(null);
 
@@ -767,31 +801,31 @@ function FeaturesSection({ features, isLoading, onCreate, onUpdate, onDelete, is
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">
-            {editingFeatureId ? "Edit Feature" : "Add Feature"}
-          </CardTitle>
+          <CardTitle className="text-sm">{editingFeatureId ? "Edit Feature" : "Add Feature"}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
             <Label>Title</Label>
-            <Input 
+            <Input
               value={featureForm.title}
               onChange={(e) => setFeatureForm({ ...featureForm, title: e.target.value })}
-              placeholder="Feature title" 
-              className="mt-1.5" 
+              placeholder="Feature title"
+              className="mt-1.5"
             />
           </div>
           <div>
             <Label>Description</Label>
-            <Textarea 
+            <Textarea
               value={featureForm.description}
               onChange={(e) => setFeatureForm({ ...featureForm, description: e.target.value })}
-              placeholder="Feature description" 
-              className="mt-1.5" 
+              placeholder="Feature description"
+              className="mt-1.5"
             />
           </div>
           <div>
-            <Label>Image {editingFeatureId && <span className="text-muted-foreground">(optional - upload to replace)</span>}</Label>
+            <Label>
+              Image {editingFeatureId && <span className="text-muted-foreground">(optional - upload to replace)</span>}
+            </Label>
             <ImageUpload
               value={featureForm.image}
               onChange={(url) => setFeatureForm({ ...featureForm, image: url })}
@@ -814,9 +848,7 @@ function FeaturesSection({ features, isLoading, onCreate, onUpdate, onDelete, is
         </CardContent>
       </Card>
       {features.length === 0 ? (
-        <div className="text-sm text-muted-foreground text-center py-4">
-          No features added yet
-        </div>
+        <div className="text-sm text-muted-foreground text-center py-4">No features added yet</div>
       ) : (
         <div className="space-y-3">
           {features.map((feature) => (
@@ -824,9 +856,9 @@ function FeaturesSection({ features, isLoading, onCreate, onUpdate, onDelete, is
               <CardContent className="p-4 flex items-start justify-between gap-4">
                 <div className="flex gap-3 flex-1">
                   {getFeatureImageUrl(feature) ? (
-                    <img 
-                      src={getFeatureImageUrl(feature)} 
-                      alt={feature.usp_title} 
+                    <img
+                      src={getFeatureImageUrl(feature)}
+                      alt={feature.usp_title}
                       className="w-16 h-16 rounded object-cover shrink-0"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "/placeholder.svg";
@@ -843,18 +875,18 @@ function FeaturesSection({ features, isLoading, onCreate, onUpdate, onDelete, is
                   </div>
                 </div>
                 <div className="flex gap-1">
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="icon"
                     onClick={() => handleEditFeature(feature)}
                     disabled={isUpdating || isDeleting}
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="text-destructive" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive"
                     onClick={() => handleDeleteFeature(feature.usp_id || "")}
                     disabled={isDeleting}
                   >
@@ -877,7 +909,7 @@ function LogosSection() {
   const createLogo = useCreateSchoolLogo();
   const updateLogo = useUpdateSchoolLogo();
   const deleteLogo = useDeleteSchoolLogo();
-  
+
   const [newLogoPreview, setNewLogoPreview] = useState("");
   const [newLogoRatio, setNewLogoRatio] = useState("");
   const [editingLogoId, setEditingLogoId] = useState<string | null>(null);
@@ -889,7 +921,7 @@ function LogosSection() {
       setNewLogoRatio("");
       return;
     }
-    
+
     // Calculate ratio from image
     const img = new Image();
     img.onload = () => {
@@ -902,12 +934,12 @@ function LogosSection() {
 
   const handleCreateLogo = async () => {
     if (!newLogoPreview || !newLogoRatio) return;
-    
+
     await createLogo.mutateAsync({
       logo: newLogoPreview,
       logoRatio: newLogoRatio,
     });
-    
+
     setNewLogoPreview("");
     setNewLogoRatio("");
   };
@@ -917,7 +949,7 @@ function LogosSection() {
       setEditingLogoId(null);
       return;
     }
-    
+
     // Calculate new ratio
     const img = new Image();
     img.onload = async () => {
@@ -973,15 +1005,15 @@ function LogosSection() {
                   {newLogoRatio || "Upload an image to detect ratio"}
                 </p>
               </div>
-              <Button 
-                onClick={handleCreateLogo} 
-                disabled={!newLogoPreview || createLogo.isPending}
-                className="w-full"
-              >
+              <Button onClick={handleCreateLogo} disabled={!newLogoPreview || createLogo.isPending} className="w-full">
                 {createLogo.isPending ? (
-                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Adding...</>
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Adding...
+                  </>
                 ) : (
-                  <><Plus className="h-4 w-4 mr-2" /> Add Logo</>
+                  <>
+                    <Plus className="h-4 w-4 mr-2" /> Add Logo
+                  </>
                 )}
               </Button>
             </div>
@@ -1011,7 +1043,11 @@ function LogosSection() {
                           onClick={() => handleUpdateLogo(logo.logo_id || "")}
                           disabled={updateLogo.isPending || !editLogoPreview}
                         >
-                          {updateLogo.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                          {updateLogo.isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Check className="h-4 w-4" />
+                          )}
                         </Button>
                         <Button
                           size="sm"
@@ -1027,7 +1063,7 @@ function LogosSection() {
                     </div>
                   ) : (
                     <>
-                      <div 
+                      <div
                         className="bg-muted rounded flex items-center justify-center p-2"
                         style={{
                           aspectRatio: logo.logo_ratio?.replace(":", "/") || "1/1",
@@ -1044,9 +1080,7 @@ function LogosSection() {
                         />
                       </div>
                       <div className="mt-2 flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">
-                          Ratio: {logo.logo_ratio || "Unknown"}
-                        </span>
+                        <span className="text-sm text-muted-foreground">Ratio: {logo.logo_ratio || "Unknown"}</span>
                         <div className="flex gap-1">
                           <Button
                             variant="ghost"
@@ -1066,7 +1100,11 @@ function LogosSection() {
                             onClick={() => handleDeleteLogo(logo.logo_id || "")}
                             disabled={deleteLogo.isPending}
                           >
-                            {deleteLogo.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                            {deleteLogo.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
                           </Button>
                         </div>
                       </div>
@@ -1138,12 +1176,7 @@ function OrganizationCombobox({
                     setOpen(false);
                   }}
                 >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === org.ranking_org_id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
+                  <Check className={cn("mr-2 h-4 w-4", value === org.ranking_org_id ? "opacity-100" : "opacity-0")} />
                   {org.ranking_org_name}
                 </CommandItem>
               ))}
@@ -1163,7 +1196,7 @@ function RankingsSection() {
 
   const [formData, setFormData] = useState({
     ranking_organisation: "",
-    ranking_year: "",
+    year: "",
     level: "School",
     rank: "",
     minimum_range: "",
@@ -1177,7 +1210,7 @@ function RankingsSection() {
     ranking_org_id: string;
     ranking_addition_id: string;
     ranking_organisation: string;
-    ranking_year: string;
+    year: string;
     level: string;
     rank: string;
     minimum_range: string;
@@ -1191,7 +1224,7 @@ function RankingsSection() {
   const resetForm = () => {
     setFormData({
       ranking_organisation: "",
-      ranking_year: "",
+      year: "",
       level: "School",
       rank: "",
       minimum_range: "",
@@ -1202,14 +1235,14 @@ function RankingsSection() {
   };
 
   const handleCreate = () => {
-    if (!formData.ranking_organisation || !formData.ranking_year) {
+    if (!formData.ranking_organisation || !formData.year) {
       return;
     }
 
     createRanking.mutate(
       {
         ranking_organisation: formData.ranking_organisation,
-        ranking_year: formData.ranking_year,
+        year: formData.year,
         level: formData.level,
         rank: useRange ? "" : formData.rank,
         minimum_range: useRange ? formData.minimum_range : "",
@@ -1220,7 +1253,7 @@ function RankingsSection() {
         onSuccess: () => {
           resetForm();
         },
-      }
+      },
     );
   };
 
@@ -1231,7 +1264,7 @@ function RankingsSection() {
       ranking_org_id: ranking.ranking_org_id || "",
       ranking_addition_id: ranking.ranking_addition_id || "",
       ranking_organisation: ranking.ranking_org_id || "",
-      ranking_year: ranking.ranking_year || "",
+      year: ranking.year || "",
       level: ranking.level || "School",
       rank: ranking.rank || "",
       minimum_range: ranking.minimum_range || "",
@@ -1284,9 +1317,7 @@ function RankingsSection() {
                   ? `The backend request failed: ${(error as Error | undefined)?.message || "Unknown error"}`
                   : "The backend returned 0 organizations, so the dropdown is empty."}
               </p>
-              <p>
-                Please make sure you’re logged in and have selected a school, then click refresh.
-              </p>
+              <p>Please make sure you’re logged in and have selected a school, then click refresh.</p>
               <div>
                 <Button type="button" variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
                   {isFetching && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
@@ -1311,14 +1342,14 @@ function RankingsSection() {
                 organizations={organizations}
                 value={formData.ranking_organisation}
                 onValueChange={(value) => setFormData((prev) => ({ ...prev, ranking_organisation: value }))}
-                selectedYear={formData.ranking_year}
+                selectedYear={formData.year}
               />
             </div>
             <div>
               <Label>Year</Label>
               <Select
-                value={formData.ranking_year}
-                onValueChange={(value) => setFormData((prev) => ({ ...prev, ranking_year: value }))}
+                value={formData.year}
+                onValueChange={(value) => setFormData((prev) => ({ ...prev, year: value }))}
               >
                 <SelectTrigger className="mt-1.5">
                   <SelectValue placeholder="Select year" />
@@ -1359,7 +1390,9 @@ function RankingsSection() {
                 onChange={(e) => setUseRange(e.target.checked)}
                 className="rounded border-input"
               />
-              <Label htmlFor="use-range" className="cursor-pointer">Use range (e.g., 9-20)</Label>
+              <Label htmlFor="use-range" className="cursor-pointer">
+                Use range (e.g., 9-20)
+              </Label>
             </div>
 
             {useRange ? (
@@ -1408,7 +1441,10 @@ function RankingsSection() {
               onChange={(e) => setFormData((prev) => ({ ...prev, supporting_text: e.target.value }))}
             />
           </div>
-          <Button onClick={handleCreate} disabled={createRanking.isPending || !formData.ranking_organisation || !formData.ranking_year}>
+          <Button
+            onClick={handleCreate}
+            disabled={createRanking.isPending || !formData.ranking_organisation || !formData.year}
+          >
             {createRanking.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Add Ranking
           </Button>
@@ -1429,15 +1465,17 @@ function RankingsSection() {
                         <OrganizationCombobox
                           organizations={organizations}
                           value={editData.ranking_organisation}
-                          onValueChange={(value) => setEditData((prev) => prev ? { ...prev, ranking_organisation: value } : null)}
-                          selectedYear={editData.ranking_year}
+                          onValueChange={(value) =>
+                            setEditData((prev) => (prev ? { ...prev, ranking_organisation: value } : null))
+                          }
+                          selectedYear={editData.year}
                         />
                       </div>
                       <div>
                         <Label>Year</Label>
                         <Select
-                          value={editData.ranking_year}
-                          onValueChange={(value) => setEditData((prev) => prev ? { ...prev, ranking_year: value } : null)}
+                          value={editData.year}
+                          onValueChange={(value) => setEditData((prev) => (prev ? { ...prev, year: value } : null))}
                         >
                           <SelectTrigger className="mt-1.5">
                             <SelectValue placeholder="Select year" />
@@ -1456,7 +1494,7 @@ function RankingsSection() {
                       <Label>Level</Label>
                       <Select
                         value={editData.level}
-                        onValueChange={(value) => setEditData((prev) => prev ? { ...prev, level: value } : null)}
+                        onValueChange={(value) => setEditData((prev) => (prev ? { ...prev, level: value } : null))}
                       >
                         <SelectTrigger className="mt-1.5">
                           <SelectValue placeholder="Select level" />
@@ -1473,7 +1511,7 @@ function RankingsSection() {
                         <Input
                           type="number"
                           value={editData.rank}
-                          onChange={(e) => setEditData((prev) => prev ? { ...prev, rank: e.target.value } : null)}
+                          onChange={(e) => setEditData((prev) => (prev ? { ...prev, rank: e.target.value } : null))}
                           className="mt-1.5"
                         />
                       </div>
@@ -1482,7 +1520,9 @@ function RankingsSection() {
                         <Input
                           type="number"
                           value={editData.minimum_range}
-                          onChange={(e) => setEditData((prev) => prev ? { ...prev, minimum_range: e.target.value } : null)}
+                          onChange={(e) =>
+                            setEditData((prev) => (prev ? { ...prev, minimum_range: e.target.value } : null))
+                          }
                           className="mt-1.5"
                         />
                       </div>
@@ -1491,7 +1531,9 @@ function RankingsSection() {
                         <Input
                           type="number"
                           value={editData.maximum_range}
-                          onChange={(e) => setEditData((prev) => prev ? { ...prev, maximum_range: e.target.value } : null)}
+                          onChange={(e) =>
+                            setEditData((prev) => (prev ? { ...prev, maximum_range: e.target.value } : null))
+                          }
                           className="mt-1.5"
                         />
                       </div>
@@ -1500,7 +1542,9 @@ function RankingsSection() {
                       <Label>Supporting Text</Label>
                       <Textarea
                         value={editData.supporting_text}
-                        onChange={(e) => setEditData((prev) => prev ? { ...prev, supporting_text: e.target.value } : null)}
+                        onChange={(e) =>
+                          setEditData((prev) => (prev ? { ...prev, supporting_text: e.target.value } : null))
+                        }
                         className="mt-1.5"
                       />
                     </div>
@@ -1509,7 +1553,13 @@ function RankingsSection() {
                         {updateRanking.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                         Save
                       </Button>
-                      <Button variant="outline" onClick={() => { setEditingId(null); setEditData(null); }}>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setEditingId(null);
+                          setEditData(null);
+                        }}
+                      >
                         Cancel
                       </Button>
                     </div>
@@ -1517,33 +1567,25 @@ function RankingsSection() {
                 ) : (
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2">
                         <span className="font-medium">
                           {ranking.ranking_org_name}
-                          {ranking.ranking_year && (
-                            <span className="text-muted-foreground font-normal"> ({ranking.ranking_year})</span>
-                          )}
+                          {ranking.year && <span className="text-muted-foreground font-normal"> ({ranking.year})</span>}
                         </span>
                       </div>
                       <div className="text-lg font-semibold text-primary">
-                        {ranking.rank ? (
-                          `#${ranking.rank}`
-                        ) : ranking.minimum_range && ranking.maximum_range ? (
-                          `#${ranking.minimum_range} - #${ranking.maximum_range}`
-                        ) : (
-                          "N/A"
-                        )}
+                        {ranking.rank
+                          ? `#${ranking.rank}`
+                          : ranking.minimum_range && ranking.maximum_range
+                            ? `#${ranking.minimum_range} - #${ranking.maximum_range}`
+                            : "N/A"}
                       </div>
                       {ranking.supporting_text && (
                         <p className="text-sm text-muted-foreground">{ranking.supporting_text}</p>
                       )}
                     </div>
                     <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleStartEdit(ranking)}
-                      >
+                      <Button variant="ghost" size="icon" onClick={() => handleStartEdit(ranking)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
