@@ -43,10 +43,15 @@ export interface ProgramInfo {
 }
 
 export interface ProgramFeature {
-  id?: string;
-  title: string;
-  description: string;
-  photo_url: string;
+  usp_id?: string;
+  program_id?: string;
+  usp_title: string;
+  usp_description: string;
+  usp_image_name?: string;
+  usp_file_format?: string;
+  created_on?: string;
+  created_by?: string;
+  is_approved_by?: string;
 }
 
 export interface ProgramMember {
@@ -203,7 +208,14 @@ export async function saveProgramInfo(programId: string, info: Partial<ProgramIn
 // ============ Program Features ============
 
 export async function fetchProgramFeatures(programId: string): Promise<ProgramFeature[]> {
-  const result = await callProgramsProxy<{ success: boolean; data?: { features: ProgramFeature[] } }>(
+  const result = await callProgramsProxy<{ 
+    success: boolean; 
+    data?: { 
+      features: ProgramFeature[];
+      count?: number;
+      program_id?: string;
+    } 
+  }>(
     "features",
     "GET",
     { program_id: programId }
