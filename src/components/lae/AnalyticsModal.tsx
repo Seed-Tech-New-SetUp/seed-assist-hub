@@ -29,7 +29,6 @@ import {
   BarChart3,
   PieChart,
   TableIcon,
-  X,
 } from "lucide-react";
 import {
   AnalyticsData,
@@ -263,19 +262,10 @@ export function AnalyticsModal({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-[95vw] h-[95vh] flex flex-col p-0 gap-0">
           <DialogHeader className="px-6 py-4 border-b shrink-0">
-            <div className="flex items-center justify-between">
-              <DialogTitle className="flex items-center gap-2 text-lg">
-                <BarChart3 className="h-5 w-5 text-primary" />
-                {assignmentName} - Analytics
-              </DialogTitle>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onOpenChange(false)}
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
+            <DialogTitle className="flex items-center gap-2 text-lg">
+              <BarChart3 className="h-5 w-5 text-primary" />
+              {assignmentName} - Analytics
+            </DialogTitle>
           </DialogHeader>
 
           <div className="flex-1 overflow-auto px-6 py-4">
