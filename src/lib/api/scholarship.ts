@@ -16,6 +16,8 @@ export interface ApiApplicant {
   nationality: string;
   gender: string;
   status: string;
+  recommendation_status: string;
+  selection_status: string | null;
   award_name: string | null;
   standardised_test: string;
   standardised_test_score: string;
@@ -236,6 +238,7 @@ export interface Applicant {
   nationality: string;
   gender: string;
   isSeedRecommended: boolean;
+  selectionStatus: WorkflowStatus | null;
   status: WorkflowStatus;
   standardizedTest: {
     name: string;
@@ -311,7 +314,7 @@ function cleanCountryName(countryOrNationality: string): string {
 
 function normalizeStatus(status: string): WorkflowStatus {
   const normalized = status.toLowerCase().trim();
-  if (normalized === "winner" || normalized === "winners") return "winner";
+  if (normalized === "winner" || normalized === "winners" || normalized === "selected") return "winner";
   if (normalized === "on_hold" || normalized === "onhold") return "onhold";
   if (["pending", "shortlisted", "rejected", "recommended"].includes(normalized)) {
     return normalized as WorkflowStatus;
@@ -319,8 +322,28 @@ function normalizeStatus(status: string): WorkflowStatus {
   return "pending";
 }
 
+function normalizeSelectionStatus(selectionStatus: string | null): WorkflowStatus | null {
+  if (!selectionStatus) return null;
+  const normalized = selectionStatus.toLowerCase().trim();
+  if (normalized === "selected") return "winner";
+  if (normalized === "onhold" || normalized === "on_hold") return "onhold";
+  if (["shortlisted", "rejected"].includes(normalized)) {
+    return normalized as WorkflowStatus;
+  }
+  return null;
+}
+
 function transformApplicant(api: ApiApplicant): Applicant {
   const cleanedNationality = cleanCountryName(api.nationality);
+  const isSeedRecommended = api.recommendation_status?.toLowerCase() === "recommended";
+  const selectionStatus = normalizeSelectionStatus(api.selection_status);
+  
+  // Determine display status: use selection_status if set, otherwise fall back to status field
+  let displayStatus: WorkflowStatus = normalizeStatus(api.status);
+  if (selectionStatus) {
+    displayStatus = selectionStatus;
+  }
+  
   return {
     id: api.contact_id,
     name: api.name,
@@ -329,8 +352,9 @@ function transformApplicant(api: ApiApplicant): Applicant {
     countryCode: getCountryCode(cleanedNationality),
     nationality: cleanedNationality,
     gender: api.gender,
-    isSeedRecommended: api.status.toLowerCase() === "recommended",
-    status: normalizeStatus(api.status),
+    isSeedRecommended,
+    selectionStatus,
+    status: displayStatus,
     standardizedTest: {
       name: api.standardised_test,
       score: parseFloat(api.standardised_test_score) || 0,
