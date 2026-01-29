@@ -290,6 +290,13 @@ const BSFReports = () => {
       ),
     },
     {
+      key: "city",
+      header: "City",
+      render: (event: BSFEvent) => (
+        <span className="text-sm">{event.city}</span>
+      ),
+    },
+    {
       key: "registrants",
       header: "Registrants",
       className: "text-center",
