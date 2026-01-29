@@ -50,9 +50,9 @@ import { LeadsFilter } from "@/lib/api/leads";
 import { format } from "date-fns";
 
 // Country code to flag emoji mapping
-function getFlagEmoji(countryCode: string): string {
-  if (!countryCode || countryCode.length !== 2) return "";
-  const codePoints = countryCode
+function getFlagEmoji(flagCode: string): string {
+  if (!flagCode || flagCode.length !== 2) return "";
+  const codePoints = flagCode
     .toUpperCase()
     .split("")
     .map((char) => 127397 + char.charCodeAt(0));
@@ -71,7 +71,10 @@ export default function ProfileLeads() {
   // Build filter object for API
   const apiFilters: LeadsFilter = useMemo(() => {
     const filters: LeadsFilter = {};
-    if (filterPage !== "all") filters.filter_page = filterPage;
+    if (filterPage !== "all") {
+      filters.filter_page = "program";
+      filters.program_id = filterPage;
+    }
     if (dateFilter !== "all") filters.date_filter = dateFilter;
     if (countryFilter !== "all") filters.country = countryFilter;
     return filters;
@@ -91,10 +94,11 @@ export default function ProfileLeads() {
     const query = searchQuery.toLowerCase();
     return leads.filter(
       (lead) =>
-        lead.name?.toLowerCase().includes(query) ||
+        lead.first_name?.toLowerCase().includes(query) ||
+        lead.last_name?.toLowerCase().includes(query) ||
         lead.email?.toLowerCase().includes(query) ||
         lead.phone?.toLowerCase().includes(query) ||
-        lead.country?.toLowerCase().includes(query)
+        lead.country_name?.toLowerCase().includes(query)
     );
   }, [leads, searchQuery]);
 
@@ -164,6 +168,12 @@ export default function ProfileLeads() {
     },
   ];
 
+  // Parse programs_viewed string to array
+  const parsePrograms = (programsStr: string): string[] => {
+    if (!programsStr) return [];
+    return programsStr.split(",").map((p) => p.trim()).filter(Boolean);
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -213,7 +223,7 @@ export default function ProfileLeads() {
                   <SelectContent>
                     <SelectItem value="all">All Pages</SelectItem>
                     {programs.map((p) => (
-                      <SelectItem key={p.program_id} value={p.program_id}>
+                      <SelectItem key={p.id} value={p.id}>
                         {p.program_name}
                       </SelectItem>
                     ))}
@@ -329,13 +339,13 @@ export default function ProfileLeads() {
                     ))
                   ) : paginatedLeads.length > 0 ? (
                     paginatedLeads.map((lead, idx) => (
-                      <TableRow key={lead.lead_id || idx}>
+                      <TableRow key={lead.user_id || idx}>
                         <TableCell>
                           <input type="checkbox" className="rounded border-gray-300" />
                         </TableCell>
                         <TableCell>
                           <div>
-                            <p className="font-medium">{lead.name}</p>
+                            <p className="font-medium">{lead.first_name} {lead.last_name}</p>
                             {lead.phone && (
                               <p className="text-xs text-muted-foreground">{lead.phone}</p>
                             )}
@@ -344,15 +354,15 @@ export default function ProfileLeads() {
                         <TableCell className="text-sm">{lead.email}</TableCell>
                         <TableCell>
                           <span className="flex items-center gap-1.5">
-                            {lead.country_code && (
-                              <span>{getFlagEmoji(lead.country_code)}</span>
+                            {lead.flag_code && (
+                              <span>{getFlagEmoji(lead.flag_code)}</span>
                             )}
-                            {lead.country}
+                            {lead.country_name}
                           </span>
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
-                            {lead.programs_viewed?.map((program, pIdx) => (
+                            {parsePrograms(lead.programs_viewed).map((program, pIdx) => (
                               <Badge
                                 key={pIdx}
                                 variant="secondary"
@@ -363,18 +373,18 @@ export default function ProfileLeads() {
                             ))}
                           </div>
                         </TableCell>
-                        <TableCell className="text-center">{lead.start_year}</TableCell>
+                        <TableCell className="text-center">{lead.intended_pg_program_start_year}</TableCell>
                         <TableCell className="text-center">
-                          {lead.registered_on
-                            ? format(new Date(lead.registered_on), "MMM d, yyyy")
+                          {lead.registration_date
+                            ? format(new Date(lead.registration_date), "MMM d, yyyy")
                             : "-"}
                         </TableCell>
                         <TableCell className="text-center">
                           <div className="flex items-center justify-center gap-2">
                             <span>{lead.page_views}</span>
-                            {lead.clicks > 0 && (
+                            {lead.total_clicks > 0 && (
                               <Badge className="bg-orange-500 text-white text-xs">
-                                {lead.clicks} cli
+                                {lead.total_clicks} cli
                               </Badge>
                             )}
                           </div>

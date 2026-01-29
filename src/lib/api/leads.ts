@@ -12,7 +12,7 @@ export interface LeadStats {
 }
 
 export interface LeadProgram {
-  program_id: string;
+  id: string;
   program_name: string;
 }
 
@@ -22,17 +22,24 @@ export interface LeadCountry {
 }
 
 export interface Lead {
-  lead_id: string;
-  name: string;
-  phone?: string;
+  school_id: string;
+  user_id: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  country: string;
-  country_code?: string;
-  programs_viewed: string[];
-  start_year: string;
-  registered_on: string;
+  country_of_residence: string;
+  country_name: string;
+  flag_code: string;
+  phone: string;
+  intended_study_level: string;
+  intended_subject_area: string;
+  intended_pg_program_start_year: string;
+  registration_date: string;
   page_views: number;
-  clicks: number;
+  programs_viewed: string; // comma-separated
+  total_clicks: number;
+  last_activity: string;
+  utm_sources: string;
 }
 
 export interface UserData {
@@ -108,7 +115,7 @@ export async function fetchLeadStats(): Promise<LeadStats> {
 }
 
 export async function fetchLeadPrograms(): Promise<LeadProgram[]> {
-  const result = await callLeadsProxy<{ success: boolean; data: { programs: LeadProgram[] } }>("leads-programs", "GET");
+  const result = await callLeadsProxy<{ success: boolean; data: { programs: LeadProgram[]; count: number } }>("leads-programs", "GET");
   return decodeObjectStrings(result.data?.programs || []);
 }
 
@@ -118,8 +125,8 @@ export async function fetchLeadCountries(): Promise<LeadCountry[]> {
 }
 
 export async function fetchLeads(filters: LeadsFilter): Promise<Lead[]> {
-  const result = await callLeadsProxy<{ success: boolean; data: { leads: Lead[] } }>("leads-list", "POST", filters);
-  return decodeObjectStrings(result.data?.leads || []);
+  const result = await callLeadsProxy<{ success: boolean; data: { res: Lead[]; count: number } }>("leads-list", "POST", filters);
+  return decodeObjectStrings(result.data?.res || []);
 }
 
 export async function exportLeads(filters: LeadsFilter): Promise<Blob> {
