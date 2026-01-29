@@ -467,12 +467,23 @@ export default function ScholarshipApplications() {
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
-                            {applicant.isSeedRecommended ? (
+                            {applicant.isSeedRecommended && (
                               <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20 whitespace-nowrap">
                                 <Star className="h-3 w-3 mr-1" />
                                 SEED Recommended
                               </Badge>
-                            ) : (
+                            )}
+                            {applicant.selectionStatus && (
+                              <Badge variant="outline" className={statusConfig[applicant.selectionStatus]?.color || status.color}>
+                                {(() => {
+                                  const selConfig = statusConfig[applicant.selectionStatus];
+                                  const Icon = selConfig?.icon || status.icon;
+                                  return <Icon className="h-3 w-3 mr-1" />;
+                                })()}
+                                {statusConfig[applicant.selectionStatus]?.label || applicant.selectionStatus}
+                              </Badge>
+                            )}
+                            {!applicant.isSeedRecommended && !applicant.selectionStatus && (
                               <Badge variant="outline" className={status.color}>
                                 <status.icon className="h-3 w-3 mr-1" />
                                 {status.label}
