@@ -104,14 +104,12 @@ export function MonthFilter({ value, onChange }: MonthFilterProps) {
 // Helper functions for filtering
 export function getSeasonFromDate(dateStr: string): string {
   const month = new Date(dateStr).getMonth() + 1; // 1-12
-  // Spring: Feb, Mar, Apr, May (2-5)
-  // Summer: Jun, Jul, Aug (6-8)
-  // Fall: Sep, Oct, Nov (9-11)
-  // Winter: Dec, Jan (12, 1)
-  if (month >= 2 && month <= 5) return "Spring";
-  if (month >= 6 && month <= 8) return "Summer";
-  if (month >= 9 && month <= 11) return "Fall";
-  return "Winter";
+  // Spring: Jan - May (1-5)
+  // Summer: Jun - Jul (6-7)
+  // Fall: Aug - Dec (8-12)
+  if (month >= 1 && month <= 5) return "Spring";
+  if (month >= 6 && month <= 7) return "Summer";
+  return "Fall";
 }
 
 export function getMonthFromDate(dateStr: string): string {
