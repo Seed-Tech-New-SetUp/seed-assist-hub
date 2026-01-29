@@ -23,7 +23,6 @@ import {
   FileSpreadsheet,
   Loader2,
   TableIcon,
-  X,
   AlertCircle,
 } from "lucide-react";
 import { fetchDetailData, DetailDataResponse } from "@/lib/api/lae";
@@ -112,19 +111,10 @@ export function DetailModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[90vw] h-[85vh] flex flex-col p-0 gap-0">
         <DialogHeader className="px-6 py-4 border-b shrink-0">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center gap-2 text-lg">
-              <TableIcon className="h-5 w-5 text-primary" />
-              {filterLabel}: {filterValues.length > 1 ? `${filterValues.length} Selected` : filterValues[0]}
-            </DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onOpenChange(false)}
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
+          <DialogTitle className="flex items-center gap-2 text-lg">
+            <TableIcon className="h-5 w-5 text-primary" />
+            {filterLabel}: {filterValues.length > 1 ? `${filterValues.length} Selected` : filterValues[0]}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 overflow-auto px-6 py-4">
@@ -194,30 +184,32 @@ export function DetailModal({
                 </CardHeader>
                 <CardContent className="p-0">
                   <ScrollArea className="h-[400px]">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          {detailData.columns.map((column, index) => (
-                            <TableHead key={column}>
-                              {formatHeader(column, index)}
-                            </TableHead>
-                          ))}
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {detailData.data.map((row, rowIndex) => (
-                          <TableRow key={rowIndex}>
-                            {detailData.columns.map((column) => (
-                              <TableCell key={column}>
-                                {row[column] !== null && row[column] !== undefined
-                                  ? String(row[column])
-                                  : "-"}
-                              </TableCell>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            {detailData.columns.map((column, index) => (
+                              <TableHead key={column} className="whitespace-nowrap">
+                                {formatHeader(column, index)}
+                              </TableHead>
                             ))}
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {detailData.data.map((row, rowIndex) => (
+                            <TableRow key={rowIndex}>
+                              {detailData.columns.map((column) => (
+                                <TableCell key={column} className="whitespace-nowrap">
+                                  {row[column] !== null && row[column] !== undefined
+                                    ? String(row[column])
+                                    : "-"}
+                                </TableCell>
+                              ))}
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
                   </ScrollArea>
                 </CardContent>
               </Card>
