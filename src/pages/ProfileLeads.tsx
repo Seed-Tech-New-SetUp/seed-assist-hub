@@ -377,8 +377,9 @@ export default function ProfileLeads() {
                           <div className="flex items-center justify-center gap-2">
                             <span>{lead.page_views}</span>
                             {lead.total_clicks > 0 && (
-                              <Badge className="bg-orange-500 text-white text-xs">
-                                {lead.total_clicks} cli
+                              <Badge className="bg-orange-500 text-white text-xs flex flex-col leading-tight py-1">
+                                <span>{lead.total_clicks}</span>
+                                <span className="text-[10px]">clicks</span>
                               </Badge>
                             )}
                             <button
