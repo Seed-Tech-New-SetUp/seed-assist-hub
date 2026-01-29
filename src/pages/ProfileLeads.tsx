@@ -39,6 +39,7 @@ import {
   Download,
   Loader2,
 } from "lucide-react";
+import { LeadDetailModal } from "@/components/leads/LeadDetailModal";
 import {
   useLeadUserData,
   useLeadStats,
@@ -68,6 +69,8 @@ export default function ProfileLeads() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
+  const [selectedLead, setSelectedLead] = useState<any>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
 
   // Build filter object for API
   const apiFilters: LeadsFilter = useMemo(() => {
@@ -378,6 +381,16 @@ export default function ProfileLeads() {
                                 {lead.total_clicks} cli
                               </Badge>
                             )}
+                            <button
+                              onClick={() => {
+                                setSelectedLead(lead);
+                                setDetailModalOpen(true);
+                              }}
+                              className="p-1 rounded hover:bg-muted transition-colors"
+                              title="View Details"
+                            >
+                              <Eye className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                            </button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -436,6 +449,13 @@ export default function ProfileLeads() {
             )}
           </CardContent>
         </Card>
+
+        {/* Lead Detail Modal */}
+        <LeadDetailModal
+          lead={selectedLead}
+          open={detailModalOpen}
+          onOpenChange={setDetailModalOpen}
+        />
       </div>
     </DashboardLayout>
   );
