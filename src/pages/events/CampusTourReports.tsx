@@ -112,6 +112,7 @@ interface CampusTourEvent {
   eventName: string;
   subProductName: string;
   city: string;
+  campusName: string;
   country: string;
   date: string;
   location: string;
@@ -129,6 +130,8 @@ interface ApiMeta {
   campusReached: number;
   attendeesReached: number;
   studentsConnected: number;
+  totalRegistrants?: number;
+  totalAttendees?: number;
 }
 
 const CampusTourReports = () => {
@@ -173,6 +176,7 @@ const CampusTourReports = () => {
             eventName: event.eventName,
             subProductName: event.subProductName || "Campus Tour",
             city: event.city,
+            campusName: event.campus_name || "",
             country: event.country,
             date: event.date,
             location: event.location,
@@ -255,11 +259,11 @@ const CampusTourReports = () => {
     return filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [pastEvents, yearFilter, seasonFilter]);
 
-  // Stats from API meta
+  // Stats from API meta - calculate from events if not provided
   const totalEvents = meta?.totalEvents ?? events.length;
   const totalCampuses = meta?.campusReached ?? 0;
-  const totalAttendees = meta?.attendeesReached ?? 0;
-  const totalStudents = meta?.studentsConnected ?? 0;
+  const totalRegistrants = meta?.totalRegistrants ?? events.reduce((sum, e) => sum + e.registrants, 0);
+  const totalAttendees = meta?.totalAttendees ?? events.reduce((sum, e) => sum + e.attended, 0);
 
   const columns = [
     {
@@ -291,6 +295,13 @@ const CampusTourReports = () => {
       header: "Date",
       render: (event: CampusTourEvent) => (
         <span className="text-sm">{formatDate(event.date)}</span>
+      ),
+    },
+    {
+      key: "campus",
+      header: "Campus",
+      render: (event: CampusTourEvent) => (
+        <span className="text-sm">{event.campusName || event.city}</span>
       ),
     },
     {
@@ -384,7 +395,7 @@ const CampusTourReports = () => {
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-secondary/50"><Users className="h-5 w-5 text-secondary-foreground" /></div>
-                <div><p className="text-2xl font-bold text-foreground">{totalAttendees.toLocaleString()}</p><p className="text-xs text-muted-foreground">Attendees Reached</p></div>
+                <div><p className="text-2xl font-bold text-foreground">{totalRegistrants.toLocaleString()}</p><p className="text-xs text-muted-foreground">Total Registrants</p></div>
               </div>
             </CardContent>
           </Card>
@@ -392,7 +403,7 @@ const CampusTourReports = () => {
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10"><UserCheck className="h-5 w-5 text-primary" /></div>
-                <div><p className="text-2xl font-bold text-foreground">{totalStudents.toLocaleString()}</p><p className="text-xs text-muted-foreground">Students Connected</p></div>
+                <div><p className="text-2xl font-bold text-foreground">{totalAttendees.toLocaleString()}</p><p className="text-xs text-muted-foreground">Total Attendees</p></div>
               </div>
             </CardContent>
           </Card>
