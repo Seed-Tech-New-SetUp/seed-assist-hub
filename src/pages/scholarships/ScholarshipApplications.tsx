@@ -429,7 +429,7 @@ export default function ScholarshipApplications() {
                     />
                   </TableHead>
                   <TableHead>Name (Country)</TableHead>
-                  <TableHead className="w-[200px]">Status</TableHead>
+                  <TableHead className="w-[140px]">Status</TableHead>
                   <TableHead>Standardized Test</TableHead>
                   <TableHead>UG Completion</TableHead>
                   <TableHead>UG GPA</TableHead>
