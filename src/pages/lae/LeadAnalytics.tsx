@@ -160,7 +160,7 @@ export default function LeadAnalytics() {
           </p>
         </div>
 
-        {/* File Upload and List */}
+        {/* File Upload and List - Temporarily disabled
         <div className="grid lg:grid-cols-2 gap-6">
           <FileUploadZone
             onUpload={handleUpload}
@@ -176,6 +176,7 @@ export default function LeadAnalytics() {
             deletingFileId={deletingFileId}
           />
         </div>
+        */}
 
         {/* Analytics Assignments */}
         <Card>
