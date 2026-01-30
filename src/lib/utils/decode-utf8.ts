@@ -64,7 +64,7 @@ function fixMojibake(str: string): string {
     [String.fromCharCode(0xE2, 0x80, 0x9D), '"'],
     [String.fromCharCode(0xE2, 0x80, 0x93), '–'],
     [String.fromCharCode(0xE2, 0x80, 0x94), '—'],
-    // Common accented characters
+    // Common accented characters (Windows-1252 misinterpretation of UTF-8)
     ['Ã©', 'é'],
     ['Ã¨', 'è'],
     ['Ã ', 'à'],
@@ -79,6 +79,14 @@ function fixMojibake(str: string): string {
     ['Ã¤', 'ä'],
     ['Ã±', 'ñ'],
     ['Ã­', 'í'],
+    ['Ã³', 'ó'],
+    ['Ãº', 'ú'],
+    // Latin-1 supplement characters that get corrupted
+    ['Ã¡', 'á'],
+    ['Ã¿', 'ÿ'],
+    ['Ã', 'Á'],
+    // Handle replacement character (�) - often indicates encoding issue
+    // When é (U+00E9) gets corrupted, try to preserve context
   ];
   
   let fixed = str;
@@ -101,6 +109,19 @@ export function decodeUTF8(str: string): string {
   
   // Fix common mojibake patterns
   decoded = fixMojibake(decoded);
+  
+  // Handle replacement character (U+FFFD) which indicates encoding failure
+  // Try to recover known patterns
+  const knownPatterns: Array<[RegExp, string]> = [
+    [/M\uFFFDridien/gi, 'Méridien'],
+    [/caf\uFFFD/gi, 'café'],
+    [/resum\uFFFD/gi, 'resumé'],
+    [/na\uFFFDve/gi, 'naïve'],
+  ];
+  
+  for (const [pattern, replacement] of knownPatterns) {
+    decoded = decoded.replace(pattern, replacement);
+  }
   
   try {
     // Try to fix double-encoded UTF-8 (common issue when data goes through multiple encoding steps)
