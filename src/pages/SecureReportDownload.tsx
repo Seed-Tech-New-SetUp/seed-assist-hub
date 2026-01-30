@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { extractFilenameFromHeader } from "@/lib/utils/download-filename";
 
 type VerificationStatus = "idle" | "verifying" | "success" | "error";
 
@@ -13,12 +14,20 @@ interface SecureReportDownloadProps {
   reportType: "virtual" | "in-person";
 }
 
+const API_BASE = "https://assist.seedglobaleducation.com/api";
+
 export default function SecureReportDownload({ reportType }: SecureReportDownloadProps) {
   const { hashId } = useParams<{ hashId: string }>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<VerificationStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+
+  const getEndpointUrl = () => {
+    return reportType === "in-person"
+      ? `${API_BASE}/in-person-event/report_download.php`
+      : `${API_BASE}/virtual-event/report_download.php`;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,35 +41,46 @@ export default function SecureReportDownload({ reportType }: SecureReportDownloa
     setErrorMessage("");
 
     try {
-      // TODO: Replace with actual API endpoint
-      const response = await fetch(`/api/reports/verify-download`, {
+      const response = await fetch(getEndpointUrl(), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          hashId,
+          hash_id: hashId,
           email: email.trim(),
           password: password.trim(),
+          report_type: reportType,
         }),
       });
 
-      const data = await response.json();
-
-      if (data.success && data.downloadUrl) {
+      // Check if response is a file (binary) or JSON error
+      const contentType = response.headers.get("Content-Type") || "";
+      
+      if (contentType.includes("application/vnd.openxmlformats") || 
+          contentType.includes("application/octet-stream") ||
+          contentType.includes("application/vnd.ms-excel")) {
+        // Success - file is being streamed
+        const blob = await response.blob();
+        const filename = extractFilenameFromHeader(response, "report.xlsx");
+        
         setStatus("success");
         toast.success("Verification successful! Your download will start shortly.");
         
-        // Trigger auto-download
+        // Trigger download
         setTimeout(() => {
+          const url = window.URL.createObjectURL(blob);
           const link = document.createElement("a");
-          link.href = data.downloadUrl;
-          link.download = data.fileName || "report.xlsx";
+          link.href = url;
+          link.download = filename;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
-        }, 1000);
+          window.URL.revokeObjectURL(url);
+        }, 500);
       } else {
+        // Error response - parse as JSON
+        const data = await response.json();
         setStatus("error");
         setErrorMessage(data.message || "Verification failed. Please check your credentials.");
       }
