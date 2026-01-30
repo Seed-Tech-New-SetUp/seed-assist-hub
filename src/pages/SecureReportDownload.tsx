@@ -45,13 +45,8 @@ export default function SecureReportDownload({ reportType }: SecureReportDownloa
       if (!hashId) return;
       
       try {
-        const response = await fetch(getInfoEndpointUrl(), {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ hash_id: hashId }),
-        });
+        const url = `${getInfoEndpointUrl()}?id=${encodeURIComponent(hashId)}`;
+        const response = await fetch(url);
 
         if (response.ok) {
           const data = await response.json();
