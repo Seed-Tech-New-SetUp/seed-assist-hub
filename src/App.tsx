@@ -102,9 +102,12 @@ const App = () => (
                 {/* User Management */}
                 <Route path="/user-management" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
 
-                {/* Public Routes */}
-                <Route path="/reports/download/:hashId" element={<SecureReportDownload />} />
-                <Route path="/reports/:reportId" element={<ReportDetail />} />
+                {/* Public Routes - Secure Report Downloads */}
+                <Route path="/mreports/:hashId" element={<SecureReportDownload reportType="virtual" />} />
+                <Route path="/reports/:hashId" element={<SecureReportDownload reportType="in-person" />} />
+                
+                {/* Legacy Report Detail */}
+                <Route path="/report-detail/:reportId" element={<ReportDetail />} />
 
                 {/* 404 */}
                 <Route path="*" element={<NotFound />} />

@@ -9,7 +9,11 @@ import { toast } from "sonner";
 
 type VerificationStatus = "idle" | "verifying" | "success" | "error";
 
-export default function SecureReportDownload() {
+interface SecureReportDownloadProps {
+  reportType: "virtual" | "in-person";
+}
+
+export default function SecureReportDownload({ reportType }: SecureReportDownloadProps) {
   const { hashId } = useParams<{ hashId: string }>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
