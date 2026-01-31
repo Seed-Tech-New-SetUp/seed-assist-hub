@@ -29,6 +29,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
 import { Star, Check, Pause, X, Trophy, Search, Eye, AlertCircle, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -41,6 +50,8 @@ import {
   ApiMeta, 
   ApiFilterOptions 
 } from "@/lib/api/scholarship";
+
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
 const statusConfig: Record<WorkflowStatus, { label: string; icon: React.ElementType; color: string }> = {
   pending: { label: "Pending", icon: Pause, color: "bg-gray-500/10 text-gray-600 border-gray-500/20" },
@@ -65,6 +76,8 @@ export default function ScholarshipApplications() {
   const [newStatus, setNewStatus] = useState<WorkflowStatus | null>(null);
   const [showNotifyDialog, setShowNotifyDialog] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   const [filters, setFilters] = useState<FilterState>({
     standardizedTests: [],
     testScoreRange: [0, 800],
@@ -130,7 +143,7 @@ export default function ScholarshipApplications() {
     [applicants]
   );
 
-  const filteredApplicants = applicants.filter(applicant => {
+  const filteredApplicants = useMemo(() => applicants.filter(applicant => {
     // Search filter
     const matchesSearch = applicant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       applicant.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -165,13 +178,41 @@ export default function ScholarshipApplications() {
 
     return matchesSearch && matchesStatus && matchesTest && matchesTestScore && 
       matchesYear && matchesWorkExp && matchesNationality && matchesGender;
-  });
+  }), [applicants, searchQuery, statusFilter, filters]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, filters]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredApplicants.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, filteredApplicants.length);
+  const paginatedApplicants = filteredApplicants.slice(startIndex, endIndex);
+
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const pages: (number | "ellipsis")[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push("ellipsis");
+      for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+        pages.push(i);
+      }
+      if (currentPage < totalPages - 2) pages.push("ellipsis");
+      pages.push(totalPages);
+    }
+    return pages;
+  };
 
   const toggleSelectAll = () => {
-    if (selectedApplicants.length === filteredApplicants.length) {
+    if (selectedApplicants.length === paginatedApplicants.length) {
       setSelectedApplicants([]);
     } else {
-      setSelectedApplicants(filteredApplicants.map(a => a.id));
+      setSelectedApplicants(paginatedApplicants.map(a => a.id));
     }
   };
 
@@ -409,14 +450,35 @@ export default function ScholarshipApplications() {
         {/* Applicants Table */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg">
-              Applicants
-              {filteredApplicants.length !== applicants.length && (
-                <span className="text-sm font-normal text-muted-foreground ml-2">
-                  (showing {filteredApplicants.length} of {applicants.length})
-                </span>
-              )}
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">
+                Applicants
+                {filteredApplicants.length !== applicants.length && (
+                  <span className="text-sm font-normal text-muted-foreground ml-2">
+                    (filtered: {filteredApplicants.length} of {applicants.length})
+                  </span>
+                )}
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Show</span>
+                <Select value={pageSize.toString()} onValueChange={(val) => { setPageSize(Number(val)); setCurrentPage(1); }}>
+                  <SelectTrigger className="w-[70px] h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAGE_SIZE_OPTIONS.map((size) => (
+                      <SelectItem key={size} value={size.toString()}>{size}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <span className="text-sm text-muted-foreground">entries</span>
+              </div>
+            </div>
+            {filteredApplicants.length > 0 && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Showing {startIndex + 1}-{endIndex} of {filteredApplicants.length} applicants
+              </p>
+            )}
           </CardHeader>
           <CardContent>
             <Table>
@@ -424,7 +486,7 @@ export default function ScholarshipApplications() {
                 <TableRow>
                   <TableHead className="w-[50px]">
                     <Checkbox
-                      checked={selectedApplicants.length === filteredApplicants.length && filteredApplicants.length > 0}
+                      checked={selectedApplicants.length === paginatedApplicants.length && paginatedApplicants.length > 0}
                       onCheckedChange={toggleSelectAll}
                     />
                   </TableHead>
@@ -439,14 +501,14 @@ export default function ScholarshipApplications() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredApplicants.length === 0 ? (
+                {paginatedApplicants.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                       No applicants found matching your criteria
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredApplicants.map((applicant) => {
+                  paginatedApplicants.map((applicant) => {
                     const status = statusConfig[applicant.status];
                     return (
                       <TableRow key={applicant.id}>
@@ -519,6 +581,45 @@ export default function ScholarshipApplications() {
                 )}
               </TableBody>
             </Table>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center mt-6">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                        className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                    {getPageNumbers().map((page, i) =>
+                      page === "ellipsis" ? (
+                        <PaginationItem key={`ellipsis-${i}`}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      ) : (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(page)}
+                            isActive={currentPage === page}
+                            className="cursor-pointer"
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      )
+                    )}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                        className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
           </CardContent>
         </Card>
 
