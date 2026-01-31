@@ -116,6 +116,11 @@ export default function SecureReportDownload({ reportType }: SecureReportDownloa
       });
 
       const contentType = response.headers.get("Content-Type") || "";
+      const contentDisposition = response.headers.get("Content-Disposition");
+      
+      // Debug: Log headers to verify CORS exposure
+      console.log("Content-Disposition header:", contentDisposition);
+      console.log("All exposed headers:", [...response.headers.entries()]);
       
       if (contentType.includes("application/vnd.openxmlformats") || 
           contentType.includes("application/octet-stream") ||
