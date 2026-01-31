@@ -136,9 +136,18 @@ export default function SecureReportDownload({ reportType }: SecureReportDownloa
         window.URL.revokeObjectURL(url);
       } else {
         const data = await response.json();
-        // Handle nested error structure: { success: false, error: { code, message } }
-        const errorMsg = data.error?.message || data.message || "Verification failed. Please check your credentials.";
-        setErrorMessage(errorMsg);
+        const errorCode = data.error?.code || "";
+        
+        // Handle specific error codes with user-friendly messages
+        if (errorCode === "FORBIDDEN") {
+          setErrorMessage("You do not have access to this event report.");
+        } else if (errorCode === "UNAUTHORIZED" || errorCode === "INVALID_CREDENTIALS" || response.status === 401) {
+          setErrorMessage("Invalid email or password. Please check your credentials.");
+        } else {
+          // Fallback to API message or generic error
+          const errorMsg = data.error?.message || data.message || "Verification failed. Please try again.";
+          setErrorMessage(errorMsg);
+        }
       }
     } catch (error) {
       console.error("Download error:", error);
