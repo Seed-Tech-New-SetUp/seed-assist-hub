@@ -66,7 +66,7 @@ const baseNavigation: NavItem[] = [
         icon: MapPin,
         permissionKey: "inPersonEvents",
         items: [
-          { title: "Overview", href: "/events/in-person" },
+          // { title: "Overview", href: "/events/in-person" }, // TODO: Re-enable when overview pages are updated
           { title: "Business School Festivals", href: "/events/in-person/bsf", permissionKey: "bsf" },
           { title: "Campus Tours", href: "/events/in-person/campus-tours", permissionKey: "campusTours" },
         ],
@@ -76,7 +76,7 @@ const baseNavigation: NavItem[] = [
         icon: Video,
         permissionKey: "virtualEvents",
         items: [
-          { title: "Overview", href: "/events/virtual" },
+          // { title: "Overview", href: "/events/virtual" }, // TODO: Re-enable when overview pages are updated
           { title: "Masterclass", href: "/events/virtual/masterclass", permissionKey: "masterclasses" },
           { title: "1:1 Profile Evaluation", href: "/events/virtual/meetups", permissionKey: "meetups", alwaysShow: true },
         ],
