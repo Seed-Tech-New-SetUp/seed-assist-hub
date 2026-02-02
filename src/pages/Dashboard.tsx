@@ -200,6 +200,21 @@ export default function Dashboard() {
     }
   };
 
+  // Calculate visible pillars for dynamic grid
+  const visiblePillars = pillars.filter(pillar => getVisibleModules(pillar.modules).length > 0);
+  const pillarCount = visiblePillars.length;
+
+  // Dynamic grid classes based on pillar count
+  const getGridClasses = () => {
+    if (pillarCount === 1) {
+      return "grid grid-cols-1 gap-4 md:gap-6 lg:gap-8 max-w-4xl mx-auto";
+    }
+    if (pillarCount === 2) {
+      return "grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 lg:gap-8";
+    }
+    return "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8";
+  };
+
   return (
     <DashboardLayout>
       {/* Page Header */}
@@ -213,10 +228,9 @@ export default function Dashboard() {
       </div>
 
       {/* Three Pillars Hero Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
-        {pillars.map((pillar) => {
+      <div className={getGridClasses()}>
+        {visiblePillars.map((pillar) => {
           const visibleModules = getVisibleModules(pillar.modules);
-          if (visibleModules.length === 0) return null;
 
           return (
             <div
