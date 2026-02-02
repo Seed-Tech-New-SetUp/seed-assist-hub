@@ -70,7 +70,7 @@ import {
 } from "@/lib/api/school-profile";
 
 const sections = [
-  { id: "info", label: "Organisation Details", icon: Building2 },
+  { id: "info", label: "School Details", icon: Building2 },
   { id: "social", label: "Digital Presence", icon: Globe },
   { id: "faqs", label: "Knowledge Base", icon: HelpCircle },
   { id: "features", label: "Key Highlights", icon: Star },
@@ -214,8 +214,8 @@ export default function SchoolProfileEdit() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-display font-bold text-foreground">Organisation Profile</h1>
-          <p className="text-muted-foreground mt-1">Manage your organisation's information and settings</p>
+          <h1 className="text-2xl font-display font-bold text-foreground">School Profile</h1>
+          <p className="text-muted-foreground mt-1">Manage your school's information and settings</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

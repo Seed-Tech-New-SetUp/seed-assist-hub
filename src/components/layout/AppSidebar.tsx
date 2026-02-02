@@ -97,14 +97,14 @@ const baseNavigation: NavItem[] = [
     ],
   },
   {
-    title: "Organisation Profile",
+    title: "School Profile",
     icon: Building2,
     permissionKey: "orgProfile", // Used for checking subModules.accessLeads
     children: [
       {
         title: "",
         items: [
-          { title: "Organisation Details", href: "/school-profile/edit" },
+          { title: "School Details", href: "/school-profile/edit" },
           { title: "Academic Programs", href: "/school-profile/programs" },
           { title: "Access Leads", href: "/profile-leads", permissionKey: "accessLeads", alwaysShow: true },
         ],
@@ -160,7 +160,7 @@ const filterNavigation = (navigation: NavItem[], permissions: Permissions | null
       // Dashboard is always visible
       if (!item.permissionKey) return true;
 
-      // Organisation Profile is always visible (but items inside may be locked)
+      // School Profile is always visible (but items inside may be locked)
       if (item.permissionKey === "orgProfile") return true;
 
       // Check top-level permission
@@ -432,7 +432,7 @@ export function AppSidebar() {
                             
                             // Check if this item is locked (has alwaysShow but no permission)
                             // In the "no-title" branch, items rely on the parent module's `subModules`.
-                            // Example: Organisation Profile -> permissions.orgProfile.subModules.accessLeads
+                            // Example: School Profile -> permissions.orgProfile.subModules.accessLeads
                             let isLocked = false;
                             if (subItem.alwaysShow && subItem.permissionKey) {
                               const permModule = item.permissionKey

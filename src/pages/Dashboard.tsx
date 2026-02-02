@@ -113,12 +113,12 @@ export default function Dashboard() {
       ],
     },
     {
-      title: "Organisation Profile",
+      title: "School Profile",
       icon: Building2,
       permissionKey: "orgProfile",
       buttons: [
         {
-          label: "Organisation Details",
+          label: "School Details",
           href: "/school-profile/edit",
         },
         {
@@ -182,7 +182,7 @@ export default function Dashboard() {
   // Filter cards based on permissions
   const visibleCards = moduleCards.filter((card) => {
     if (!card.permissionKey) return true;
-    // Organisation Profile is always visible
+    // School Profile is always visible
     if (card.permissionKey === "orgProfile") return true;
     return isModuleEnabled(card.permissionKey);
   });
