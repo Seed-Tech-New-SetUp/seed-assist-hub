@@ -708,9 +708,32 @@ export default function Login() {
 
           <p className="text-center text-xs text-muted-foreground">
             By {isSignUp ? "signing up" : "signing in"}, you agree to our{" "}
-            <Button variant="link" className="px-0 h-auto text-xs">Terms</Button>
+            <a 
+              href="https://www.seedglobaleducation.com/terms-of-use/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              Terms of Use
+            </a>
+            ,{" "}
+            <a 
+              href="https://www.seedglobaleducation.com/privacy-policy/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              Privacy Policy
+            </a>
             {" "}and{" "}
-            <Button variant="link" className="px-0 h-auto text-xs">Privacy Policy</Button>
+            <a 
+              href="https://www.seedglobaleducation.com/cookie-policy/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              Cookie Policy
+            </a>
           </p>
         </div>
       </div>
