@@ -1,8 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
-import { SchoolSwitcher } from "./SchoolSwitcher";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
@@ -34,10 +32,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     navigate("/login");
   };
 
-  const handleSwitchSchool = () => {
-    navigate("/select-school");
-  };
-
   const getInitials = () => {
     if (user?.user_metadata?.full_name) {
       return user.user_metadata.full_name
@@ -63,10 +57,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         collapsed ? "pl-16" : "pl-64"
       )}>
         <header className="sticky top-0 z-30 h-16 bg-card/80 backdrop-blur-sm border-b border-border">
-          <div className="flex items-center justify-between h-full px-6">
-            <div className="flex items-center gap-4">
-              <SchoolSwitcher />
-            </div>
+          <div className="flex items-center justify-end h-full px-6">
 
             <div className="flex items-center gap-2">
               <ThemeToggle />
