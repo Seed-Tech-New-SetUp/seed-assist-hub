@@ -44,6 +44,7 @@ import SecureReportDownload from "./pages/SecureReportDownload";
 import InCountryReports from "./pages/InCountryReports";
 import LeadAnalytics from "./pages/lae/LeadAnalytics";
 import ProfileLeads from "./pages/ProfileLeads";
+import VisaPrep from "./pages/VisaPrep";
 
 const queryClient = new QueryClient();
 
@@ -98,6 +99,9 @@ const App = () => (
 
                 {/* Profile Leads (Access Leads) */}
                 <Route path="/profile-leads" element={<ProtectedRoute><ProfileLeads /></ProtectedRoute>} />
+
+                {/* Visa Prep */}
+                <Route path="/visa-prep" element={<ProtectedRoute><VisaPrep /></ProtectedRoute>} />
 
                 {/* User Management */}
                 <Route path="/user-management" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />

@@ -13,6 +13,7 @@ import {
   Globe,
   BarChart3,
   Lock,
+  Plane,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -165,6 +166,17 @@ export default function Dashboard() {
         {
           label: "View Analytics",
           href: "/lead-analytics",
+        },
+      ],
+    },
+    {
+      title: "Visa Prep",
+      icon: Plane,
+      permissionKey: "visaPrep",
+      buttons: [
+        {
+          label: "View Licenses",
+          href: "/visa-prep",
         },
       ],
     },

@@ -18,6 +18,7 @@ import {
   Lock,
   Globe,
   BarChart3,
+  Plane,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -136,6 +137,12 @@ const baseNavigation: NavItem[] = [
     href: "/lead-analytics",
     icon: BarChart3,
     permissionKey: "leadAndApplicationEngagement",
+  },
+  {
+    title: "Visa Prep",
+    href: "/visa-prep",
+    icon: Plane,
+    permissionKey: "visaPrep",
   },
   // TODO: Re-enable Team Management when ready
   // {
