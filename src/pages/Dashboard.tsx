@@ -109,10 +109,7 @@ export default function Dashboard() {
           href: "/scholarships/applications",
           locked: !isSubModuleEnabled("scholarshipPortal", "applicantPools"),
         },
-        {
-          label: "Insights",
-          href: "/scholarships/analytics",
-        },
+        // { label: "Insights", href: "/scholarships/analytics" }, // Hidden for now
       ],
     },
     {

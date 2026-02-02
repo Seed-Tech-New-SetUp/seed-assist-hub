@@ -93,7 +93,7 @@ const baseNavigation: NavItem[] = [
         title: "",
         items: [
           { title: "Applicant Pool", href: "/scholarships/applications", permissionKey: "applicantPools" },
-          { title: "Insights", href: "/scholarships/analytics" },
+          // { title: "Insights", href: "/scholarships/analytics" }, // Hidden for now
         ],
       },
     ],
