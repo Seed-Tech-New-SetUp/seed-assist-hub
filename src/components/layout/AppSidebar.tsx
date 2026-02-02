@@ -531,7 +531,40 @@ export function AppSidebar() {
       </ScrollArea>
 
       {/* Footer */}
-      <div className="absolute bottom-0 left-0 right-0 p-2 border-t border-sidebar-border">
+      <div className="absolute bottom-0 left-0 right-0 p-2 border-t border-sidebar-border space-y-2">
+        {/* Legal Links */}
+        {!collapsed && (
+          <div className="flex flex-wrap justify-center gap-x-2 gap-y-0.5 px-1">
+            <a 
+              href="https://www.seedglobaleducation.com/terms-of-use/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-[10px] text-sidebar-foreground/50 hover:text-sidebar-foreground/80 transition-colors"
+            >
+              Terms
+            </a>
+            <span className="text-[10px] text-sidebar-foreground/30">•</span>
+            <a 
+              href="https://www.seedglobaleducation.com/privacy-policy/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-[10px] text-sidebar-foreground/50 hover:text-sidebar-foreground/80 transition-colors"
+            >
+              Privacy
+            </a>
+            <span className="text-[10px] text-sidebar-foreground/30">•</span>
+            <a 
+              href="https://www.seedglobaleducation.com/cookie-policy/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-[10px] text-sidebar-foreground/50 hover:text-sidebar-foreground/80 transition-colors"
+            >
+              Cookies
+            </a>
+          </div>
+        )}
+        
+        {/* Logout Button */}
         <Button
           variant="ghost"
           size="sm"
