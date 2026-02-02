@@ -214,8 +214,8 @@ export default function VisaPrep() {
                       <TableHead>Usage Expiry Date</TableHead>
                       <TableHead className="text-center">Usage Status</TableHead>
                       <TableHead>Usage Start Date</TableHead>
-                      <TableHead className="text-center">Test Attempted</TableHead>
-                      <TableHead className="text-center">View</TableHead>
+                      <TableHead className="text-center sticky right-12 bg-background z-10 shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.1)]">Test Attempted</TableHead>
+                      <TableHead className="text-center sticky right-0 bg-background z-10">View</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -245,10 +245,10 @@ export default function VisaPrep() {
                           {getUsageBadge(license.usage_status)}
                         </TableCell>
                         <TableCell className="whitespace-nowrap">{license.usage_start_date || "—"}</TableCell>
-                        <TableCell className="text-center font-medium">
+                        <TableCell className="text-center font-medium sticky right-12 bg-background z-10 shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.1)]">
                           {license.test_attempted ?? 0}
                         </TableCell>
-                        <TableCell className="text-center">
+                        <TableCell className="text-center sticky right-0 bg-background z-10">
                           <Button
                             variant="ghost"
                             size="icon-sm"
