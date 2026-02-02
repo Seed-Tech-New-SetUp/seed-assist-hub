@@ -1,128 +1,222 @@
+import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { InsightCard } from "@/components/dashboard/InsightCard";
-import { MetricRing } from "@/components/dashboard/MetricRing";
-import { AdvancedROIChart, ChannelPerformance, ConversionFunnel } from "@/components/dashboard/AdvancedROIChart";
-import { ActivityFeed, UpcomingEventsList } from "@/components/dashboard/ActivityFeed";
-import { GlobalInsights, AIInsights } from "@/components/dashboard/GlobalInsights";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSchool } from "@/contexts/SchoolContext";
 import {
-  Target,
-  FileText,
+  Calendar,
+  Video,
   GraduationCap,
-  TrendingUp,
-  Download,
-  BarChart3,
+  Building2,
+  FileText,
+  Globe,
+  Lock,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface ModuleButton {
+  label: string;
+  href: string;
+  locked?: boolean;
+}
+
+interface ModuleCard {
+  title: string;
+  icon: React.ElementType;
+  buttons: ModuleButton[];
+  permissionKey?: string;
+}
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+  const { user, permissions, selectedSchool } = useAuth();
+  const { currentSchool } = useSchool();
+
+  // Get user display info
+  const displayName = (user as any)?.full_name || (user as any)?.user_metadata?.full_name || "User";
+  const designation = currentSchool?.designation || (user as any)?.designation || "";
+  const universityName = selectedSchool?.university || "";
+  const schoolName = selectedSchool?.school_name || currentSchool?.name || "";
+
+  // Helper to check permissions
+  const isModuleEnabled = (key: string): boolean => {
+    if (!permissions) return true;
+    const module = permissions[key as keyof typeof permissions];
+    if (!module) return true;
+    if (typeof module === "object" && "enabled" in module) {
+      return module.enabled;
+    }
+    return true;
+  };
+
+  const isSubModuleEnabled = (moduleKey: string, subKey: string): boolean => {
+    if (!permissions) return true;
+    const module = permissions[moduleKey as keyof typeof permissions];
+    if (!module || typeof module !== "object") return true;
+    if ("subModules" in module && module.subModules) {
+      const subModules = module.subModules as Record<string, boolean>;
+      return subModules[subKey] !== false;
+    }
+    return true;
+  };
+
+  // Define module cards
+  const moduleCards: ModuleCard[] = [
+    {
+      title: "In-Person Events",
+      icon: Calendar,
+      permissionKey: "engagement",
+      buttons: [
+        {
+          label: "Business School Festival",
+          href: "/events/in-person/bsf",
+          locked: !isSubModuleEnabled("engagement", "bsf"),
+        },
+        {
+          label: "Campus Tours",
+          href: "/events/in-person/campus-tours",
+          locked: !isSubModuleEnabled("engagement", "campusTours"),
+        },
+      ],
+    },
+    {
+      title: "Masterclasses and Virtual Events",
+      icon: Video,
+      permissionKey: "engagement",
+      buttons: [
+        {
+          label: "Master Class",
+          href: "/events/virtual/masterclass",
+          locked: !isSubModuleEnabled("engagement", "masterclasses"),
+        },
+        {
+          label: "1:1 Profile Evaluation",
+          href: "/events/virtual/meetups",
+          locked: !isSubModuleEnabled("engagement", "meetups"),
+        },
+      ],
+    },
+    {
+      title: "Scholarships",
+      icon: GraduationCap,
+      permissionKey: "scholarshipPortal",
+      buttons: [
+        {
+          label: "Scholarship Applications",
+          href: "/scholarships/applications",
+          locked: !isSubModuleEnabled("scholarshipPortal", "applicantPools"),
+        },
+        {
+          label: "View Analytics",
+          href: "/scholarships/analytics",
+        },
+      ],
+    },
+    {
+      title: "School Profile",
+      icon: Building2,
+      permissionKey: "orgProfile",
+      buttons: [
+        {
+          label: "Edit Information",
+          href: "/school-profile/edit",
+        },
+        {
+          label: "Access Leads",
+          href: "/profile-leads",
+          locked: !isSubModuleEnabled("orgProfile", "accessLeads"),
+        },
+      ],
+    },
+    {
+      title: "University Applications",
+      icon: FileText,
+      permissionKey: "admissions",
+      buttons: [
+        {
+          label: "All Applications via SEED",
+          href: "/university-applications/all",
+          locked: !isSubModuleEnabled("admissions", "applicationPipeline"),
+        },
+      ],
+    },
+    {
+      title: "In Country Representation",
+      icon: Globe,
+      permissionKey: "icr",
+      buttons: [
+        {
+          label: "View Analytics",
+          href: "/in-country-reports",
+        },
+      ],
+    },
+  ];
+
+  // Filter cards based on permissions
+  const visibleCards = moduleCards.filter((card) => {
+    if (!card.permissionKey) return true;
+    // Organisation Profile is always visible
+    if (card.permissionKey === "orgProfile") return true;
+    return isModuleEnabled(card.permissionKey);
+  });
+
+  const handleNavigate = (href: string, locked?: boolean) => {
+    if (!locked) {
+      navigate(href);
+    }
+  };
+
   return (
     <DashboardLayout>
       {/* Page Header */}
       <div className="mb-8 animate-fade-in">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl lg:text-3xl font-semibold mb-1">
-              Welcome back, John
-            </h1>
-            <p className="text-muted-foreground">
-              ROI overview for Harvard Business School
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="default" className="gap-2">
-              <Download className="h-4 w-4" />
-              Export Report
-            </Button>
-            <Button size="default" className="gap-2">
-              <BarChart3 className="h-4 w-4" />
-              View Analytics
-            </Button>
-          </div>
-        </div>
+        <h1 className="text-2xl lg:text-3xl font-semibold text-[#1a365d] dark:text-foreground">
+          Welcome, {displayName}
+        </h1>
+        <p className="text-muted-foreground mt-1">
+          {[designation, universityName, schoolName].filter(Boolean).join(" | ")}
+        </p>
+        <div className="mt-4 border-b border-border" />
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <InsightCard
-          title="Total Leads"
-          value="2,847"
-          change={12.5}
-          changeLabel="vs last month"
-          icon={Target}
-          variant="primary"
-          delay={100}
-        />
-        <InsightCard
-          title="Active Applications"
-          value="428"
-          change={8.2}
-          changeLabel="vs last month"
-          icon={FileText}
-          variant="info"
-          delay={150}
-        />
-        <InsightCard
-          title="Scholarship Applicants"
-          value="156"
-          change={-2.3}
-          changeLabel="vs last month"
-          icon={GraduationCap}
-          variant="success"
-          delay={200}
-        />
-        <InsightCard
-          title="ROI Multiplier"
-          value="5.4x"
-          change={18.7}
-          changeLabel="vs last quarter"
-          icon={TrendingUp}
-          variant="warning"
-          delay={250}
-        />
-      </div>
-
-      {/* ROI Performance Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-        <AdvancedROIChart />
-        <ChannelPerformance />
-      </div>
-
-      {/* Secondary Stats + Conversion Funnel */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-        <Card className="border-border animate-fade-in-up" style={{ animationDelay: "300ms" }}>
-          <CardContent className="p-5">
-            <div className="flex flex-col items-center">
-              <MetricRing value={24} max={30} label="Virtual Events" sublabel="this month" variant="primary" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-border animate-fade-in-up" style={{ animationDelay: "350ms" }}>
-          <CardContent className="p-5">
-            <div className="flex flex-col items-center">
-              <MetricRing value={892} max={1000} label="Admits This Year" sublabel="+24.5%" variant="success" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <div className="lg:col-span-2">
-          <ConversionFunnel />
-        </div>
-      </div>
-
-      {/* Activity + Insights Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-        <div className="lg:col-span-2">
-          <ActivityFeed />
-        </div>
-        <GlobalInsights />
-      </div>
-
-      {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <UpcomingEventsList />
-        <AIInsights />
+      {/* Module Cards Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {visibleCards.map((card) => (
+          <Card
+            key={card.title}
+            className="border-border shadow-sm hover:shadow-md transition-shadow"
+          >
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3 text-lg font-semibold text-foreground">
+                <card.icon className="h-5 w-5 text-muted-foreground" />
+                {card.title}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="flex flex-wrap gap-3">
+                {card.buttons.map((btn) => (
+                  <Button
+                    key={btn.label}
+                    onClick={() => handleNavigate(btn.href, btn.locked)}
+                    disabled={btn.locked}
+                    className={cn(
+                      "flex-1 min-w-[140px] h-10 text-sm font-medium transition-all",
+                      btn.locked
+                        ? "bg-muted text-muted-foreground cursor-not-allowed border border-border"
+                        : "bg-[#e07830] hover:bg-[#c96828] text-white"
+                    )}
+                    variant={btn.locked ? "outline" : "default"}
+                  >
+                    {btn.label}
+                    {btn.locked && <Lock className="ml-2 h-3.5 w-3.5" />}
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </DashboardLayout>
   );
