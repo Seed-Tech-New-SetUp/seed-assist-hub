@@ -54,7 +54,7 @@ export function SchoolSwitcher() {
   // Single school - no dropdown needed
   if (!currentSchool || schools.length <= 1) {
     return currentSchool ? (
-      <div className="mx-3 my-3 p-4 bg-white rounded-lg shadow-sm">
+      <div className="mx-3 my-3 p-4 bg-card rounded-lg shadow-sm border border-border">
         {schoolLogo && (
           <div className="flex justify-center mb-3">
             <img
@@ -64,14 +64,14 @@ export function SchoolSwitcher() {
             />
           </div>
         )}
-        <p className="text-sm font-semibold text-gray-800 text-center leading-snug">
+        <p className="text-sm font-semibold text-foreground text-center leading-snug">
           {fullSchoolName}
         </p>
         {schoolCountry && (
           <p className="text-xs text-primary text-center mt-1 font-medium">{schoolCountry}</p>
         )}
         {designation && (
-          <p className="text-[10px] text-gray-500 text-center mt-1 capitalize">{designation}</p>
+          <p className="text-[10px] text-muted-foreground text-center mt-1 capitalize">{designation}</p>
         )}
       </div>
     ) : null;
@@ -83,8 +83,8 @@ export function SchoolSwitcher() {
       <DropdownMenuTrigger asChild>
         <button
           className={cn(
-            "mx-3 my-3 p-4 bg-white rounded-lg shadow-sm w-[calc(100%-1.5rem)] text-left",
-            "hover:shadow-md transition-shadow cursor-pointer",
+            "mx-3 my-3 p-4 bg-card rounded-lg shadow-sm border border-border w-[calc(100%-1.5rem)] text-left",
+            "hover:bg-accent/50 hover:border-accent transition-all cursor-pointer",
             "focus:outline-none focus:ring-2 focus:ring-primary/20"
           )}
         >
@@ -97,7 +97,7 @@ export function SchoolSwitcher() {
               />
             </div>
           )}
-          <p className="text-sm font-semibold text-gray-800 text-center leading-snug">
+          <p className="text-sm font-semibold text-foreground text-center leading-snug">
             {fullSchoolName}
           </p>
           {schoolCountry && (
@@ -105,16 +105,21 @@ export function SchoolSwitcher() {
           )}
           
           {/* Switch School indicator */}
-          <div className="flex items-center justify-center gap-1.5 mt-3 pt-3 border-t border-gray-100">
-            <span className="text-xs text-gray-500 font-medium">Switch School</span>
+          <div className="flex items-center justify-center gap-1.5 mt-3 pt-3 border-t border-border">
+            <span className="text-xs text-muted-foreground font-medium">Switch School</span>
             <ChevronDown className={cn(
-              "h-3.5 w-3.5 text-gray-400 transition-transform",
+              "h-3.5 w-3.5 text-muted-foreground transition-transform",
               open && "rotate-180"
             )} />
           </div>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="center" className="w-72 bg-white z-50">
+      <DropdownMenuContent 
+        align="end" 
+        side="right"
+        sideOffset={8}
+        className="w-72 bg-popover border border-border shadow-lg z-50"
+      >
         <DropdownMenuLabel className="text-xs text-muted-foreground font-normal px-3">
           Switch School
         </DropdownMenuLabel>
@@ -125,12 +130,14 @@ export function SchoolSwitcher() {
             onClick={() => handleSchoolChange(school)}
             className={cn(
               "cursor-pointer py-3 px-3",
+              "focus:bg-accent focus:text-accent-foreground",
+              "hover:bg-accent hover:text-accent-foreground",
               switchingSchoolId === school.id && "opacity-75"
             )}
             disabled={switchingSchoolId !== null}
           >
             <div className="flex items-center gap-3 w-full">
-              <div className="h-10 w-10 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0">
+              <div className="h-10 w-10 rounded-lg bg-muted border border-border flex items-center justify-center flex-shrink-0">
                 {school.logo_url ? (
                   <img
                     src={school.logo_url}
@@ -138,15 +145,15 @@ export function SchoolSwitcher() {
                     className="h-7 w-7 object-contain"
                   />
                 ) : (
-                  <Building2 className="h-5 w-5 text-gray-400" />
+                  <Building2 className="h-5 w-5 text-muted-foreground" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-800 leading-snug">
+                <p className="text-sm font-semibold leading-snug">
                   {school.name}
                 </p>
                 {school.designation && (
-                  <p className="text-xs text-gray-500 mt-0.5 leading-snug">
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
                     {school.designation}
                   </p>
                 )}
