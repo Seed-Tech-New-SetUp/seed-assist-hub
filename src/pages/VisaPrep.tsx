@@ -90,7 +90,22 @@ export default function VisaPrep() {
 
   const saveEditing = () => {
     if (editFormData.license_number) {
-      reassignMutation.mutate(editFormData as ReassignPayload);
+      // Trim all values and split name into first/last
+      const fullName = (editFormData.first_name || "").trim();
+      const nameParts = fullName.split(/\s+/);
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
+      
+      const payload: ReassignPayload = {
+        license_number: editFormData.license_number,
+        first_name: firstName,
+        last_name: lastName,
+        email: (editFormData.email || "").trim(),
+        mobile: (editFormData.mobile || "").trim(),
+        target_degree: (editFormData.target_degree || "").trim(),
+      };
+      
+      reassignMutation.mutate(payload);
     }
   };
 
