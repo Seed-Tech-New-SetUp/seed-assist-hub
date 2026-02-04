@@ -7,7 +7,7 @@ import { FileUploadZone } from "@/components/lae/FileUploadZone";
 import { FilesList } from "@/components/lae/FilesList";
 import { AssignmentCard } from "@/components/lae/AssignmentCard";
 import { AnalyticsModal } from "@/components/lae/AnalyticsModal";
-import { DetailModal } from "@/components/lae/DetailModal";
+import { AllRecordsModal } from "@/components/lae/AllRecordsModal";
 import {
   LAEFile,
   LAEAssignment,
@@ -255,14 +255,12 @@ export default function LeadAnalytics() {
         assignmentName={selectedAssignmentName}
       />
 
-      {/* Contacts Modal (All Applications) */}
-      <DetailModal
+      {/* All Records Modal (All Applications) */}
+      <AllRecordsModal
         open={contactsModalOpen}
         onOpenChange={setContactsModalOpen}
         assignmentId={contactsAssignmentId}
-        filterType="status"
-        filterValues={["all"]}
-        filterLabel={contactsAssignmentName}
+        assignmentName={contactsAssignmentName}
       />
     </DashboardLayout>
   );

@@ -112,21 +112,31 @@ serve(async (req) => {
         break;
 
       case 'detail':
+      case 'all_records':
         // GET /api/assist/lae/detail.php - Get detail records
+        // For 'all_records' action, we fetch without filters
         const detailParams = new URLSearchParams();
         detailParams.append('assignment_id', params.assignment_id);
-        detailParams.append('filter_type', params.filter_type);
-        if (Array.isArray(params.filter_values)) {
-          detailParams.append('filter_value', params.filter_values.join(','));
+        
+        if (action === 'all_records') {
+          // For all records, don't pass filter_type/filter_value to get everything
+          // The backend should return all records when no filter is specified
+          detailParams.append('filter_type', 'all');
+          detailParams.append('filter_value', 'all');
         } else {
-          detailParams.append('filter_value', params.filter_values || '');
-        }
-        if (params.multiple) detailParams.append('multiple', '1');
-        if (params.status && params.status !== 'all') {
-          detailParams.append('status', params.status);
-        }
-        if (params.program && params.program !== 'all') {
-          detailParams.append('program', params.program);
+          detailParams.append('filter_type', params.filter_type);
+          if (Array.isArray(params.filter_values)) {
+            detailParams.append('filter_value', params.filter_values.join(','));
+          } else {
+            detailParams.append('filter_value', params.filter_values || '');
+          }
+          if (params.multiple) detailParams.append('multiple', '1');
+          if (params.status && params.status !== 'all') {
+            detailParams.append('status', params.status);
+          }
+          if (params.program && params.program !== 'all') {
+            detailParams.append('program', params.program);
+          }
         }
         url = `${BASE_URL}/detail.php?${detailParams.toString()}`;
         break;
