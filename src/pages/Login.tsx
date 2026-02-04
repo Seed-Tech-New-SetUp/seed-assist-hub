@@ -545,14 +545,14 @@ export default function Login() {
                 with <span className="font-semibold text-sidebar-accent-foreground">SEED Global Education</span>
               </p>
               <p className="text-sm text-sidebar-foreground leading-relaxed pt-2">
-                Your all-in-one platform to attract qualified candidates, nurture prospective students, and convert leads into enrolled scholars. From event management and lead analytics to scholarship administration and visa preparation — streamline your entire international recruitment journey.
+                Attract, nurture, and convert — all in one platform.
               </p>
             </div>
           </div>
 
           {/* Footer */}
           <p className="text-xs text-sidebar-foreground">
-            Trusted by leading business schools worldwide
+            Trusted by leading universities & business schools
           </p>
         </div>
       </div>
