@@ -556,7 +556,11 @@ export default function ScholarshipApplications() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <span className="text-lg">{getFlagEmoji(applicant.countryCode)}</span>
+                            <img
+                              src={`https://flagcdn.com/w40/${applicant.countryCode.toLowerCase()}.png`}
+                              alt={applicant.country}
+                              className="h-8 w-8 rounded-full object-cover flex-shrink-0"
+                            />
                             <div>
                               <p className="font-medium">{applicant.name}</p>
                               <p className="text-xs text-muted-foreground">{applicant.country}</p>
