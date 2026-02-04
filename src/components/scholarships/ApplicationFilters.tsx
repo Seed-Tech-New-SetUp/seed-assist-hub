@@ -359,13 +359,13 @@ export function ApplicationFilters({
           suffix=" yrs"
         />
 
-        {/* Nationality */}
+        {/* Region */}
         <MultiSelectFilter
-          label="Nationality"
+          label="Region"
           options={availableNationalities}
           selected={filters.nationalities}
           onChange={(selected) => onFiltersChange({ ...filters, nationalities: selected as string[] })}
-          placeholder="Nationality"
+          placeholder="Region"
         />
 
         {/* Gender */}
