@@ -214,6 +214,27 @@ export async function fetchDetailData(
   return data;
 }
 
+export async function fetchAllRecords(
+  assignmentId: string
+): Promise<DetailDataResponse> {
+  const token = getAuthToken();
+  if (!token) handleUnauthorized("No authentication token");
+
+  const { data, error } = await supabase.functions.invoke("lae-proxy", {
+    body: {
+      action: "all_records",
+      assignment_id: assignmentId,
+    },
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  checkAuthError(data, error as { message?: string; status?: number });
+  if (error) throw new Error(error.message);
+  if (!data?.success) throw new Error(data?.error || "Failed to fetch all records");
+
+  return data;
+}
+
 export function getDetailExportUrl(
   assignmentId: string,
   filterType: "status" | "program",
