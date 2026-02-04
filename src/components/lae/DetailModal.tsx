@@ -77,6 +77,17 @@ export function DetailModal({
           program: filterType !== "program" ? crossFilters?.program : undefined,
         }
       );
+      
+      // Deduplicate columns array (API sometimes returns duplicates)
+      if (data.columns) {
+        const seen = new Set<string>();
+        data.columns = data.columns.filter((col) => {
+          if (seen.has(col)) return false;
+          seen.add(col);
+          return true;
+        });
+      }
+      
       setDetailData(data);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to load data";
@@ -243,8 +254,9 @@ export function DetailModal({
                     <Table className="w-max">
                       <TableHeader>
                         <TableRow>
+                          {/* Use index as key to handle duplicate column names */}
                           {detailData.columns.map((column, index) => (
-                            <TableHead key={column} className="whitespace-nowrap">
+                            <TableHead key={`col-${index}`} className="whitespace-nowrap">
                               {formatHeader(column, index)}
                             </TableHead>
                           ))}
@@ -253,8 +265,8 @@ export function DetailModal({
                       <TableBody>
                         {detailData.data.map((row, rowIndex) => (
                           <TableRow key={rowIndex}>
-                            {detailData.columns.map((column) => (
-                              <TableCell key={column} className="whitespace-nowrap">
+                            {detailData.columns.map((column, colIndex) => (
+                              <TableCell key={`cell-${colIndex}`} className="whitespace-nowrap">
                                 {row[column] !== null && row[column] !== undefined
                                   ? String(row[column])
                                   : "-"}
