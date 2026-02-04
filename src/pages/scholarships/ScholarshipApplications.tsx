@@ -355,38 +355,83 @@ export default function ScholarshipApplications() {
           </Button>
         </div>
 
-        {/* Status Legend */}
-        <div className="flex flex-wrap items-center gap-4 md:gap-6">
-          <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-              <Check className="h-5 w-5 text-green-600" />
-            </div>
-            <span className="text-sm font-medium text-muted-foreground">- SEED Recommended</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-              <Star className="h-5 w-5 text-yellow-500" />
-            </div>
-            <span className="text-sm font-medium text-muted-foreground">- Shortlisted</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
-              <Pause className="h-5 w-5 text-orange-500" />
-            </div>
-            <span className="text-sm font-medium text-muted-foreground">- On Hold</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-lg bg-red-500/10 flex items-center justify-center">
-              <X className="h-5 w-5 text-red-500" />
-            </div>
-            <span className="text-sm font-medium text-muted-foreground">- Rejected</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-lg bg-cyan-500/10 flex items-center justify-center">
-              <Trophy className="h-5 w-5 text-cyan-500" />
-            </div>
-            <span className="text-sm font-medium text-muted-foreground">- Winner</span>
-          </div>
+        {/* Status Filter Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <Card
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              statusFilter === "SEED_RECOMMENDED" ? "ring-2 ring-green-500 bg-green-500/5" : "hover:bg-muted/50"
+            }`}
+            onClick={() => setStatusFilter(statusFilter === "SEED_RECOMMENDED" ? "all" : "SEED_RECOMMENDED")}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                  <Check className="h-5 w-5 text-green-600" />
+                </div>
+                <span className="text-sm font-medium">SEED Recommended</span>
+              </div>
+            </CardContent>
+          </Card>
+          <Card
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              statusFilter === "shortlisted" ? "ring-2 ring-yellow-500 bg-yellow-500/5" : "hover:bg-muted/50"
+            }`}
+            onClick={() => setStatusFilter(statusFilter === "shortlisted" ? "all" : "shortlisted")}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-yellow-500/10 flex items-center justify-center flex-shrink-0">
+                  <Star className="h-5 w-5 text-yellow-500" />
+                </div>
+                <span className="text-sm font-medium">Shortlisted</span>
+              </div>
+            </CardContent>
+          </Card>
+          <Card
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              statusFilter === "onhold" ? "ring-2 ring-orange-500 bg-orange-500/5" : "hover:bg-muted/50"
+            }`}
+            onClick={() => setStatusFilter(statusFilter === "onhold" ? "all" : "onhold")}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+                  <Pause className="h-5 w-5 text-orange-500" />
+                </div>
+                <span className="text-sm font-medium">On Hold</span>
+              </div>
+            </CardContent>
+          </Card>
+          <Card
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              statusFilter === "rejected" ? "ring-2 ring-red-500 bg-red-500/5" : "hover:bg-muted/50"
+            }`}
+            onClick={() => setStatusFilter(statusFilter === "rejected" ? "all" : "rejected")}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-red-500/10 flex items-center justify-center flex-shrink-0">
+                  <X className="h-5 w-5 text-red-500" />
+                </div>
+                <span className="text-sm font-medium">Rejected</span>
+              </div>
+            </CardContent>
+          </Card>
+          <Card
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              statusFilter === "winner" ? "ring-2 ring-cyan-500 bg-cyan-500/5" : "hover:bg-muted/50"
+            }`}
+            onClick={() => setStatusFilter(statusFilter === "winner" ? "all" : "winner")}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-cyan-500/10 flex items-center justify-center flex-shrink-0">
+                  <Trophy className="h-5 w-5 text-cyan-500" />
+                </div>
+                <span className="text-sm font-medium">Winner</span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Search & Filters */}
