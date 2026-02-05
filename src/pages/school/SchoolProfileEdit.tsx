@@ -22,7 +22,6 @@ import {
   Star,
   Trophy,
   Phone,
-  GraduationCap,
   ChevronRight,
   Plus,
   Trash2,
@@ -77,7 +76,6 @@ const sections = [
   { id: "logos", label: "Brand Assets", icon: ImageIcon },
   { id: "rankings", label: "Accreditations & Rankings", icon: Trophy },
   { id: "contact", label: "Key Contacts", icon: Phone },
-  { id: "programs", label: "Program Portfolio", icon: GraduationCap },
 ];
 
 export default function SchoolProfileEdit() {
