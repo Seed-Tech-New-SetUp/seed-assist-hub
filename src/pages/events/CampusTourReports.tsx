@@ -305,7 +305,9 @@ const CampusTourReports = () => {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </div>
           <div>
-            <p className="font-medium">{event.eventName}</p>
+            <p className="font-medium">
+              {event.eventName} - {event.campusName || event.city}
+            </p>
             <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
               <MapPin className="h-3 w-3" />
               {event.location || event.city}
