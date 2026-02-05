@@ -317,7 +317,7 @@ export function AppSidebar() {
       )}
 
       {/* Navigation */}
-      <ScrollArea className="flex-1 h-[calc(100vh-15rem)]">
+      <ScrollArea className="flex-1 h-[calc(100vh-18rem)] pb-2">
         <nav className="p-2 space-y-1">
           {navigation.map((item) => {
             const hasChildren = item.children && item.children.length > 0;
