@@ -39,16 +39,16 @@
  
  Congratulations! We're pleased to inform you that you have been shortlisted for the ${data.scholarshipName} offered by ${data.schoolName}.
  
- What's Next?
+**What's Next?**
  
  • Submit Your Application: Please apply to ${data.schoolName} before the application deadline. Ensure you use the same email address as your scholarship application.
  
  • Already Applied? If you have already submitted your application, please get in touch with your Dedicated SEED Relationship Manager and share your program application details.
  
- Award Announcement:
+**Award Announcement:**
  Scholarship recipients will be announced by ${data.schoolName} after all applications have been evaluated.
  
- Important Note:
+**Important Note:**
  Being shortlisted is an important milestone, but it does not guarantee a final award. The final decision rests solely with ${data.schoolName}.
  
  All scholarship amounts will be directly deducted from your tuition fee by the university.
@@ -56,8 +56,8 @@
  Congratulations once again! If you have any questions, please contact us at scholarships@seedglobaleducation.com
  
  Best regards,
- ${data.clientName}
-${data.universityName ? `${data.universityName} - ${data.schoolName}` : data.schoolName}`,
+**${data.clientName}**
+**${data.universityName ? `${data.universityName} - ${data.schoolName}` : data.schoolName}**`,
      },
      rejected: {
        subject: `Update on Your Scholarship Application`,
@@ -69,15 +69,15 @@ ${data.universityName ? `${data.universityName} - ${data.schoolName}` : data.sch
  
  While this news may be disappointing, please know that your interest in ${data.schoolName} is highly valued, and we encourage you to continue exploring future opportunities.
  
- Important Note: If you've already received an admission offer and/or a scholarship directly from the university, those awards are separate from the SEED scholarship and shall remain unchanged.
+**Important Note:** If you've already received an admission offer and/or a scholarship directly from the university, those awards are separate from the SEED scholarship and shall remain unchanged.
  
  If you have any questions, please contact us at scholarships@seedglobaleducation.com.
  
  Thank you once again for your interest in ${data.schoolName}. We wish you the very best in your academic journey.
  
  Best regards,
- ${data.clientName}
-${data.universityName ? `${data.universityName} - ${data.schoolName}` : data.schoolName}`,
+**${data.clientName}**
+**${data.universityName ? `${data.universityName} - ${data.schoolName}` : data.schoolName}**`,
      },
      onHold: {
        subject: `Update on Your Scholarship Application Status`,
@@ -87,7 +87,7 @@ ${data.universityName ? `${data.universityName} - ${data.schoolName}` : data.sch
  
  Your application is being carefully reviewed, and we are pleased to inform you that your profile remains under consideration.
  
- Here's what this means for you:
+**Here's what this means for you:**
  
  • You do not need to reapply or take any additional action at this time.
  
@@ -100,8 +100,8 @@ ${data.universityName ? `${data.universityName} - ${data.schoolName}` : data.sch
  Thank you, and best of luck!
  
  Best regards,
- ${data.clientName}
-${data.universityName ? `${data.universityName} - ${data.schoolName}` : data.schoolName}`,
+**${data.clientName}**
+**${data.universityName ? `${data.universityName} - ${data.schoolName}` : data.schoolName}**`,
      },
      selected: {
        subject: `Congratulations on Winning the ${data.awardName || "Scholarship Award"}`,
@@ -111,7 +111,7 @@ ${data.universityName ? `${data.universityName} - ${data.schoolName}` : data.sch
  
  Your achievement marks an important step toward your academic journey, and we're thrilled to see the impact you will create.
  
- Important Notes:
+**Important Notes:**
  
  • This award has been granted by ${data.schoolName}.
  
@@ -122,8 +122,8 @@ ${data.universityName ? `${data.universityName} - ${data.schoolName}` : data.sch
  Congratulations once again on this well-deserved recognition!
  
  Best regards,
- ${data.clientName}
-${data.universityName ? `${data.universityName} - ${data.schoolName}` : data.schoolName}`,
+**${data.clientName}**
+**${data.universityName ? `${data.universityName} - ${data.schoolName}` : data.schoolName}**`,
      },
    };
  
@@ -140,13 +140,20 @@ ${data.universityName ? `${data.universityName} - ${data.schoolName}` : data.sch
          const lines = paragraph.split("\n");
          const listItems = lines
            .filter((line) => line.startsWith("• "))
-           .map((line) => `<li>${line.replace("• ", "")}</li>`)
+           .map((line) => {
+             let content = line.replace("• ", "");
+             // Handle bold markers **text**
+             content = content.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+             return `<li>${content}</li>`;
+           })
            .join("");
          const nonListLines = lines.filter((line) => !line.startsWith("• "));
-         const prefix = nonListLines.length > 0 ? `<p>${nonListLines.join("<br>")}</p>` : "";
+         const prefix = nonListLines.length > 0 ? `<p>${nonListLines.join("<br>").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")}</p>` : "";
          return `${prefix}<ul>${listItems}</ul>`;
        }
-       return `<p>${paragraph.replace(/\n/g, "<br>")}</p>`;
+       // Handle bold markers **text**
+       const withBold = paragraph.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+       return `<p>${withBold.replace(/\n/g, "<br>")}</p>`;
      })
      .join("");
  }
