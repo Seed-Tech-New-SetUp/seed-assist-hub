@@ -76,6 +76,47 @@ export interface ICRReportsResponse {
   error?: string;
 }
 
+// Previous reports response (from previous_reports.php)
+export interface ICRPreviousReport {
+  report_id: number;
+  report_month: string;
+  status: string;
+  client_name: string;
+  total_leads_generated: number;
+  total_leads_engaged: number;
+  submitted_at: string;
+  updated_at: string;
+  created_at: string;
+  leadGeneration: Array<{
+    activity_type: string;
+    qualified_leads: number;
+    description: string;
+  }>;
+  leadEngagement: Array<{
+    activity_type: string;
+    leads_engaged: number;
+    description: string;
+  }>;
+  applicationFunnel: {
+    leadsEngaged: number;
+    notInterested: number;
+    interested2026: number;
+    applicationsSubmitted: number;
+    admitted: number;
+    offersAccepted: number;
+    enrolled: number;
+  };
+}
+
+export interface ICRPreviousReportsResponse {
+  success: boolean;
+  data?: {
+    reports: ICRPreviousReport[];
+    total_count: number;
+  };
+  error?: string;
+}
+
 // Payload types for create/update
 export interface ICRLeadGenerationInput {
   activity_type: string;
@@ -156,6 +197,45 @@ export async function fetchICRReports(
   } catch (error) {
     console.error("ICR fetch error:", error);
     return { success: false, error: "Failed to fetch ICR reports" };
+  }
+}
+
+export async function fetchPreviousICRReports(): Promise<ICRPreviousReportsResponse> {
+  const token = getCookie(AUTH_COOKIES.TOKEN) ?? getCookie("auth_token");
+
+  if (!token) {
+    handleUnauthorized("Not authenticated");
+  }
+
+  try {
+    const response = await supabase.functions.invoke('icr-proxy', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: { action: 'previous_reports' },
+    });
+
+    if (response.error) {
+      console.error("ICR Previous Reports API Error:", response.error);
+      if (isUnauthorizedError((response.error as { status?: number }).status || 0, { error: response.error.message })) {
+        handleUnauthorized(response.error.message);
+      }
+      return { success: false, error: response.error.message };
+    }
+
+    const data = response.data as ICRPreviousReportsResponse;
+    
+    // Check for unauthorized in response data
+    if (!data.success && data.error) {
+      if (isUnauthorizedError(0, { error: data.error })) {
+        handleUnauthorized(data.error);
+      }
+    }
+
+    return data;
+  } catch (error) {
+    console.error("ICR previous reports fetch error:", error);
+    return { success: false, error: "Failed to fetch previous ICR reports" };
   }
 }
 
