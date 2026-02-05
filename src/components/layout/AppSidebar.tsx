@@ -56,7 +56,7 @@ const baseNavigation: NavItem[] = [
     icon: LayoutDashboard 
   },
   {
-    title: "Engagement",
+    title: "Events",
     icon: Calendar,
     permissionKey: "engagement",
     children: [
@@ -77,7 +77,7 @@ const baseNavigation: NavItem[] = [
         items: [
           // { title: "Overview", href: "/events/virtual" }, // TODO: Re-enable when overview pages are updated
           { title: "Masterclass", href: "/events/virtual/masterclass", permissionKey: "masterclasses" },
-          { title: "1:1 Profile Evaluation", href: "/events/virtual/meetups", permissionKey: "meetups", alwaysShow: true },
+          { title: "Meetups", href: "/events/virtual/meetups", permissionKey: "meetups", alwaysShow: true },
         ],
       },
     ],
