@@ -310,6 +310,7 @@ export default function ScholarshipApplications() {
      schoolName: selectedSchool?.school_name || currentSchool?.name || "University",
      clientName: (user as { full_name?: string })?.full_name || "SEED Global Education",
      awardName: "[Award Name]",
+     universityName: selectedSchool?.university,
    };
 
   // Loading state

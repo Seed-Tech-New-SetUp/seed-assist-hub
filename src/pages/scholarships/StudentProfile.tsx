@@ -355,6 +355,7 @@ export default function StudentProfile() {
     schoolName: selectedSchool?.school_name || currentSchool?.name || "University",
     clientName: (user as { full_name?: string })?.full_name || "SEED Global Education",
     awardName: getWinnerAwardName(),
+    universityName: selectedSchool?.university,
   };
 
   const navigateToPrev = () => {
