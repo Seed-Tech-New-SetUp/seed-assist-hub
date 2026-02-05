@@ -32,12 +32,11 @@ import {
 } from "@/components/events/EventFilters";
 
 const formatDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  const date = new Date(dateStr);
+  const month = date.toLocaleDateString("en-US", { month: "short" });
+  const day = String(date.getDate()).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${month} ${day}, ${year}`;
 };
 
 const formatDateTime = (dateTimeStr: string) => {
@@ -299,6 +298,7 @@ const CampusTourReports = () => {
     {
       key: "event",
       header: "Event",
+      sortKey: (event: CampusTourEvent) => event.eventName,
       render: (event: CampusTourEvent) => (
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-muted">
@@ -323,6 +323,7 @@ const CampusTourReports = () => {
     {
       key: "date",
       header: "Date",
+      sortKey: (event: CampusTourEvent) => new Date(event.date),
       render: (event: CampusTourEvent) => (
         <span className="text-sm">{formatDate(event.date)}</span>
       ),
@@ -330,6 +331,7 @@ const CampusTourReports = () => {
     {
       key: "campus",
       header: "City/Campus",
+      sortKey: (event: CampusTourEvent) => event.campusName || event.city,
       render: (event: CampusTourEvent) => (
         <span className="text-sm">{event.campusName || event.city}</span>
       ),
@@ -338,6 +340,7 @@ const CampusTourReports = () => {
       key: "registrants",
       header: "Registrants",
       className: "text-center",
+      sortKey: (event: CampusTourEvent) => event.registrants,
       render: (event: CampusTourEvent) => (
         <span className="font-medium">{event.registrants.toLocaleString()}</span>
       ),
@@ -346,6 +349,7 @@ const CampusTourReports = () => {
       key: "attended",
       header: "Attended",
       className: "text-center",
+      sortKey: (event: CampusTourEvent) => event.attended,
       render: (event: CampusTourEvent) => (
         <span className="font-medium">{event.attended.toLocaleString()}</span>
       ),

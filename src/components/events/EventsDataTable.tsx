@@ -24,13 +24,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { Search, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Column<T> {
   key: string;
   header: string;
   render: (item: T) => ReactNode;
   className?: string;
+  sortable?: boolean;
+  sortKey?: (item: T) => string | number | Date;
 }
 
 interface EventsDataTableProps<T> {
@@ -43,6 +46,8 @@ interface EventsDataTableProps<T> {
   pageSizeOptions?: number[];
   defaultPageSize?: number;
 }
+
+type SortDirection = "asc" | "desc" | null;
 
 export function EventsDataTable<T extends { id?: string; event_id?: string }>({
   data,
@@ -57,6 +62,25 @@ export function EventsDataTable<T extends { id?: string; event_id?: string }>({
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(defaultPageSize);
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+
+  // Handle column header click for sorting
+  const handleSort = (columnKey: string) => {
+    if (sortColumn === columnKey) {
+      // Cycle through: asc -> desc -> null
+      if (sortDirection === "asc") {
+        setSortDirection("desc");
+      } else if (sortDirection === "desc") {
+        setSortColumn(null);
+        setSortDirection(null);
+      }
+    } else {
+      setSortColumn(columnKey);
+      setSortDirection("asc");
+    }
+    setCurrentPage(1);
+  };
 
   // Filter data based on search (applied to ALL data, not just current page)
   const filteredData = useMemo(() => {
@@ -71,11 +95,35 @@ export function EventsDataTable<T extends { id?: string; event_id?: string }>({
     });
   }, [data, searchQuery, searchKey]);
 
+  // Sort filtered data
+  const sortedData = useMemo(() => {
+    if (!sortColumn || !sortDirection) return filteredData;
+    
+    const column = columns.find(c => c.key === sortColumn);
+    if (!column?.sortKey) return filteredData;
+
+    return [...filteredData].sort((a, b) => {
+      const aVal = column.sortKey!(a);
+      const bVal = column.sortKey!(b);
+      
+      let comparison = 0;
+      if (aVal instanceof Date && bVal instanceof Date) {
+        comparison = aVal.getTime() - bVal.getTime();
+      } else if (typeof aVal === "number" && typeof bVal === "number") {
+        comparison = aVal - bVal;
+      } else {
+        comparison = String(aVal).localeCompare(String(bVal));
+      }
+      
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+  }, [filteredData, sortColumn, sortDirection, columns]);
+
   // Pagination calculations
-  const totalPages = Math.ceil(filteredData.length / pageSize);
+  const totalPages = Math.ceil(sortedData.length / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = Math.min(startIndex + pageSize, filteredData.length);
-  const paginatedData = filteredData.slice(startIndex, endIndex);
+  const endIndex = Math.min(startIndex + pageSize, sortedData.length);
+  const paginatedData = sortedData.slice(startIndex, endIndex);
 
   // Reset to page 1 when search or data changes
   const handleSearchChange = (value: string) => {
@@ -113,6 +161,16 @@ export function EventsDataTable<T extends { id?: string; event_id?: string }>({
     return pages;
   };
 
+  const renderSortIcon = (columnKey: string) => {
+    if (sortColumn !== columnKey) {
+      return <ArrowUpDown className="h-3.5 w-3.5 ml-1 opacity-50" />;
+    }
+    if (sortDirection === "asc") {
+      return <ArrowUp className="h-3.5 w-3.5 ml-1" />;
+    }
+    return <ArrowDown className="h-3.5 w-3.5 ml-1" />;
+  };
+
   return (
     <div className="space-y-4">
       {/* Top Row: Page Size, Count, Search, and Filters */}
@@ -135,8 +193,8 @@ export function EventsDataTable<T extends { id?: string; event_id?: string }>({
             </Select>
             <span>entries</span>
             <span className="text-foreground font-medium ml-2">
-              {filteredData.length > 0 
-                ? `(Showing ${startIndex + 1}-${endIndex} of ${filteredData.length} events)`
+              {sortedData.length > 0 
+                ? `(Showing ${startIndex + 1}-${endIndex} of ${sortedData.length} events)`
                 : "(No events found)"
               }
             </span>
@@ -169,8 +227,18 @@ export function EventsDataTable<T extends { id?: string; event_id?: string }>({
           <TableHeader>
             <TableRow>
               {columns.map((col) => (
-                <TableHead key={col.key} className={col.className}>
-                  {col.header}
+                <TableHead 
+                  key={col.key} 
+                  className={cn(
+                    col.className,
+                    col.sortKey && "cursor-pointer select-none hover:bg-muted/50"
+                  )}
+                  onClick={() => col.sortKey && handleSort(col.key)}
+                >
+                  <span className="inline-flex items-center">
+                    {col.header}
+                    {col.sortKey && renderSortIcon(col.key)}
+                  </span>
                 </TableHead>
               ))}
             </TableRow>

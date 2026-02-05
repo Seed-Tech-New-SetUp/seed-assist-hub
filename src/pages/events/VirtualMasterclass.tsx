@@ -49,12 +49,11 @@ interface MasterclassResponse {
 }
 
 const formatDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  const date = new Date(dateStr);
+  const month = date.toLocaleDateString("en-US", { month: "short" });
+  const day = String(date.getDate()).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${month} ${day}, ${year}`;
 };
 
 const formatTime = (timeStr: string, timezone: string) => {
@@ -258,6 +257,7 @@ export default function VirtualMasterclass() {
     {
       key: "event",
       header: "Event",
+      sortKey: (event: MasterclassEvent) => event.event_name,
       render: (event: MasterclassEvent) => (
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-muted">
@@ -282,6 +282,7 @@ export default function VirtualMasterclass() {
     {
       key: "date",
       header: "Date",
+      sortKey: (event: MasterclassEvent) => new Date(event.date),
       render: (event: MasterclassEvent) => (
         <span className="text-sm">{formatDate(event.date)}</span>
       ),
@@ -290,6 +291,7 @@ export default function VirtualMasterclass() {
       key: "registrants",
       header: "Registrants",
       className: "text-center",
+      sortKey: (event: MasterclassEvent) => event.registrants,
       render: (event: MasterclassEvent) => (
         <span className="font-medium">{event.registrants.toLocaleString()}</span>
       ),
@@ -298,6 +300,7 @@ export default function VirtualMasterclass() {
       key: "attendees",
       header: "Attendees",
       className: "text-center",
+      sortKey: (event: MasterclassEvent) => event.attendees,
       render: (event: MasterclassEvent) => (
         <span className="font-medium">{event.attendees.toLocaleString()}</span>
       ),
