@@ -55,7 +55,7 @@ Being shortlisted is an important milestone, but it does not guarantee a final a
 
 All scholarship amounts will be directly deducted from your tuition fee by the university.
 
-Congratulations once again! If you have any questions, please contact us at scholarships@seedglobaleducation.com
+Congratulations once again! If you have any questions, please contact us at assist@seedglobaleducation.com
 
 Best regards,
 **${data.clientName}**
@@ -73,7 +73,7 @@ While this news may be disappointing, please know that your interest in ${fullSc
 
 **Important Note:** If you've already received an admission offer and/or a scholarship directly from the university, those awards are separate from the SEED scholarship and shall remain unchanged.
 
-If you have any questions, please contact us at scholarships@seedglobaleducation.com.
+If you have any questions, please contact us at assist@seedglobaleducation.com.
 
 Thank you once again for your interest in ${fullSchoolName}. We wish you the very best in your academic journey.
 
@@ -95,7 +95,7 @@ Your application is being carefully reviewed, and we are pleased to inform you t
 
 We appreciate your patience during this process and your continued interest in ${fullSchoolName}.
 
-If you have any questions, please reach out to us at scholarships@seedglobaleducation.com.
+If you have any questions, please reach out to us at assist@seedglobaleducation.com.
 
 Thank you, and best of luck!
 
