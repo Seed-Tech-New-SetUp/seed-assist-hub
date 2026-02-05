@@ -22,9 +22,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, Trash2, Pencil, Eye, Loader2 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  fetchICRReports,
+  fetchPreviousICRReports,
   deleteICRReport,
   formatReportMonth,
+  type ICRPreviousReport,
   type ICRReport,
 } from "@/lib/api/icr";
 import { toast } from "@/hooks/use-toast";
@@ -36,6 +37,50 @@ interface PreviousReportsModalProps {
   onEditReport?: (report: ICRReport) => void;
 }
 
+// Convert ICRPreviousReport to ICRReport format for edit/view
+function convertToICRReport(prev: ICRPreviousReport): ICRReport {
+  return {
+    report_id: prev.report_id,
+    report_month: prev.report_month,
+    client_name: prev.client_name,
+    client_email: "",
+    client_role: "",
+    created_at: prev.created_at,
+    updated_at: prev.updated_at,
+    lead_generation: prev.leadGeneration.map((lg, idx) => ({
+      id: idx,
+      report_id: prev.report_id,
+      activity_type: lg.activity_type,
+      qualified_leads: lg.qualified_leads,
+      description: lg.description,
+      created_at: prev.created_at,
+      updated_at: prev.updated_at,
+    })),
+    lead_engagement: prev.leadEngagement.map((le, idx) => ({
+      id: idx,
+      report_id: prev.report_id,
+      activity_type: le.activity_type,
+      leads_engaged: le.leads_engaged,
+      description: le.description,
+      created_at: prev.created_at,
+      updated_at: prev.updated_at,
+    })),
+    application_funnel: {
+      id: 0,
+      report_id: prev.report_id,
+      leads_engaged: prev.applicationFunnel.leadsEngaged,
+      not_interested: prev.applicationFunnel.notInterested,
+      interested_2026: prev.applicationFunnel.interested2026,
+      applications_submitted: prev.applicationFunnel.applicationsSubmitted,
+      admitted: prev.applicationFunnel.admitted,
+      offers_accepted: prev.applicationFunnel.offersAccepted,
+      enrolled: prev.applicationFunnel.enrolled,
+      created_at: prev.created_at,
+      updated_at: prev.updated_at,
+    },
+  };
+}
+
 export function PreviousReportsModal({
   open,
   onOpenChange,
@@ -45,11 +90,11 @@ export function PreviousReportsModal({
   const [selectedReport, setSelectedReport] = useState<ICRReport | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [reportToDelete, setReportToDelete] = useState<ICRReport | null>(null);
+  const [reportToDelete, setReportToDelete] = useState<ICRPreviousReport | null>(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["icr-reports-modal"],
-    queryFn: () => fetchICRReports(),
+    queryFn: () => fetchPreviousICRReports(),
     enabled: open,
   });
 
@@ -76,12 +121,12 @@ export function PreviousReportsModal({
 
   const reports = data?.data?.reports || [];
 
-  const handleViewDetails = (report: ICRReport) => {
-    setSelectedReport(report);
+  const handleViewDetails = (report: ICRPreviousReport) => {
+    setSelectedReport(convertToICRReport(report));
     setDetailModalOpen(true);
   };
 
-  const handleDeleteClick = (report: ICRReport) => {
+  const handleDeleteClick = (report: ICRPreviousReport) => {
     setReportToDelete(report);
     setDeleteConfirmOpen(true);
   };
@@ -92,25 +137,19 @@ export function PreviousReportsModal({
     }
   };
 
-  const handleEdit = (report: ICRReport) => {
+  const handleEdit = (report: ICRPreviousReport) => {
     onOpenChange(false);
-    onEditReport?.(report);
+    onEditReport?.(convertToICRReport(report));
   };
 
-  // Calculate totals for a report
-  const getReportStats = (report: ICRReport) => {
-    const leadsGenerated = report.lead_generation.reduce(
-      (sum, lg) => sum + lg.qualified_leads,
-      0
-    );
-    const leadsEngaged = report.lead_engagement.reduce(
-      (sum, le) => sum + le.leads_engaged,
-      0
-    );
-    const genActivities = report.lead_generation.length;
-    const engActivities = report.lead_engagement.length;
-
-    return { leadsGenerated, leadsEngaged, genActivities, engActivities };
+  // Use pre-calculated totals from API
+  const getReportStats = (report: ICRPreviousReport) => {
+    return {
+      leadsGenerated: report.total_leads_generated,
+      leadsEngaged: report.total_leads_engaged,
+      genActivities: report.leadGeneration.length,
+      engActivities: report.leadEngagement.length,
+    };
   };
 
   return (

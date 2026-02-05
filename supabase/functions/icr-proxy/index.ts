@@ -90,6 +90,17 @@ serve(async (req) => {
         };
         break;
 
+      case 'previous_reports':
+        apiUrl = `${BASE_URL}/previous_reports.php`;
+        fetchOptions = {
+          method: 'GET',
+          headers: {
+            'Authorization': authHeader,
+            'Content-Type': 'application/json',
+          },
+        };
+        break;
+
       case 'list':
       default:
         // Build the API URL with optional filters for listing
