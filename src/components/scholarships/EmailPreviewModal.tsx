@@ -23,6 +23,7 @@
    schoolName: string;
    clientName: string;
    awardName?: string;
+  universityName?: string;
  }
  
  interface EmailTemplate {
@@ -56,7 +57,7 @@
  
  Best regards,
  ${data.clientName}
- ${data.schoolName}`,
+${data.universityName ? `${data.universityName} - ${data.schoolName}` : data.schoolName}`,
      },
      rejected: {
        subject: `Update on Your Scholarship Application`,
@@ -76,7 +77,7 @@
  
  Best regards,
  ${data.clientName}
- ${data.schoolName}`,
+${data.universityName ? `${data.universityName} - ${data.schoolName}` : data.schoolName}`,
      },
      onHold: {
        subject: `Update on Your Scholarship Application Status`,
@@ -100,7 +101,7 @@
  
  Best regards,
  ${data.clientName}
- ${data.schoolName}`,
+${data.universityName ? `${data.universityName} - ${data.schoolName}` : data.schoolName}`,
      },
      selected: {
        subject: `Congratulations on Winning the ${data.awardName || "Scholarship Award"}`,
@@ -122,7 +123,7 @@
  
  Best regards,
  ${data.clientName}
- ${data.schoolName}`,
+${data.universityName ? `${data.universityName} - ${data.schoolName}` : data.schoolName}`,
      },
    };
  
