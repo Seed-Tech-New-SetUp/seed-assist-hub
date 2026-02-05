@@ -48,12 +48,11 @@ interface MeetupResponse {
 }
 
 const formatDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  const date = new Date(dateStr);
+  const month = date.toLocaleDateString("en-US", { month: "short" });
+  const day = String(date.getDate()).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${month} ${day}, ${year}`;
 };
 
 const formatTime = (timeStr: string, timezone: string) => {
@@ -264,6 +263,7 @@ export default function VirtualMeetups() {
     {
       key: "event",
       header: "Event",
+      sortKey: (event: MeetupEvent) => event.event_name,
       render: (event: MeetupEvent) => (
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-muted">
@@ -290,6 +290,7 @@ export default function VirtualMeetups() {
     {
       key: "date",
       header: "Date",
+      sortKey: (event: MeetupEvent) => new Date(event.date),
       render: (event: MeetupEvent) => (
         <span className="text-sm">{formatDate(event.date)}</span>
       ),
@@ -298,6 +299,7 @@ export default function VirtualMeetups() {
       key: "registrants",
       header: "Registrants",
       className: "text-center",
+      sortKey: (event: MeetupEvent) => event.registrants,
       render: (event: MeetupEvent) => (
         <span className="font-medium">{event.registrants.toLocaleString()}</span>
       ),
@@ -306,6 +308,7 @@ export default function VirtualMeetups() {
       key: "attendees",
       header: "Attendees",
       className: "text-center",
+      sortKey: (event: MeetupEvent) => event.attendees,
       render: (event: MeetupEvent) => (
         <span className="font-medium">{event.attendees.toLocaleString()}</span>
       ),

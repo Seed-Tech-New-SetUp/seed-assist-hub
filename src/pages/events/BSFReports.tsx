@@ -32,12 +32,11 @@ import {
 } from "@/components/events/EventFilters";
 
 const formatDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  const date = new Date(dateStr);
+  const month = date.toLocaleDateString("en-US", { month: "short" });
+  const day = String(date.getDate()).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${month} ${day}, ${year}`;
 };
 
 const formatDateTime = (dateTimeStr: string) => {
@@ -289,6 +288,7 @@ const BSFReports = () => {
     {
       key: "event",
       header: "Event",
+      sortKey: (event: BSFEvent) => event.eventName,
       render: (event: BSFEvent) => (
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-muted">
@@ -313,6 +313,7 @@ const BSFReports = () => {
     {
       key: "date",
       header: "Date",
+      sortKey: (event: BSFEvent) => new Date(event.date),
       render: (event: BSFEvent) => (
         <span className="text-sm">{formatDate(event.date)}</span>
       ),
@@ -320,6 +321,7 @@ const BSFReports = () => {
     {
       key: "city",
       header: "City",
+      sortKey: (event: BSFEvent) => event.city,
       render: (event: BSFEvent) => (
         <span className="text-sm">{event.city}</span>
       ),
@@ -328,6 +330,7 @@ const BSFReports = () => {
       key: "registrants",
       header: "Registrants",
       className: "text-center",
+      sortKey: (event: BSFEvent) => event.registrants,
       render: (event: BSFEvent) => (
         <span className="font-medium">{event.registrants.toLocaleString()}</span>
       ),
@@ -336,6 +339,7 @@ const BSFReports = () => {
       key: "attendees",
       header: "Attendees",
       className: "text-center",
+      sortKey: (event: BSFEvent) => event.attendees,
       render: (event: BSFEvent) => (
         <span className="font-medium">{event.attendees.toLocaleString()}</span>
       ),
