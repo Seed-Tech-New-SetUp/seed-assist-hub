@@ -165,12 +165,23 @@ export function formatReportMonth(reportMonth: string): string {
 
 // Activity type display names
 export const activityTypeLabels: Record<string, string> = {
-  festivals: 'Education Fairs/Festivals',
-  webinars: 'Webinars',
-  campusVisits: 'Campus Visits',
+  // Lead Generation
+  testPrep: 'Test Prep Events',
+  collegeCampus: 'College Campus Events',
+  highSchool: 'High School Events',
+  festivals: 'Festivals / Fairs / Seminars',
+  coffeeMeets: 'Coffee Meets / Info-sessions',
+  webinars: 'Online Masterclasses / Webinars',
+  partners: 'Partners Engaged',
+  otherGen: 'Other Activity',
+  // Lead Engagement
   phoneCalls: 'Phone Calls',
+  onlineMeetings: 'Online Meetings / Profile Evaluations',
   emailConv: 'Email Conversations',
-  whatsapp: 'WhatsApp',
+  whatsapp: 'WhatsApp Conversations',
+  otherEng: 'Other Activity',
+  // Legacy
+  campusVisits: 'Campus Visits',
   socialMedia: 'Social Media',
   oneOnOne: 'One-on-One Meetings',
 };
