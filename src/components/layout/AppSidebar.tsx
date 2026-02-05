@@ -317,7 +317,7 @@ export function AppSidebar() {
       )}
 
       {/* Navigation */}
-      <ScrollArea className="flex-1 h-[calc(100vh-18rem)] pb-2">
+      <div className="flex-1 h-[calc(100vh-18rem)] overflow-y-auto pb-2 scrollbar-thin">
         <nav className="p-2 space-y-1">
           {navigation.map((item) => {
             const hasChildren = item.children && item.children.length > 0;
@@ -536,7 +536,7 @@ export function AppSidebar() {
             );
           })}
         </nav>
-      </ScrollArea>
+      </div>
 
       {/* Footer */}
       <div className="absolute bottom-0 left-0 right-0 p-2 border-t border-sidebar-border space-y-2 bg-sidebar z-10">
