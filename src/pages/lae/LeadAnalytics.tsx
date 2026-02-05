@@ -180,16 +180,16 @@ export default function LeadAnalytics() {
         </div>
         */}
 
-        {/* Analytics Assignments */}
+        {/* Ongoing Assignments */}
         <Card>
           <CardHeader className="flex-row items-center justify-between space-y-0 pb-4">
             <div>
               <CardTitle className="text-lg flex items-center gap-2">
                 <ClipboardList className="h-5 w-5 text-primary" />
-                Analytics Assignments
+                Ongoing Assignments
               </CardTitle>
               <CardDescription>
-                View and analyze your assigned data projects
+                Track leads and applications generated from your campaigns
               </CardDescription>
             </div>
             <Button
