@@ -514,7 +514,7 @@ export default function ScholarshipApplications() {
                         <SelectValue placeholder="Assign Status" />
                       </SelectTrigger>
                       <SelectContent>
-                        {(["pending", "shortlisted", "onhold", "rejected"] as WorkflowStatus[]).map((status) => (
+                        {(["shortlisted", "onhold", "rejected"] as WorkflowStatus[]).map((status) => (
                           <SelectItem key={status} value={status}>{statusConfig[status].label}</SelectItem>
                         ))}
                       </SelectContent>
