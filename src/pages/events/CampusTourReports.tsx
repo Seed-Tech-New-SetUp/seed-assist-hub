@@ -306,7 +306,7 @@ const CampusTourReports = () => {
           </div>
           <div>
             <p className="font-medium">
-              {event.eventName} - {event.campusName || event.city}
+              {event.subProductName || event.eventName} - {event.campusName || event.city}
             </p>
             <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
               <MapPin className="h-3 w-3" />
