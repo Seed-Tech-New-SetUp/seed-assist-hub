@@ -126,9 +126,17 @@ const baseNavigation: NavItem[] = [
   },
   {
     title: "In-Country Representation",
-    href: "/in-country-reports",
     icon: Globe,
     permissionKey: "icr",
+    children: [
+      {
+        title: "",
+        items: [
+          { title: "View Analytics", href: "/in-country-reports" },
+          { title: "Add Report", href: "/in-country-reports/add" },
+        ],
+      },
+    ],
   },
   {
     title: "Lead And Application Engagement",
