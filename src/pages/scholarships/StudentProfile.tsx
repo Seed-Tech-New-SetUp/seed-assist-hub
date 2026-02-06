@@ -476,7 +476,7 @@ export default function StudentProfile() {
         </div>
 
         {/* Header Section - Sticky */}
-        <Card className="sticky top-0 z-20 bg-background shadow-sm">
+        <Card className="sticky top-14 md:top-16 z-20 bg-background shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
