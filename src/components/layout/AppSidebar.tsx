@@ -293,12 +293,12 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-40 h-screen bg-sidebar border-r border-sidebar-border transition-all duration-200 ease-out",
+        "fixed left-0 top-0 z-40 h-screen bg-sidebar border-r border-sidebar-border transition-all duration-200 ease-out flex flex-col",
         collapsed ? "w-16" : "w-72"
       )}
     >
       {/* Logo */}
-      <div className="flex h-16 items-center justify-center px-3 border-b border-sidebar-border">
+      <div className="flex h-16 items-center justify-center px-3 border-b border-sidebar-border flex-shrink-0">
         {collapsed ? (
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-display font-bold text-sm flex-shrink-0">
             S
@@ -314,11 +314,13 @@ export function AppSidebar() {
 
       {/* School Details Card with Switcher */}
       {!collapsed && selectedSchool && (
-        <SchoolSwitcher />
+        <div className="flex-shrink-0">
+          <SchoolSwitcher />
+        </div>
       )}
 
-      {/* Navigation */}
-      <div className="flex-1 h-[calc(100vh-18rem)] overflow-y-auto pb-2 scrollbar-thin">
+      {/* Navigation - flex-1 to take remaining space */}
+      <div className="flex-1 overflow-y-auto pb-2 scrollbar-thin">
         <nav className="p-2 space-y-1">
           {navigation.map((item) => {
             const hasChildren = item.children && item.children.length > 0;
@@ -540,7 +542,7 @@ export function AppSidebar() {
       </div>
 
       {/* Footer */}
-      <div className="absolute bottom-0 left-0 right-0 p-2 border-t border-sidebar-border space-y-2 bg-sidebar z-10">
+      <div className="flex-shrink-0 p-2 border-t border-sidebar-border space-y-2 bg-sidebar">
         {/* Legal Links */}
         {!collapsed && (
           <div className="flex flex-wrap justify-center gap-x-2 gap-y-0.5 px-1">
