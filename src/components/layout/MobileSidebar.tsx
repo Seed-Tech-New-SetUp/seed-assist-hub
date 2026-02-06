@@ -294,7 +294,7 @@ export function MobileSidebar({ onClose }: MobileSidebarProps) {
                   <CollapsibleTrigger asChild>
                     <button
                       className={cn(
-                        "flex items-center gap-3 w-full px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200",
+                        "flex items-center gap-3 w-full px-4 py-2.5 rounded-full text-base font-medium transition-all duration-200",
                         isActive
                           ? "bg-sidebar-accent text-sidebar-accent-foreground"
                           : "text-sidebar-foreground hover:bg-sidebar-accent/60"
@@ -321,7 +321,7 @@ export function MobileSidebar({ onClose }: MobileSidebarProps) {
                               <CollapsibleTrigger asChild>
                                 <button
                                   className={cn(
-                                    "flex items-center gap-3 w-full px-3 py-2 rounded-full text-xs font-medium transition-all duration-200",
+                                    "flex items-center gap-3 w-full px-3 py-2 rounded-full text-sm font-medium transition-all duration-200",
                                     subActive 
                                       ? "bg-sidebar-accent text-sidebar-accent-foreground" 
                                       : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
@@ -346,7 +346,7 @@ export function MobileSidebar({ onClose }: MobileSidebarProps) {
                                     return (
                                       <div
                                         key={subItem.href}
-                                        className="flex items-center gap-2 px-3 py-1.5 text-xs text-sidebar-foreground/40"
+                                        className="flex items-center gap-2 px-3 py-1.5 text-sm text-sidebar-foreground/40"
                                       >
                                         <span>{subItem.title}</span>
                                         <Lock className="h-3 w-3" />
@@ -359,7 +359,7 @@ export function MobileSidebar({ onClose }: MobileSidebarProps) {
                                       key={subItem.href}
                                       onClick={() => handleNavigate(subItem.href)}
                                       className={cn(
-                                        "flex items-center w-full px-3 py-1.5 text-xs transition-colors",
+                                        "flex items-center w-full px-3 py-1.5 text-sm transition-colors",
                                         subItemActive
                                           ? "text-sidebar-primary font-medium"
                                           : "text-sidebar-foreground/70 hover:text-sidebar-accent-foreground"
@@ -394,7 +394,7 @@ export function MobileSidebar({ onClose }: MobileSidebarProps) {
                               return (
                                 <div
                                   key={subItem.href}
-                                  className="flex items-center gap-2 px-3 py-1.5 text-xs text-sidebar-foreground/40"
+                                  className="flex items-center gap-2 px-3 py-1.5 text-sm text-sidebar-foreground/40"
                                 >
                                   <span>{subItem.title}</span>
                                   <Lock className="h-3 w-3" />
@@ -407,7 +407,7 @@ export function MobileSidebar({ onClose }: MobileSidebarProps) {
                                 key={subItem.href}
                                 onClick={() => handleNavigate(subItem.href)}
                                 className={cn(
-                                  "flex items-center w-full px-3 py-1.5 text-xs transition-colors",
+                                  "flex items-center w-full px-3 py-1.5 text-sm transition-colors",
                                   subActive
                                     ? "text-sidebar-primary font-medium"
                                     : "text-sidebar-foreground/70 hover:text-sidebar-accent-foreground"
@@ -430,7 +430,7 @@ export function MobileSidebar({ onClose }: MobileSidebarProps) {
                 key={item.title}
                 onClick={() => handleNavigate(item.href!)}
                 className={cn(
-                  "flex items-center gap-3 w-full px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200",
+                  "flex items-center gap-3 w-full px-4 py-2.5 rounded-full text-base font-medium transition-all duration-200",
                   isActive
                     ? "bg-sidebar-accent text-sidebar-accent-foreground"
                     : "text-sidebar-foreground hover:bg-sidebar-accent/60"
