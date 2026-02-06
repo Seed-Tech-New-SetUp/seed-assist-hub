@@ -294,7 +294,7 @@ export function AppSidebar() {
     <aside
       className={cn(
         "fixed left-0 top-0 z-40 h-screen bg-sidebar border-r border-sidebar-border transition-all duration-200 ease-out",
-        collapsed ? "w-16" : "w-64"
+        collapsed ? "w-16" : "w-72"
       )}
     >
       {/* Logo */}
@@ -335,7 +335,7 @@ export function AppSidebar() {
                   <CollapsibleTrigger asChild>
                     <button
                       className={cn(
-                        "flex items-center gap-3 w-full px-4 py-2.5 rounded-full text-[13px] font-medium transition-all duration-200 group",
+                        "flex items-center gap-3 w-full px-4 py-2.5 rounded-full text-[15px] font-medium transition-all duration-200 group",
                         isActive
                           ? "bg-sidebar-accent text-sidebar-accent-foreground"
                           : "text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/60",
@@ -373,7 +373,7 @@ export function AppSidebar() {
                               <CollapsibleTrigger asChild>
                                 <button
                                   className={cn(
-                                    "flex items-center gap-3 w-full px-3 py-2 rounded-full text-[12px] font-medium transition-all duration-200",
+                                    "flex items-center gap-3 w-full px-3 py-2 rounded-full text-[14px] font-medium transition-all duration-200",
                                     subActive
                                       ? "bg-sidebar-accent text-sidebar-accent-foreground"
                                       : "text-sidebar-foreground/80 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/60"
@@ -404,7 +404,7 @@ export function AppSidebar() {
                                     return (
                                       <div
                                         key={subItem.href}
-                                        className="flex items-center gap-2 px-3 py-1.5 text-[12px] transition-colors text-sidebar-foreground/40 cursor-not-allowed"
+                                        className="flex items-center gap-2 px-3 py-1.5 text-[13px] transition-colors text-sidebar-foreground/40 cursor-not-allowed"
                                       >
                                         <span className="truncate">{subItem.title}</span>
                                         <Lock className="h-3 w-3 flex-shrink-0" />
@@ -417,7 +417,7 @@ export function AppSidebar() {
                                       key={subItem.href}
                                       to={subItem.href}
                                       className={cn(
-                                        "flex items-center gap-2 px-3 py-1.5 text-[12px] transition-colors",
+                                        "flex items-center gap-2 px-3 py-1.5 text-[13px] transition-colors",
                                         subItemActive
                                           ? "text-sidebar-primary font-medium"
                                           : "text-sidebar-foreground/70 hover:text-sidebar-accent-foreground"
@@ -461,9 +461,9 @@ export function AppSidebar() {
                             
                             if (isLocked) {
                               return (
-                                <div
+                              <div
                                   key={subItem.href}
-                                  className="flex items-center gap-2 px-3 py-1.5 text-[12px] transition-colors text-sidebar-foreground/40 cursor-not-allowed"
+                                  className="flex items-center gap-2 px-3 py-1.5 text-[13px] transition-colors text-sidebar-foreground/40 cursor-not-allowed"
                                 >
                                   <span className="truncate">{subItem.title}</span>
                                   <Lock className="h-3 w-3 flex-shrink-0" />
@@ -476,7 +476,7 @@ export function AppSidebar() {
                                 key={subItem.href}
                                 to={subItem.href}
                                 className={cn(
-                                  "flex items-center gap-2 px-3 py-1.5 text-[12px] transition-colors",
+                                  "flex items-center gap-2 px-3 py-1.5 text-[13px] transition-colors",
                                   subActive
                                     ? "text-sidebar-primary font-medium"
                                     : "text-sidebar-foreground/70 hover:text-sidebar-accent-foreground"
@@ -500,7 +500,7 @@ export function AppSidebar() {
                   <NavLink
                     to={item.href!}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-2.5 rounded-full text-[13px] font-medium transition-all duration-200 group relative",
+                      "flex items-center gap-3 px-4 py-2.5 rounded-full text-[15px] font-medium transition-all duration-200 group relative",
                       isActive
                         ? "bg-sidebar-accent text-sidebar-accent-foreground"
                         : "text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/60",
