@@ -51,15 +51,16 @@
     --glass: 0 0% 100% / 0.85;
     --glass-border: 210 15% 88% / 0.5;
 
-    /* Sidebar - Corporate dark */
+    /* Sidebar - Corporate dark with amber accent */
     --sidebar-background: 220 25% 12%;
     --sidebar-foreground: 210 15% 75%;
-    --sidebar-primary: 215 70% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-primary: 30 90% 50%;
+    --sidebar-primary-foreground: 220 25% 12%;
     --sidebar-accent: 220 20% 18%;
     --sidebar-accent-foreground: 210 15% 90%;
-    --sidebar-border: 220 20% 18%;
-    --sidebar-ring: 215 70% 50%;
+    --sidebar-border: 220 20% 22%;
+    --sidebar-ring: 30 90% 50%;
+    --sidebar-icon: 30 90% 55%;
   }
 
   .dark {
@@ -97,12 +98,13 @@
 
     --sidebar-background: 220 25% 8%;
     --sidebar-foreground: 210 15% 75%;
-    --sidebar-primary: 215 65% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-primary: 30 90% 50%;
+    --sidebar-primary-foreground: 220 25% 8%;
     --sidebar-accent: 220 20% 14%;
     --sidebar-accent-foreground: 210 15% 90%;
-    --sidebar-border: 220 20% 14%;
-    --sidebar-ring: 215 65% 55%;
+    --sidebar-border: 220 20% 18%;
+    --sidebar-ring: 30 90% 50%;
+    --sidebar-icon: 30 90% 55%;
   }
 }
 

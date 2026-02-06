@@ -294,15 +294,15 @@ export function MobileSidebar({ onClose }: MobileSidebarProps) {
                   <CollapsibleTrigger asChild>
                     <button
                       className={cn(
-                        "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                        "flex items-center gap-3 w-full px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200",
                         isActive
                           ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                          : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent/60"
                       )}
                     >
-                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      <item.icon className="h-5 w-5 flex-shrink-0 text-sidebar-icon" />
                       <span className="flex-1 text-left">{item.title}</span>
-                      <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
+                      <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", isOpen && "rotate-180")} />
                     </button>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-1 mt-1">
@@ -317,17 +317,19 @@ export function MobileSidebar({ onClose }: MobileSidebarProps) {
                             open={isSubOpen}
                             onOpenChange={() => toggleSubSection(group.title)}
                           >
-                            <div className="ml-5 pl-3 border-l border-sidebar-border/50">
+                            <div className="ml-7 pl-4 border-l-2 border-sidebar-border">
                               <CollapsibleTrigger asChild>
                                 <button
                                   className={cn(
-                                    "flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium transition-colors",
-                                    subActive ? "text-sidebar-accent-foreground" : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50"
+                                    "flex items-center gap-3 w-full px-3 py-2 rounded-full text-xs font-medium transition-all duration-200",
+                                    subActive 
+                                      ? "bg-sidebar-accent text-sidebar-accent-foreground" 
+                                      : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
                                   )}
                                 >
-                                  {group.icon && <group.icon className="h-4 w-4" />}
+                                  {group.icon && <group.icon className="h-4 w-4 text-sidebar-icon" />}
                                   <span className="flex-1 text-left">{group.title}</span>
-                                  <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", isSubOpen && "rotate-180")} />
+                                  <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", isSubOpen && "rotate-180")} />
                                 </button>
                               </CollapsibleTrigger>
                               <CollapsibleContent className="space-y-1 mt-1">
@@ -344,7 +346,7 @@ export function MobileSidebar({ onClose }: MobileSidebarProps) {
                                     return (
                                       <div
                                         key={subItem.href}
-                                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-sidebar-foreground/40"
+                                        className="flex items-center gap-2 px-3 py-1.5 text-xs text-sidebar-foreground/40"
                                       >
                                         <span>{subItem.title}</span>
                                         <Lock className="h-3 w-3" />
@@ -357,10 +359,10 @@ export function MobileSidebar({ onClose }: MobileSidebarProps) {
                                       key={subItem.href}
                                       onClick={() => handleNavigate(subItem.href)}
                                       className={cn(
-                                        "flex items-center w-full px-3 py-2 rounded-lg text-xs transition-colors",
+                                        "flex items-center w-full px-3 py-1.5 text-xs transition-colors",
                                         subItemActive
-                                          ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium"
-                                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50"
+                                          ? "text-sidebar-primary font-medium"
+                                          : "text-sidebar-foreground/70 hover:text-sidebar-accent-foreground"
                                       )}
                                     >
                                       {subItem.title}
@@ -374,7 +376,7 @@ export function MobileSidebar({ onClose }: MobileSidebarProps) {
                       }
 
                       return (
-                        <div key={groupIndex} className="ml-5 pl-3 border-l border-sidebar-border/50 space-y-1">
+                        <div key={groupIndex} className="ml-7 pl-4 border-l-2 border-sidebar-border space-y-1">
                           {group.items.map((subItem) => {
                             const subActive = isPathActive(subItem.href);
                             let isLocked = false;
@@ -392,7 +394,7 @@ export function MobileSidebar({ onClose }: MobileSidebarProps) {
                               return (
                                 <div
                                   key={subItem.href}
-                                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-sidebar-foreground/40"
+                                  className="flex items-center gap-2 px-3 py-1.5 text-xs text-sidebar-foreground/40"
                                 >
                                   <span>{subItem.title}</span>
                                   <Lock className="h-3 w-3" />
@@ -405,10 +407,10 @@ export function MobileSidebar({ onClose }: MobileSidebarProps) {
                                 key={subItem.href}
                                 onClick={() => handleNavigate(subItem.href)}
                                 className={cn(
-                                  "flex items-center w-full px-3 py-2 rounded-lg text-xs transition-colors",
+                                  "flex items-center w-full px-3 py-1.5 text-xs transition-colors",
                                   subActive
-                                    ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium"
-                                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50"
+                                    ? "text-sidebar-primary font-medium"
+                                    : "text-sidebar-foreground/70 hover:text-sidebar-accent-foreground"
                                 )}
                               >
                                 {subItem.title}
@@ -428,13 +430,13 @@ export function MobileSidebar({ onClose }: MobileSidebarProps) {
                 key={item.title}
                 onClick={() => handleNavigate(item.href!)}
                 className={cn(
-                  "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                  "flex items-center gap-3 w-full px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200",
                   isActive
-                    ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent/60"
                 )}
               >
-                <item.icon className="h-5 w-5 flex-shrink-0" />
+                <item.icon className="h-5 w-5 flex-shrink-0 text-sidebar-icon" />
                 <span className="leading-tight">{item.title}</span>
               </button>
             );
