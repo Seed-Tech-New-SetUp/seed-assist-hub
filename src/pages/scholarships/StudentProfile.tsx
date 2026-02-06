@@ -41,6 +41,7 @@ import {
   AlertCircle,
   ExternalLink,
   RefreshCw,
+  Edit,
 } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -510,25 +511,49 @@ export default function StudentProfile() {
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  onClick={navigateToPrev}
-                  disabled={!profile.navigation.previous}
-                  title={profile.navigation.previous ? `Previous: ${profile.navigation.previous.name}` : "No previous applicant"}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  onClick={navigateToNext}
-                  disabled={!profile.navigation.next}
-                  title={profile.navigation.next ? `Next: ${profile.navigation.next.name}` : "No next applicant"}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+              <div className="flex items-center gap-4">
+                {/* Wireframe Action Buttons */}
+                <div className="flex items-center gap-1">
+                  <Button 
+                    variant="ghost" 
+                    size="icon-sm" 
+                    className="border border-transparent hover:border-primary hover:text-primary hover:bg-primary/5"
+                    title="Edit Application"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon-sm" 
+                    className="border border-transparent hover:border-primary hover:text-primary hover:bg-primary/5"
+                    title="Send Email"
+                    onClick={() => window.open(`mailto:${profile.email}`, '_blank')}
+                  >
+                    <Mail className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                {/* Navigation Buttons */}
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    onClick={navigateToPrev}
+                    disabled={!profile.navigation.previous}
+                    title={profile.navigation.previous ? `Previous: ${profile.navigation.previous.name}` : "No previous applicant"}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    onClick={navigateToNext}
+                    disabled={!profile.navigation.next}
+                    title={profile.navigation.next ? `Next: ${profile.navigation.next.name}` : "No next applicant"}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
