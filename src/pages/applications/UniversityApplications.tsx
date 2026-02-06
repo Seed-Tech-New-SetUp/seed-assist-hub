@@ -73,17 +73,46 @@ export default function UniversityApplications() {
     loadApplications();
   }, [loadApplications]);
 
+  // Build a set of emails that have an admitted record
+  const admittedEmails = useMemo(() => {
+    return new Set(
+      applications
+        .filter((app) => app.status === "Admitted")
+        .map((app) => app.email?.toLowerCase())
+    );
+  }, [applications]);
+
+  // Build a set of emails that have an applied record (for showing progression)
+  const appliedEmails = useMemo(() => {
+    return new Set(
+      applications
+        .filter((app) => app.status !== "Admitted")
+        .map((app) => app.email?.toLowerCase())
+    );
+  }, [applications]);
+
   // Filter by active filter type
   const filteredByType = useMemo(() => {
     switch (activeFilter) {
       case "applications":
-        return applications.filter((app) => app.status !== "Admitted");
+        // Show applications, but exclude those whose email already has an admit
+        return applications.filter(
+          (app) => app.status !== "Admitted" && !admittedEmails.has(app.email?.toLowerCase())
+        );
       case "admits":
         return applications.filter((app) => app.status === "Admitted");
       default:
         return applications;
     }
-  }, [applications, activeFilter]);
+  }, [applications, activeFilter, admittedEmails]);
+
+  // Check if an admitted record had a prior application
+  const hasAppliedRecord = useCallback(
+    (email: string | undefined) => {
+      return email ? appliedEmails.has(email.toLowerCase()) : false;
+    },
+    [appliedEmails]
+  );
 
   // Filter locally for immediate search feedback
   const filteredApplications = filteredByType.filter(
@@ -307,10 +336,14 @@ export default function UniversityApplications() {
                             <TableCell>
                               {app.status === "Admitted" ? (
                                 <div className="flex items-center gap-1.5">
-                                  <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-xs px-2">
-                                    Applied
-                                  </Badge>
-                                  <ArrowRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                                  {hasAppliedRecord(app.email) && (
+                                    <>
+                                      <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-xs px-2">
+                                        Applied
+                                      </Badge>
+                                      <ArrowRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                                    </>
+                                  )}
                                   <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-xs px-2">
                                     Admitted
                                   </Badge>
