@@ -13,16 +13,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Search,
   Plus,
   Filter,
-  MoreHorizontal,
   GraduationCap,
   Award,
   Clock,
@@ -215,7 +208,7 @@ export default function ScholarshipApplicants() {
         </CardHeader>
         <CardContent>
           <Table>
-            <TableHeader>
+            <TableHeader className="sticky top-0 bg-background z-10">
               <TableRow>
                 <TableHead>Applicant</TableHead>
                 <TableHead>Program</TableHead>
@@ -223,7 +216,6 @@ export default function ScholarshipApplicants() {
                 <TableHead className="text-right">Amount</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Submitted</TableHead>
-                <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -237,15 +229,43 @@ export default function ScholarshipApplicants() {
                     style={{ animationDelay: `${400 + index * 50}ms`, animationFillMode: 'forwards' }}
                   >
                     <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-9 w-9">
-                          <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
-                            {applicant.name.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">{applicant.name}</p>
-                          <p className="text-xs text-muted-foreground">{applicant.email}</p>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-9 w-9">
+                            <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
+                              {applicant.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{applicant.name}</p>
+                            <p className="text-xs text-muted-foreground">{applicant.email}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="icon-sm" 
+                            className="border border-transparent hover:border-primary hover:text-primary hover:bg-primary/5"
+                            title="View Profile"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon-sm" 
+                            className="border border-transparent hover:border-primary hover:text-primary hover:bg-primary/5"
+                            title="Edit Application"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon-sm" 
+                            className="border border-transparent hover:border-primary hover:text-primary hover:bg-primary/5"
+                            title="Send Email"
+                          >
+                            <Mail className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
                     </TableCell>
@@ -264,29 +284,6 @@ export default function ScholarshipApplicants() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">{applicant.submittedDate}</TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon-sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Profile
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit Application
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Mail className="h-4 w-4 mr-2" />
-                            Send Email
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
                   </TableRow>
                 );
               })}
