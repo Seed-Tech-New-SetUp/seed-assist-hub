@@ -270,10 +270,15 @@ export function BulkAssignModal({ open, onClose, onSuccess, licences }: BulkAssi
                 </div>
               </div>
               {uploadResult.results?.failed && uploadResult.results.failed.length > 0 && (
-                <div className="text-xs text-destructive mt-2">
-                  {uploadResult.results.failed.map((f, i) => (
-                    <p key={i}>Row {f.row} ({f.license_no}): {f.reason || "Assignment failed — licence may already be activated or locked"}</p>
-                  ))}
+                <div className="text-xs text-destructive mt-2 space-y-1">
+                  {uploadResult.results.failed.map((f: any, i: number) => {
+                    const reason = f.reason
+                      || (Array.isArray(f.errors) ? f.errors.map((e: any) => e.message || e.field).join("; ") : null)
+                      || "Unknown error";
+                    return (
+                      <p key={i}>Row {f.row} ({f.license_no}): {reason}</p>
+                    );
+                  })}
                 </div>
               )}
             </div>
