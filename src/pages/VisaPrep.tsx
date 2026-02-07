@@ -381,7 +381,7 @@ export default function VisaPrep() {
         {/* Filter Row */}
         <div className="flex flex-wrap items-center gap-3">
           <Select value={activeFilter || "all"} onValueChange={(v) => { setActiveFilter(v === "all" ? null : v as CardFilter); setPage(1); }}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[234px]">
               <SelectValue placeholder="Licence Status" />
             </SelectTrigger>
             <SelectContent>
@@ -394,7 +394,7 @@ export default function VisaPrep() {
           </Select>
 
           <Select value={filterVisaStatus} onValueChange={(v) => { setFilterVisaStatus(v); setPage(1); }}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[234px]">
               <SelectValue placeholder="Visa Status" />
             </SelectTrigger>
             <SelectContent>
@@ -406,7 +406,7 @@ export default function VisaPrep() {
           </Select>
 
           <Select value={filterInterviewStatus} onValueChange={(v) => { setFilterInterviewStatus(v); setPage(1); }}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[234px]">
               <SelectValue placeholder="Interview Status" />
             </SelectTrigger>
             <SelectContent>
@@ -426,7 +426,7 @@ export default function VisaPrep() {
           <div className="ml-auto">
             <Button
               size="lg"
-              className="h-11 px-6 text-sm font-semibold gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
+              className="h-11 px-12 text-sm font-semibold gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md min-w-[280px]"
               onClick={() => setShowAssignOptions(true)}
             >
               <Plus className="h-5 w-5" /> Assign Licences
