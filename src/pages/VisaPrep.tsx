@@ -443,23 +443,21 @@ export default function VisaPrep() {
                                 </Button>
                               ) : lic.isAllocated ? (
                                 <Button
-                                  variant="outline"
                                   size="sm"
-                                  className="h-7 text-xs border-orange-500/50 text-orange-600 hover:bg-orange-500/10 dark:text-orange-400"
+                                  className="h-8 text-xs bg-orange-500 hover:bg-orange-600 text-white font-semibold shadow-sm"
                                   onClick={() => { setAssignPrefill(lic); setShowAssignModal(true); }}
                                   title="Reassign licence (currently allocated but not activated)"
                                 >
-                                  <RefreshCcw className="h-3 w-3 mr-1" /> Reassign
+                                  <RefreshCcw className="h-3.5 w-3.5 mr-1" /> Reassign
                                 </Button>
                               ) : (
                                 <Button
-                                  variant="outline"
                                   size="sm"
-                                  className="h-7 text-xs"
+                                  className="h-8 text-xs bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-sm"
                                   onClick={() => { setAssignPrefill(lic); setShowAssignModal(true); }}
                                   title="Assign licence"
                                 >
-                                  <UserPlus className="h-3 w-3 mr-1" /> Assign
+                                  <UserPlus className="h-3.5 w-3.5 mr-1" /> Assign
                                 </Button>
                               )}
                             </div>
