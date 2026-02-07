@@ -12,6 +12,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Search, RefreshCw, Eye, UserPlus, Key, Users, Zap, PlayCircle,
   ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Lock,
@@ -339,11 +340,11 @@ export default function VisaPrep() {
     expired: enrichedLicenses.filter(l => l.isExpired).length,
   };
 
-  const statCards: Array<{ key: CardFilter; label: string; value: number; icon: React.ReactNode; color: string }> = [
-    { key: "available", label: "Licences Available", value: hasLocalData ? localCounts.available : (stats?.licenses.unassigned ?? 0), icon: <Key className="h-5 w-5" />, color: "text-primary bg-primary/10" },
-    { key: "allocated", label: "Licences Allocated", value: hasLocalData ? localCounts.allocated : (stats?.licenses.assigned ?? 0), icon: <Users className="h-5 w-5" />, color: "text-blue-500 bg-blue-500/10" },
-    { key: "activated", label: "Licences Activated", value: hasLocalData ? localCounts.activated : (stats?.licenses.activated ?? 0), icon: <Zap className="h-5 w-5" />, color: "text-orange-500 bg-orange-500/10" },
-    { key: "expired", label: "Licences Expired", value: hasLocalData ? localCounts.expired : (stats?.licenses.expired ?? 0), icon: <PlayCircle className="h-5 w-5" />, color: "text-red-500 bg-red-500/10" },
+  const statCards: Array<{ key: CardFilter; label: string; value: number; icon: React.ReactNode; color: string; hoverColor: string; tooltip: string }> = [
+    { key: "available", label: "Licences Available", value: hasLocalData ? localCounts.available : (stats?.licenses.unassigned ?? 0), icon: <Key className="h-5 w-5" />, color: "text-primary bg-primary/10", hoverColor: "hover:bg-primary/10", tooltip: "Licences not yet assigned to any student" },
+    { key: "allocated", label: "Licences Allocated", value: hasLocalData ? localCounts.allocated : (stats?.licenses.assigned ?? 0), icon: <Users className="h-5 w-5" />, color: "text-blue-500 bg-blue-500/10", hoverColor: "hover:bg-blue-500/10", tooltip: "Licences assigned to students" },
+    { key: "activated", label: "Licences Activated", value: hasLocalData ? localCounts.activated : (stats?.licenses.activated ?? 0), icon: <Zap className="h-5 w-5" />, color: "text-orange-500 bg-orange-500/10", hoverColor: "hover:bg-orange-500/10", tooltip: "Licences activated by students on the platform" },
+    { key: "expired", label: "Licences Expired", value: hasLocalData ? localCounts.expired : (stats?.licenses.expired ?? 0), icon: <PlayCircle className="h-5 w-5" />, color: "text-red-500 bg-red-500/10", hoverColor: "hover:bg-red-500/10", tooltip: "Licences that have been used and expired" },
   ];
 
   return (
@@ -363,21 +364,27 @@ export default function VisaPrep() {
         ) : stats ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {statCards.map((card) => (
-              <Card
-                key={card.key}
-                className={cn("cursor-pointer transition-all hover:shadow-md", activeFilter === card.key && "ring-2 ring-primary shadow-md")}
-                onClick={() => handleCardClick(card.key)}
-              >
-                <CardContent className="py-4 px-5">
-                  <div className="flex items-center gap-3">
-                    <div className={cn("p-2 rounded-lg", card.color)}>{card.icon}</div>
-                    <div>
-                      <p className="text-xs text-muted-foreground leading-tight">{card.label}</p>
-                      <p className="text-3xl font-bold leading-tight mt-0.5">{card.value}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <Tooltip key={card.key}>
+                <TooltipTrigger asChild>
+                  <Card
+                    className={cn("cursor-pointer transition-all hover:shadow-md", card.hoverColor, activeFilter === card.key && "ring-2 ring-primary shadow-md")}
+                    onClick={() => handleCardClick(card.key)}
+                  >
+                    <CardContent className="py-4 px-5">
+                      <div className="flex items-center gap-3">
+                        <div className={cn("p-2 rounded-lg", card.color)}>{card.icon}</div>
+                        <div>
+                          <p className="text-xs text-muted-foreground leading-tight">{card.label}</p>
+                          <p className="text-3xl font-bold leading-tight mt-0.5">{card.value}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>{card.tooltip}</p>
+                </TooltipContent>
+              </Tooltip>
             ))}
           </div>
         ) : null}
