@@ -269,7 +269,7 @@ export interface BulkAllocationResponse {
     created: Array<{ row: number; license_no: string }>;
     updated: Array<{ row: number; license_no: string }>;
     skipped: Array<{ row: number; license_no: string; reason: string }>;
-    failed: Array<{ row: number; license_no: string; reason: string }>;
+    failed: Array<{ row: number; license_no: string; reason?: string; errors?: Array<{ field: string; message: string }> }>;
   };
   error?: string | { code: string; message: string };
 }
