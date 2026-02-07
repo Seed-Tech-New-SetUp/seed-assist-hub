@@ -168,19 +168,18 @@ export function TilesDashboard() {
         { label: "Applicant Pool", href: "/scholarships/applications", locked: !isSubModuleEnabled("scholarshipPortal", "applicantPools") },
       ],
     },
-    // TODO: Re-enable AI Visa Tutor when ready
-    // {
-    //   title: "AI Visa Tutor",
-    //   icon: Plane,
-    //   description: "AI-powered visa preparation assistance for admitted students",
-    //   permissionKey: "visaPrep",
-    //   gradient: "from-rose-500/20 via-rose-500/5 to-transparent",
-    //   iconBg: "bg-rose-500 text-white",
-    //   tag: "AI",
-    //   buttons: [
-    //     { label: "View Licenses", href: "/visa-prep" },
-    //   ],
-    // },
+    {
+      title: "AI Visa Tutor",
+      icon: Plane,
+      description: "AI-powered visa interview preparation and mock practice for admitted students",
+      permissionKey: "visaPrep",
+      gradient: "from-rose-500/20 via-rose-500/5 to-transparent",
+      iconBg: "bg-rose-500 text-white",
+      tag: "AI",
+      buttons: [
+        { label: "View Licences", href: "/visa-prep" },
+      ],
+    },
   ];
 
   const isModuleVisible = (item: ModuleItem): boolean => {
