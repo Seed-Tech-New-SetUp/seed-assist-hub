@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
 import { format, parseISO } from "date-fns";
 
 type CardFilter = "available" | "allocated" | "activated" | "used" | null;
-type SortKey = "allotted" | "activated" | "platform" | "usage" | "avg_score" | "best_score" | "visa_status" | "visa_date" | "visa_interview_status";
+type SortKey = "allotted" | "activated" | "platform" | "usage" | "avg_score" | "best_score" | "visa_status" | "visa_date" | "visa_interview_slot" | "visa_interview_status";
 type SortDir = "asc" | "desc";
 
 const PAGE_SIZE = 20;
@@ -291,7 +291,8 @@ export default function VisaPrep() {
         case "best_score": va = a.displayBestScore; vb = b.displayBestScore; break;
         case "visa_status": va = a.richVisaStatus || a.visa_status; vb = b.richVisaStatus || b.visa_status; break;
         case "visa_date": va = a.richVisaInterviewDate || a.visa_interview_date || a.visa_slot_date; vb = b.richVisaInterviewDate || b.visa_interview_date || b.visa_slot_date; break;
-        case "visa_interview_status": va = a.richVisaInterviewStatus || a.visa_interview_status; vb = b.richVisaInterviewStatus || b.visa_interview_status; break;
+        case "visa_interview_slot": va = a.richVisaInterviewStatus || a.visa_interview_status; vb = b.richVisaInterviewStatus || b.visa_interview_status; break;
+        case "visa_interview_status": va = null; vb = null; break; // Coming Soon - no data yet
       }
 
       if (va == null && vb == null) return 0;
@@ -413,13 +414,25 @@ export default function VisaPrep() {
 
           <Select value={filterInterviewStatus} onValueChange={(v) => { setFilterInterviewStatus(v); setPage(1); }}>
             <SelectTrigger className="w-[234px]">
-              <SelectValue placeholder="Interview Status" />
+              <SelectValue placeholder="Visa Interview Slot Booked" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Interview Statuses</SelectItem>
+              <SelectItem value="all">All Slot Statuses</SelectItem>
               {interviewStatusOptions.map(s => (
                 <SelectItem key={s} value={s}>{capitalize(s)}</SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+
+          <Select value="all" disabled>
+            <SelectTrigger className="w-[234px] opacity-60 cursor-not-allowed">
+              <div className="flex items-center gap-2">
+                <Lock className="h-3.5 w-3.5" />
+                <span>Visa Interview Status</span>
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Coming Soon</SelectItem>
             </SelectContent>
           </Select>
 
@@ -495,7 +508,7 @@ export default function VisaPrep() {
                         </TableHead>
                         <TableHead>
                           <button className="flex items-center" onClick={() => handleSort("usage")}>
-                            Usage <SortIcon col="usage" />
+                            No. of Mock Attempts <SortIcon col="usage" />
                           </button>
                         </TableHead>
                         <TableHead>
@@ -519,9 +532,15 @@ export default function VisaPrep() {
                           </button>
                         </TableHead>
                         <TableHead>
-                          <button className="flex items-center" onClick={() => handleSort("visa_interview_status")}>
-                            Interview Status <SortIcon col="visa_interview_status" />
+                          <button className="flex items-center" onClick={() => handleSort("visa_interview_slot")}>
+                            Visa Interview Slot Booked <SortIcon col="visa_interview_slot" />
                           </button>
+                        </TableHead>
+                        <TableHead>
+                          <div className="flex items-center gap-1.5 text-muted-foreground">
+                            <Lock className="h-3 w-3" />
+                            Visa Interview Status
+                          </div>
                         </TableHead>
                         <TableHead className="text-center sticky right-0 bg-background z-10 shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.1)] min-w-[120px]">
                           Actions
@@ -591,12 +610,18 @@ export default function VisaPrep() {
                           <TableCell className="whitespace-nowrap">
                             {formatVisaDate(lic.richVisaInterviewDate || lic.visa_interview_date || lic.visa_slot_date)}
                           </TableCell>
-                          {/* Visa Interview Status */}
+                          {/* Visa Interview Slot Booked */}
                           <TableCell className="whitespace-nowrap">
                             {(() => {
                               const vis = lic.richVisaInterviewStatus || lic.visa_interview_status;
                               return vis ? <Badge variant="outline">{capitalize(vis)}</Badge> : "—";
                             })()}
+                          </TableCell>
+                          {/* Visa Interview Status - Coming Soon */}
+                          <TableCell className="whitespace-nowrap">
+                            <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800">
+                              Coming Soon
+                            </Badge>
                           </TableCell>
                           {/* Actions */}
                           <TableCell className="text-center sticky right-0 bg-background z-10 shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.1)] min-w-[120px]">

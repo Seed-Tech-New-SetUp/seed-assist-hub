@@ -143,7 +143,7 @@ export function LicenseDetailModal({ licenseNumber, open, onClose, onUpdate }: L
                 {detail.license.usage_status === "started" ? "In Use" : "Not Used"}
               </Badge>
               {performance && performance.total_sessions > 0 && (
-                <Badge variant="outline">{performance.total_sessions} session{performance.total_sessions > 1 ? "s" : ""}</Badge>
+                <Badge variant="outline">{performance.total_sessions} mock interview{performance.total_sessions > 1 ? "s" : ""}</Badge>
               )}
             </div>
           )}
@@ -162,7 +162,7 @@ export function LicenseDetailModal({ licenseNumber, open, onClose, onUpdate }: L
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="details">Details</TabsTrigger>
                 <TabsTrigger value="performance">Performance</TabsTrigger>
-                <TabsTrigger value="sessions">Sessions ({sessions.length})</TabsTrigger>
+                <TabsTrigger value="sessions">Mock Interviews ({sessions.length})</TabsTrigger>
               </TabsList>
             </div>
 
@@ -325,7 +325,7 @@ export function LicenseDetailModal({ licenseNumber, open, onClose, onUpdate }: L
                   {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
                 </div>
               ) : sessions.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">No sessions found</div>
+                <div className="text-center py-12 text-muted-foreground">No mock interviews found</div>
               ) : (
                 <div className="border rounded-lg overflow-hidden">
                   <Table>
