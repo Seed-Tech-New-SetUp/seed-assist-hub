@@ -222,7 +222,8 @@ export default function VisaPrep() {
       : <ArrowDown className="h-3 w-3 ml-1" />;
   };
 
-  // Compute counts from actual enriched data for accuracy
+  // Compute counts: prefer local enriched data when loaded, fall back to stats API
+  const hasLocalData = enrichedLicenses.length > 0;
   const localCounts = {
     available: enrichedLicenses.filter(l => !l.isAllocated).length,
     allocated: enrichedLicenses.filter(l => l.isAllocated).length,
@@ -231,10 +232,10 @@ export default function VisaPrep() {
   };
 
   const statCards: Array<{ key: CardFilter; label: string; value: number; icon: React.ReactNode; color: string }> = [
-    { key: "available", label: "Licences Available", value: localCounts.available || (stats?.licenses.unassigned ?? 0), icon: <Key className="h-5 w-5" />, color: "text-primary bg-primary/10" },
-    { key: "allocated", label: "Licences Allocated", value: localCounts.allocated || (stats?.licenses.assigned ?? 0), icon: <Users className="h-5 w-5" />, color: "text-blue-500 bg-blue-500/10" },
-    { key: "activated", label: "Licences Activated", value: localCounts.activated || (stats?.licenses.activated ?? 0), icon: <Zap className="h-5 w-5" />, color: "text-orange-500 bg-orange-500/10" },
-    { key: "used", label: "Licences Used", value: localCounts.used || (stats?.licenses.in_use ?? 0), icon: <PlayCircle className="h-5 w-5" />, color: "text-green-600 bg-green-600/10" },
+    { key: "available", label: "Licences Available", value: hasLocalData ? localCounts.available : (stats?.licenses.unassigned ?? 0), icon: <Key className="h-5 w-5" />, color: "text-primary bg-primary/10" },
+    { key: "allocated", label: "Licences Allocated", value: hasLocalData ? localCounts.allocated : (stats?.licenses.assigned ?? 0), icon: <Users className="h-5 w-5" />, color: "text-blue-500 bg-blue-500/10" },
+    { key: "activated", label: "Licences Activated", value: hasLocalData ? localCounts.activated : (stats?.licenses.activated ?? 0), icon: <Zap className="h-5 w-5" />, color: "text-orange-500 bg-orange-500/10" },
+    { key: "used", label: "Licences Used", value: hasLocalData ? localCounts.used : (stats?.licenses.in_use ?? 0), icon: <PlayCircle className="h-5 w-5" />, color: "text-green-600 bg-green-600/10" },
   ];
 
   return (
