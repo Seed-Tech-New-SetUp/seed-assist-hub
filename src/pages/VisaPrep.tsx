@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -93,7 +93,8 @@ export default function VisaPrep() {
     queryFn: () => fetchAllocations({ limit: 500 }),
   });
 
-  const refetch = () => { refetchLicenses(); refetchAlloc(); refetchStats(); setDetailMap(new Map()); };
+  const detailFetchedRef = useRef(new Set<string>());
+  const refetch = () => { refetchLicenses(); refetchAlloc(); refetchStats(); setDetailMap(new Map()); detailFetchedRef.current = new Set(); };
 
   const stats = statsData?.data;
   const allLicenses = licensesData?.data?.licenses || [];
@@ -124,15 +125,19 @@ export default function VisaPrep() {
     return set;
   }, [allocatedSet, allLicenses]);
 
+
+
   useEffect(() => {
+    let cancelled = false;
     const licenseNos = Array.from(licencesWithStudents);
     if (licenseNos.length === 0) return;
 
-    // Only fetch for licences we haven't fetched yet
-    const toFetch = licenseNos.filter(ln => !detailMap.has(ln));
+    const toFetch = licenseNos.filter(ln => !detailFetchedRef.current.has(ln));
     if (toFetch.length === 0) return;
 
-    // Batch in groups of 10 to avoid overwhelming the API
+    // Mark as fetched immediately to prevent re-runs
+    toFetch.forEach(ln => detailFetchedRef.current.add(ln));
+
     const batchSize = 10;
     const batches: string[][] = [];
     for (let i = 0; i < toFetch.length; i += batchSize) {
@@ -141,9 +146,11 @@ export default function VisaPrep() {
 
     (async () => {
       for (const batch of batches) {
+        if (cancelled) return;
         const results = await Promise.all(
           batch.map(ln => fetchAllocationDetail(ln).then(res => ({ ln, data: res.data?.api_student ?? null })).catch(() => ({ ln, data: null })))
         );
+        if (cancelled) return;
         setDetailMap(prev => {
           const next = new Map(prev);
           results.forEach(({ ln, data }) => {
@@ -157,6 +164,8 @@ export default function VisaPrep() {
         });
       }
     })();
+
+    return () => { cancelled = true; };
   }, [licencesWithStudents]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Enrich licenses
