@@ -510,6 +510,7 @@ export default function VisaPrep() {
             lastName: alloc?.student?.last_name || assignPrefill.allocName?.split(" ").slice(1).join(" ") || "",
             email: alloc?.student?.email || assignPrefill.allocEmail || "",
             phone: alloc?.student?.phone || "",
+            consent: alloc?.comms_workflow_consent ?? true,
           };
         })() : undefined}
       />

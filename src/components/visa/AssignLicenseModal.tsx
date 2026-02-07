@@ -26,6 +26,7 @@ interface AssignLicenseModalProps {
     lastName: string;
     email: string;
     phone?: string;
+    consent?: boolean;
   };
 }
 
@@ -37,7 +38,7 @@ export function AssignLicenseModal({ open, onClose, onSuccess, prefillLicenseNo,
     student_last_name: "",
     student_email: "",
     student_phone: "",
-    comms_workflow_consent: false,
+    comms_workflow_consent: true,
   });
 
   const mutation = useMutation({
@@ -88,7 +89,7 @@ export function AssignLicenseModal({ open, onClose, onSuccess, prefillLicenseNo,
       student_last_name: "",
       student_email: "",
       student_phone: "",
-      comms_workflow_consent: false,
+      comms_workflow_consent: true,
     });
   };
 
@@ -127,6 +128,7 @@ export function AssignLicenseModal({ open, onClose, onSuccess, prefillLicenseNo,
         student_last_name: existingData?.lastName || "",
         student_email: existingData?.email || "",
         student_phone: existingData?.phone || "",
+        comms_workflow_consent: existingData?.consent ?? true,
       }));
     }
   }, [open, prefillLicenseNo, existingData]);
@@ -205,16 +207,18 @@ export function AssignLicenseModal({ open, onClose, onSuccess, prefillLicenseNo,
             />
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border p-3">
-            <div className="space-y-0.5">
+          <div className="rounded-lg border p-3 space-y-2">
+            <div className="flex items-center justify-between">
               <Label htmlFor="consent" className="text-sm font-medium">Communication Consent</Label>
-              <p className="text-xs text-muted-foreground">Allow sending notifications to the student</p>
+              <Switch
+                id="consent"
+                checked={form.comms_workflow_consent || false}
+                onCheckedChange={(checked) => updateField("comms_workflow_consent", checked)}
+              />
             </div>
-            <Switch
-              id="consent"
-              checked={form.comms_workflow_consent || false}
-              onCheckedChange={(checked) => updateField("comms_workflow_consent", checked)}
-            />
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              By enabling this, you confirm that the student has consented to receive emails and messages on behalf of your university via SEED AI Visa Tutor, including practice reminders, performance updates, and related follow-up communications. You may withdraw this consent at any time by updating this setting.
+            </p>
           </div>
 
           <div className="flex gap-2 justify-end pt-2">
