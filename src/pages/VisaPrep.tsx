@@ -315,7 +315,7 @@ export default function VisaPrep() {
                         <TableHead className="sticky left-0 bg-background z-20 min-w-[170px] shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">
                           License No.
                         </TableHead>
-                        <TableHead className="min-w-[200px]">
+                        <TableHead className="sticky left-[170px] bg-background z-20 min-w-[200px] shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">
                           <button className="flex items-center" onClick={() => handleSort("allotted")}>
                             Allotted To <SortIcon col="allotted" />
                           </button>
@@ -373,7 +373,7 @@ export default function VisaPrep() {
                             <span className="font-mono text-xs">{lic.license_number}</span>
                           </TableCell>
                           {/* Allotted To */}
-                          <TableCell className="min-w-[200px]">
+                          <TableCell className="sticky left-[170px] bg-background z-20 min-w-[200px] shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">
                             {lic.allocName ? (
                               <div>
                                 <p className="font-medium text-sm">{lic.allocName}</p>
